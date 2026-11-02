@@ -1,0 +1,157 @@
+---
+title: "A1.6 Matrices circulantes"
+subtitle: "A1 · Matrices estructuradas"
+id: A1.6
+unidad: A1
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, SparseArrays, Statistics, Random, Markdown
+include("../../recursos/_tema.jl")
+TORROJA = "../../datos/torroja/"
+```
+
+Una matriz **circulante** es una Toeplitz en la que cada fila es la anterior desplazada cíclicamente una posición a la derecha: queda determinada por una sola fila (o columna). Para una primera columna $\mathbf c=(c_0,\dots,c_{n-1})$, $C_{ij}=c_{(i-j)\bmod n}$. Se puede escribir como un polinomio en la permutación cíclica $\mathbf P$ (que desplaza un vector una posición): $\mathbf C=\sum_k c_k\mathbf P^k$, y por eso **todas las circulantes conmutan** entre sí: el producto y la inversa de circulantes son circulantes.
+
+**Convolución circular.** El producto $\mathbf C\mathbf x$ es la convolución circular $(\mathbf c\circledast\mathbf x)_m=\sum_jc_j\,x_{(m-j)\bmod n}$: los índices se «dan la vuelta» al llegar al borde.
+
+::: {#thm-circulantes}
+## Diagonalización con la DFT
+Sea $\omega=e^{2\pi i/n}$ y $\mathbf w_k=(1,\omega^k,\omega^{2k},\dots,\omega^{(n-1)k})^{\mathsf T}/\sqrt n$. Entonces $\mathbf w_k$ es un vector propio de toda circulante $\mathbf C$ de primera columna $\mathbf c$, con valor propio $\lambda_k=\sum_{j}c_j\,e^{-2\pi i\,jk/n}$, que es la **DFT de $\mathbf c$**. En forma matricial, $\mathbf C=\mathbf F^{\mathsf H}\boldsymbol\Lambda\mathbf F$ con $\mathbf F$ la matriz unitaria de la DFT.
+:::
+
+::: {.callout-note .demostracion collapse="true" title="Demostración"}
+La componente $m$ de $\mathbf C\mathbf w_k$ es $\sum_jc_j\,w_k[(m-j)\bmod n]=\frac{1}{\sqrt n}\sum_jc_j\,\omega^{k(m-j)}=\omega^{km}\frac{1}{\sqrt n}\sum_jc_j\,\omega^{-kj}=\lambda_k\,w_k[m]$. $\square$
+:::
+
+Consecuencia: **la convolución circular se vuelve un producto** en el dominio de la frecuencia, $\mathbf c\circledast\mathbf x=\mathrm{IFFT}\big(\mathrm{FFT}(\mathbf c)\cdot\mathrm{FFT}(\mathbf x)\big)$, y calcularla pasa de $O(n^2)$ (producto matriz-vector) a $O(n\log n)$ con la FFT. Los valores propios de una circulante son la DFT de su primera columna, y se puede comprobar numéricamente (el código lo hace con `fft_radix2`).
+
+```{julia}
+c4 = [1.0, 2.0, 3.0, 4.0]
+C4 = circulante(c4)
+λ_num = eigvals(C4)
+λ_fft = fft_radix2(c4)
+x4 = [1.0, 0.0, -1.0, 2.0]
+(C4, sort(abs.(λ_num)) ≈ sort(abs.(λ_fft)), conv_circular(c4, x4) ≈ C4 * x4, conv_circular_fft(c4, x4) ≈ C4 * x4)
+```
+
+**Lineal frente a circular.** La convolución lineal de una señal de $N$ muestras con un filtro de $M$ tiene $N+M-1$ muestras; la circular tiene $n$ y «envuelve» los extremos. Las dos coinciden **si se rellena con ceros** (*zero-padding*) hasta $n\ge N+M-1$. Sin relleno, las últimas muestras del resultado lineal se suman sobre las primeras (efecto de *aliasing* temporal).
+
+```{julia}
+xs = [1.0, 2.0, 3.0]
+hf = [1.0, -1.0]
+lineal = [sum(xs[j] * hf[k-j+1] for j in max(1, k - 1):min(3, k)) for k in 1:4]             # N+M-1 = 4
+circ_sin = conv_circular(xs, vcat(hf, 0.0))                                                  # n = 3: se envuelve
+circ_con = conv_circular(vcat(xs, 0.0), vcat(hf, 0.0, 0.0))                                  # n = 4: con ceros
+(lineal = lineal, circular_n3 = circ_sin, circular_n4 = circ_con)
+```
+
+Aquí $N+M-1=4$: con $n=3$ la última componente del resultado lineal ($-3$) se suma a la primera, y con $n=4$ los dos resultados coinciden.
+
+::: {#exm-filtrado}
+**Filtrado de una aceleración.** Un promedio móvil de 8 puntos (un filtro paso bajo) aplicado a 4096 muestras de la aceleración de GS1 se calcula con la FFT rellenando hasta 8192 ($\ge 4096+8-1$). El resultado coincide con la convolución directa hasta el redondeo.
+:::
+
+```{julia}
+_, a, _ = leer_torroja(TORROJA * "s1_medida01.txt")   # registro de GS1, como en A1.4
+xr = a[1:4096, 3] .* 1e3
+hmov = fill(1 / 8, 8)
+nfft = 8192
+Xp = vcat(xr, zeros(nfft - length(xr)))
+Hp = vcat(hmov, zeros(nfft - length(hmov)))
+yfft = conv_circular_fft(Xp, Hp)[1:length(xr)+length(hmov)-1]
+ydir = [sum(hmov[j] * xr[k-j+1] for j in max(1, k - length(xr) + 1):min(length(hmov), k)) for k in 1:length(xr)+length(hmov)-1]
+err_fft = maximum(abs, yfft .- ydir)
+nothing
+```
+
+La diferencia máxima entre la convolución por FFT y la directa es de `{julia} replace(@sprintf("%.1e", err_fft), "." => ",")` mg, del orden del redondeo.
+
+## Laboratorio: convolución circular {#lab-circ}
+
+```{ojs}
+//| echo: false
+import {circulante, convCircular, convCircularFFT, fft, matVec} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 4. Circulantes y convolución.** Elige el tamaño $n$, una señal (el impulso y el pulso están al final del registro, donde la convolución circular «envuelve») y un filtro. La simulación calcula la convolución **lineal**, la **circular** y, si activas el relleno, la circular con ceros hasta la potencia de 2 que haga falta.
+
+```{ojs}
+//| echo: false
+viewof c_n = Inputs.select([8, 16, 32, 64], {value: 16, label: "n (muestras de la señal)"})
+viewof c_senal = Inputs.select(["impulso", "sinusoide", "pulso rectangular"], {value: "pulso rectangular", label: "señal"})
+viewof c_filtro = Inputs.select(["media móvil de 3", "diferencia", "retardo de 2"], {value: "media móvil de 3", label: "filtro"})
+viewof c_pad = Inputs.toggle({label: "relleno de ceros (zero-padding)", value: false})
+```
+
+```{ojs}
+//| echo: false
+conv = {
+  const n = c_n;
+  const a = Array.from({length: n}, (_, t) => c_senal === "impulso" ? (t === n - 2 ? 1 : 0) : c_senal === "sinusoide" ? Math.sin(2 * Math.PI * 2 * t / n) : (t >= n - 6 ? 1 : 0));
+  const h = c_filtro === "media móvil de 3" ? [1/3, 1/3, 1/3] : c_filtro === "diferencia" ? [1, -1] : [0, 0, 1];
+  const lineal = Array.from({length: n + h.length - 1}, (_, k) => h.reduce((s, hj, j) => s + (k - j >= 0 && k - j < n ? hj * a[k - j] : 0), 0));
+  let m = n;
+  if (c_pad) { m = 1; while (m < n + h.length - 1) m <<= 1; }
+  const ap = a.concat(new Array(m - n).fill(0)), hp = h.concat(new Array(m - h.length).fill(0));
+  const circ = convCircular(ap, hp), circFFT = convCircularFFT(ap, hp);
+  const dif = circ.map((v, k) => Math.abs(v - circFFT[k]));
+  const difLin = lineal.map((v, k) => Math.abs(v - (k < m ? circ[k] : 0))).reduce((mx, v) => Math.max(mx, v), 0);
+  const Fh = fft(hp);
+  const espectro = Fh.re.map((r, k) => Math.hypot(r, Fh.im[k]));
+  return {a, h, lineal, circ, circFFT, m, dif: Math.max(...dif), difLin, espectro, C: m <= 16 ? circulante(hp) : null};
+}
+```
+
+```{ojs}
+//| echo: false
+html`<div style="display:flex;flex-wrap:wrap;gap:1rem">
+${Plot.plot({width: 520, height: 260, marginLeft: 50, x: {label: "índice"}, y: {label: "valor"},
+  marks: [Plot.ruleY([0]),
+    Plot.line(conv.lineal.map((v, k) => [k, v]), {stroke: "#1B6CA8", strokeWidth: 2}),
+    Plot.dot(conv.circ.map((v, k) => [k, v]), {fill: "#D95F02", r: 4})],
+  caption: `Azul: convolución lineal (${conv.lineal.length} muestras). Naranja: circular de tamaño ${conv.m}.`})}
+${Plot.plot({width: 360, height: 260, marginLeft: 50, x: {label: "k"}, y: {label: "|H_k|"},
+  marks: [Plot.ruleY([0]), Plot.barY(conv.espectro.slice(0, conv.m / 2 + 1).map((v, k) => ({k, v})), {x: "k", y: "v", fill: "#6F42C1"})],
+  caption: "Módulo de la DFT del filtro: son los valores propios de la circulante."})}
+${conv.C ? Plot.plot({width: 340, height: 300, marginLeft: 40, padding: 0, x: {label: "columna"}, y: {label: "fila", reverse: true}, color: {scheme: "RdBu", domain: [-1, 1]},
+  marks: [Plot.cell(conv.C.flatMap((f, i) => f.map((v, j) => ({i, j, v}))), {x: "j", y: "i", fill: "v"})],
+  caption: "Circulante del filtro (solo si el tamaño es ≤ 16)."}) : html`<p style="max-width:340px"><em>La matriz circulante solo se dibuja para tamaño ≤ 16.</em></p>`}
+</div>`
+```
+
+```{ojs}
+//| echo: false
+md`Diferencia máxima entre la circular directa y la hecha por FFT: **${conv.dif.toExponential(1)}** (redondeo). Diferencia máxima entre la circular de tamaño ${conv.m} y la lineal: **${conv.difLin.toExponential(1)}** ${conv.difLin < 1e-12 ? "→ **coinciden** (basta el relleno de ceros)." : "→ **no coinciden**: las últimas muestras se han envuelto sobre las primeras."}`
+```
+
+::: {.callout-note}
+## Hipótesis y límites de la simulación 4
+La longitud de la FFT es una potencia de 2, que es lo que implementa `matematicas.js`. La circular y la lineal solo coinciden si el tamaño de la circular es al menos $N+M-1$; sin relleno, el desfase entre las dos mide el *aliasing* temporal. Los filtros son FIR (de longitud finita), no IIR.
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-1-6-lambda0" respuesta="10"}
+La primera columna de una circulante $4\times4$ es $\mathbf c=(1,2,3,4)$. ¿Cuánto vale el valor propio asociado al vector de unos, $\lambda_0$?
+
+::: {.solucion}
+$\lambda_0=\sum_jc_j=1+2+3+4=10$ (es la componente continua de la DFT de $\mathbf c$): cada fila suma lo mismo, así que $\mathbf C\mathbf 1=10\cdot\mathbf 1$.
+:::
+:::
+
+::: {.ejercicio tipo="vf" id="m2-1-6-lineal" respuesta="falso"}
+La convolución circular de dos vectores de longitud $N$ es siempre igual a su convolución lineal.
+
+::: {.solucion}
+Falso. La lineal tiene $2N-1$ muestras y la circular, $N$: solo coinciden si se rellena con ceros hasta una longitud $\ge 2N-1$ (en general, $N_1+N_2-1$).
+:::
+:::

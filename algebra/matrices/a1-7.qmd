@@ -1,0 +1,94 @@
+---
+title: "A1.7 Otras matrices con aplicación dinámica"
+subtitle: "A1 · Matrices estructuradas"
+id: A1.7
+unidad: A1
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, SparseArrays, Statistics, Random, Markdown
+include("../../recursos/_tema.jl")
+TORROJA = "../../datos/torroja/"
+```
+
+**Vandermonde.** $V_{ij}=x_i^{\,j-1}$: aparece al interpolar con polinomios y, con los puntos $x_i=\omega^{i}$ (raíces de la unidad), es la matriz de la DFT. Con puntos reales equiespaciados se condiciona **exponencialmente mal**.
+
+```{julia}
+#| output: asis
+filas = map((4, 8, 12, 16)) do n
+    "| $n | $(replace(@sprintf("%.1e", cond(vandermonde(collect(range(0, 1; length=n))))), "." => ",")) |"
+end
+println("| n | κ₂(V) con n puntos equiespaciados en [0, 1] |\n|---|---|\n" * join(filas, "\n"))
+```
+
+: Condicionamiento de la matriz de Vandermonde. {#tbl-vandermonde}
+
+**Gram, proyección y covarianza.** Ya vistas: las tres comparten la forma $\mathbf A^{\mathsf T}\mathbf A$ o $\mathbf A\mathbf A^{\mathsf T}$. La **matriz de correlación cruzada** entre dos señales $\mathbf x,\mathbf y$ es $R_{xy}(k)=\mathbb E[x_{t+k}y_t]$; y la **matriz espectral cruzada** $\mathbf S_{yy}(\omega)$ de $m$ sensores, la transformada de Fourier de sus correlaciones, es hermítica y semidefinida positiva en cada frecuencia (F1 y [M7.7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html#m7-7): es la matriz a la que se aplica la SVD en el método FDD).
+
+**Matrices de observabilidad y controlabilidad.** Para un sistema $\dot{\mathbf x}=\mathbf A\mathbf x+\mathbf B\mathbf u$, $\mathbf y=\mathbf C\mathbf x$ de orden $n$, la matriz de **observabilidad** $\mathcal O=[\mathbf C;\,\mathbf C\mathbf A;\,\dots;\,\mathbf C\mathbf A^{n-1}]$ tiene rango $n$ si y solo si se puede reconstruir el estado a partir de la salida; y la de **controlabilidad** $\mathcal C=[\mathbf B\;\mathbf A\mathbf B\;\cdots\;\mathbf A^{n-1}\mathbf B]$, rango $n$ si y solo si se puede llevar el estado a cualquier punto con la entrada. Ambas son una pista práctica de **dónde poner los sensores**.
+
+::: {#exm-observabilidad}
+**Un sensor en el nodo de un modo.** Una cadena de tres masas simétrica (empotrada en los dos extremos, $k=m=1$) tiene un modo antisimétrico cuyo desplazamiento en la masa central es cero. Un sensor de desplazamiento **en la masa central** no puede ver ese modo: la matriz de observabilidad tiene rango 4 en lugar de 6 (el sistema tiene seis estados y tres modos con dos estados cada uno). Con el sensor en la primera masa, el rango es 6.
+:::
+
+```{julia}
+Kf = [2.0 -1.0 0.0; -1.0 2.0 -1.0; 0.0 -1.0 2.0]
+Aobs = [zeros(3, 3) I(3); -Kf zeros(3, 3)]
+rango_centro = rank(matriz_observabilidad(Aobs, [0.0 1.0 0.0 0.0 0.0 0.0]))
+rango_extremo = rank(matriz_observabilidad(Aobs, [1.0 0.0 0.0 0.0 0.0 0.0]))
+(rango_centro, rango_extremo)
+```
+
+**Matriz de transición de estados.** La solución de $\dot{\mathbf x}=\mathbf A\mathbf x$ es $\mathbf x(t)=e^{\mathbf A\Delta t}\mathbf x(0)$, y $\mathbf A_d=e^{\mathbf A\Delta t}$ es la matriz de transición: es la que se estima en identificación (ERA y SSI, [ecuación 2 de A1.5](a1-5.qmd#eq-era)) y sus autovalores son los polos discretos (S2 y S3).
+
+**Matriz MAC.** El criterio de seguridad modal (*modal assurance criterion*) compara dos formas modales $\boldsymbol\phi$ y $\boldsymbol\psi$:
+
+$$
+\mathrm{MAC}(\boldsymbol\phi,\boldsymbol\psi)=\frac{\lvert\boldsymbol\phi^{\mathsf T}\boldsymbol\psi\rvert^2}{(\boldsymbol\phi^{\mathsf T}\boldsymbol\phi)(\boldsymbol\psi^{\mathsf T}\boldsymbol\psi)}\in[0,1].
+$$ {#eq-mac}
+
+Vale 1 si los vectores son proporcionales y 0 si son ortogonales, y **no depende de la escala** de cada modo, que en identificación experimental no está determinada. Se calcula entre todos los pares de dos conjuntos de modos: la **matriz MAC** de un conjunto consigo mismo es la identidad si los modos son ortogonales.
+
+```{julia}
+Me, K0 = edificio_cortante([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
+_, K1 = edificio_cortante([1.0, 1.0, 1.0], [1.0, 0.9, 1.0])      # el segundo entrepiso, un 10 % menos rígido
+f0, P0 = modos_propios(K0, Me)
+f1, P1 = modos_propios(K1, Me)
+MACm = matriz_mac(P0, P1)
+nothing
+```
+
+Con un edificio de cortante de tres plantas de masas y rigideces iguales, y el segundo entrepiso un $10\,\%$ menos rígido, las frecuencias bajan `{julia} coma(100 * (1 - f1[1] / f0[1]); d=1)` %, `{julia} coma(100 * (1 - f1[2] / f0[2]); d=1)` % y `{julia} coma(100 * (1 - f1[3] / f0[3]); d=1)` % pero la diagonal de la matriz MAC sigue siendo `{julia} join(coma.(diag(MACm); d=4), "; ")`: **las formas modales son mucho menos sensibles que las frecuencias a un cambio local de rigidez**. Es un resultado a recordar cuando se estudie la detección de daño ([M0.3](https://me1catrr.github.io/resonancia/mse/m00-introduccion/index.html#m0-3), [M12.6](https://me1catrr.github.io/resonancia/mse/m12-caso-real-ii/index.html#m12-6)).
+
+::: {.ejercicio tipo="numerico" id="m2-1-7-mac" respuesta="0.914" tol="1%"}
+Calcula el MAC entre $\boldsymbol\phi=(1,2,3)$ y $\boldsymbol\psi=(1,\,2{,}5,\,2)$.
+
+::: {.solucion}
+$\boldsymbol\phi^{\mathsf T}\boldsymbol\psi=1+5+6=12$, $\boldsymbol\phi^{\mathsf T}\boldsymbol\phi=14$ y $\boldsymbol\psi^{\mathsf T}\boldsymbol\psi=1+6{,}25+4=11{,}25$. $\mathrm{MAC}=12^2/(14\cdot11{,}25)=144/157{,}5=0{,}914$.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-1-7-sensor" respuesta="b"}
+Con un solo sensor de desplazamiento en el punto medio de una viga simétrica biapoyada, ¿qué modos no se pueden observar?
+
+::: {.opciones}
+- Ninguno: todos los modos tienen movimiento en el centro.
+- Los antisimétricos, que tienen un nodo en el punto medio.
+- Los simétricos, que tienen un nodo en el punto medio.
+- Todos los de frecuencia alta.
+:::
+
+::: {.solucion}
+La **b**. Los modos antisimétricos (el segundo, el cuarto, etc.) tienen un nodo en el centro: el sensor mide cero para esos modos, y el sistema no es observable con él. Es una restricción de **colocación de sensores**, no del modelo.
+:::
+:::

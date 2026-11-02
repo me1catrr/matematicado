@@ -1,0 +1,38 @@
+---
+title: "A3.3 Pseudoinversa y mínimos cuadrados"
+subtitle: "A3 · Descomposición en valores singulares"
+id: A3.3
+unidad: A3
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Random, DelimitedFiles, Printf, Markdown
+include("../../recursos/_tema.jl")
+```
+
+::: {#def-pseudoinversa}
+**Pseudoinversa de Moore–Penrose.** Si $\mathbf A=\mathbf U\boldsymbol\Sigma\mathbf V^{\mathsf T}$ tiene rango $r$, $\mathbf A^{+}=\mathbf V\boldsymbol\Sigma^{+}\mathbf U^{\mathsf T}$, donde $\boldsymbol\Sigma^{+}$ invierte los $r$ valores singulares no nulos y deja los demás en cero.
+:::
+
+$\mathbf x^{+}=\mathbf A^{+}\mathbf b$ es la solución de **mínima norma** entre las que minimizan $\lVert\mathbf A\mathbf x-\mathbf b\rVert_2$. Con rango completo por columnas es la solución habitual de mínimos cuadrados; con rango deficiente hay infinitas soluciones y la pseudoinversa elige la más corta (sin componente en el núcleo). Y si se anulan también los $\sigma_i$ pequeños, se obtiene la solución **regularizada** (SVD truncada) de [A1](../matrices/a1-1.qmd).
+
+```{julia}
+#| label: ej-pinv
+A_rd = [1.0 2; 2 4; 3 6]          # rango 1: la segunda columna es el doble de la primera
+b_rd = [1.0, 2, 2]
+x_pinv = pseudoinversa_svd(A_rd) * b_rd
+x_bs = A_rd \ b_rd                 # `\` también da la de mínima norma para rango deficiente
+(rango = rango_numerico(A_rd), x_minima_norma = x_pinv, mismo_que_barra = x_pinv ≈ x_bs, residuo = norm(A_rd * x_pinv - b_rd))
+```
+
+La solución de mínima norma es $\mathbf x^{+}=($`{julia} coma(x_pinv[1]; d=4)`$,\;$`{julia} coma(x_pinv[2]; d=4)`$)$ y cualquier otra que minimice el residuo, como $(11/70+2t,\;11/35-t)$, tiene mayor norma.

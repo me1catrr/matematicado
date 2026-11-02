@@ -1,0 +1,57 @@
+---
+title: "A2.3 Los modos del edificio"
+subtitle: "A2 · Valores y vectores propios"
+id: A2.3
+unidad: A2
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+_, _, K3C = edificio_tres_plantas(escenario=:C)
+f3C, Phi3C = modos_propios(K3C, M3)
+```
+
+El caso transversal del curso es un **edificio de cortante** (*shear building*): las plantas son masas rígidas y los entrepisos, muelles laterales. Sus valores son $m=2\cdot10^5$ kg por planta y rigideces de entrepiso $5\cdot10^7$, $5\cdot10^7$ y $4\cdot10^7$ N/m (de abajo arriba). Con `modos_propios` del paquete `Resonancia`:
+
+```{julia}
+#| label: tbl-modos-edificio
+#| tbl-cap: "Frecuencias y formas modales del edificio de tres plantas (normalizadas con máximo en valor absoluto igual a 1)."
+using Markdown
+forma(j) = Phi3[:, j] ./ Phi3[argmax(abs.(Phi3[:, j])), j]
+filas = ["| $j | $(coma(f3[j]; d=3)) | $(coma(forma(j)[1]; d=3)) | $(coma(forma(j)[2]; d=3)) | $(coma(forma(j)[3]; d=3)) |" for j in 1:3]
+Markdown.parse("| Modo | f (Hz) | planta 1 | planta 2 | planta 3 |\n|:--:|--:|--:|--:|--:|\n" * join(filas, "\n"))
+```
+
+```{julia}
+#| label: fig-modos-edificio
+#| fig-cap: "Formas modales del edificio de tres plantas. El primer modo mueve todas las plantas en el mismo sentido; el segundo cambia de signo una vez, y el tercero dos veces: el modo $j$ tiene $j-1$ cambios de signo. Los círculos son las plantas; la línea vertical, la posición de reposo."
+#| fig-alt: "Tres paneles con las formas modales del edificio. En cada uno, una línea quebrada une el suelo con las tres plantas. El primer modo no cruza el eje, el segundo lo cruza una vez, el tercero dos veces."
+fig = Figure(size=(780, 330))
+for j in 1:3
+    ax = Axis(fig[1, j]; title="Modo $j: $(coma(f3[j]; d=2)) Hz", xlabel="desplazamiento relativo", ylabel=j == 1 ? "planta" : "",
+              yticks=0:3, limits=(-1.25, 1.25, -0.1, 3.2))
+    vlines!(ax, [0.0]; color=GRIS, linestyle=:dash)
+    lines!(ax, [0.0; forma(j)], 0:3; color=AZUL, linewidth=2.5)
+    scatter!(ax, [0.0; forma(j)], 0:3; color=AZUL, markersize=11)
+end
+fig
+```
+
+La frecuencia $f_j=\omega_j/2\pi$ sube con el número de cambios de signo de la forma, algo general en estructuras de cadena. La normalización a masa unidad hace que los modos tengan unidades de kg$^{-1/2}$; para dibujarlos se reescalan, y lo que importa es la *forma*.
+
+## Un cálculo comprobable
+
+El cociente de Rayleigh para la forma aproximada $\mathbf x=(1,2,3)^{\mathsf T}$ vale $R=$ `{julia} coma(cociente_rayleigh(K3, M3, [1.0, 2, 3]); d=1)` rad²/s², es decir, $f=$ `{julia} coma(sqrt(cociente_rayleigh(K3, M3, [1.0, 2, 3])) / 2π; d=3)` Hz, algo por encima del primer modo ($f_1=$ `{julia} coma(f3[1]; d=3)` Hz), como debe ser: el cociente de Rayleigh nunca baja de $\omega_1^2$. Y la comprobación de la ortogonalidad: $\lVert\boldsymbol\Phi^{\mathsf T}\mathbf M\boldsymbol\Phi-\mathbf I\rVert=$ `{julia} @sprintf("%.1e", norm(Phi3' * M3 * Phi3 - I))`.

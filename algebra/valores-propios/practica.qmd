@@ -1,0 +1,144 @@
+---
+title: "Práctica y cierre"
+subtitle: "A2 · Valores y vectores propios"
+id: A2-cierre
+unidad: A2
+bloque: "Álgebra lineal"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Construye $\mathbf M$ y $\mathbf K$ del edificio con `edificio_cortante` y calcula frecuencias y modos con `modos_propios`.
+2. Comprueba $\boldsymbol\Phi^{\mathsf T}\mathbf M\boldsymbol\Phi=\mathbf I$ y $\boldsymbol\Phi^{\mathsf T}\mathbf K\boldsymbol\Phi=\boldsymbol\Omega^2$.
+3. Reduce a 90 % la rigidez del entrepiso 2 y compara la variación de cada frecuencia con la predicción de la [ecuación 1 de A2.4](a2-4.qmd#eq-perturbacion).
+4. Calcula el MAC entre los modos de los dos estados con `matriz_mac`.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, LinearAlgebra
+M, K = edificio_cortante(fill(2e5, 3), [5e7, 5e7, 4e7])
+f, Phi = modos_propios(K, M)
+@assert Phi' * M * Phi ≈ I
+_, Kd = edificio_cortante(fill(2e5, 3), [5e7, 4.5e7, 4e7])
+fd, Phid = modos_propios(Kd, M)
+fd ./ f .- 1                    # variación relativa de las frecuencias
+matriz_mac(Phi, Phid)           # diagonal ≈ 1
+```
+
+## Python
+
+```python
+import numpy as np
+from scipy import linalg
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+M, K = mx.edificio_tres_plantas("A")
+w2, Phi = linalg.eigh(K, M)           # normaliza a masa unidad: Phi.T @ M @ Phi = I
+f = np.sqrt(w2) / (2 * np.pi)
+Md, Kd = mx.edificio_tres_plantas("C")
+fd = np.sqrt(linalg.eigh(Kd, Md, eigvals_only=True)) / (2 * np.pi)
+fd / f - 1
+```
+:::
+
+El código Python **no se ejecuta en la web**: su versión probada está en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py), contrastada con Julia mediante `referencia/matrices.json`.
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y el paquete `Resonancia`: construye las matrices de un edificio de cortante de cuatro plantas (masas de 2·10⁵ kg y rigideces de entrepiso de 6·10⁷, 5·10⁷, 5·10⁷ y 4·10⁷ N/m), calcula sus frecuencias y modos, y estima con la teoría de perturbaciones de primer orden cuánto baja cada frecuencia si el entrepiso 3 pierde el 15 % de su rigidez. Compara con el cálculo exacto y dime en qué modo se nota más. Comprueba la normalización a masa unidad.»
+
+**Verifica.** (a) Que usa `edificio_cortante` y `modos_propios`, no una función propia. (b) Que $\boldsymbol\Phi^{\mathsf T}\mathbf M\boldsymbol\Phi$ es la identidad (error del orden de $10^{-15}$). (c) Que la fórmula de perturbación es $\boldsymbol\varphi^{\mathsf T}\Delta\mathbf K\boldsymbol\varphi$ con modos a masa unidad y que $\Delta f/f=\Delta\lambda/(2\lambda)$. (d) Que el modo más afectado es el que más se deforma en el entrepiso 3. (e) Que no inventa valores: pídele el código y ejecútalo.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-2-simetrica-compleja" respuesta="falso"}
+Una matriz real **simétrica** puede tener valores propios complejos no reales.
+
+::: {.solucion}
+**Falso.** Por el [Teorema 1 de A2.1](a2-1.qmd#thm-espectral), los valores propios de una matriz real simétrica son siempre reales. Las matrices que sí pueden tenerlos complejos son las no simétricas, como una rotación.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-2-frecuencia" respuesta="1.105" tol="1%" unidad="Hz"}
+¿Cuál es la frecuencia natural del primer modo del edificio de tres plantas (masas $2\cdot10^5$ kg; rigideces $5\cdot10^7$, $5\cdot10^7$ y $4\cdot10^7$ N/m)?
+
+::: {.pista}
+Calcula `modos_propios(K, M)` con las matrices de `edificio_cortante` y toma el primer elemento de `f`.
+:::
+
+::: {.solucion}
+$f_1=1{,}105$ Hz (los otros dos son 2,939 Hz y 4,390 Hz).
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-2-rayleigh" respuesta="1.125" tol="1%" unidad="Hz"}
+Estima la frecuencia fundamental del mismo edificio con el cociente de Rayleigh y la forma aproximada $\mathbf x=(1,\,2,\,3)^{\mathsf T}$. Da el resultado en Hz, $f=\sqrt{R}/2\pi$.
+
+::: {.solucion}
+$R=\mathbf x^{\mathsf T}\mathbf K\mathbf x/\mathbf x^{\mathsf T}\mathbf M\mathbf x=50$ rad²/s², de donde $f=1{,}125$ Hz: un $1{,}9\,\%$ por encima del valor exacto, como corresponde a un cociente que nunca queda por debajo de $\omega_1^2$.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-2-sensible" respuesta="c"}
+Si el entrepiso 2 pierde rigidez, ¿qué modo del edificio de tres plantas cambia más su frecuencia, y por qué?
+
+::: {.opciones}
+- El primero, porque es el más lento.
+- El segundo, porque es el que cambia de signo en la planta 2.
+- El tercero, porque es el modo con mayor deriva entre las plantas 1 y 2.
+- Todos igual, porque la rigidez es una propiedad global.
+:::
+
+::: {.solucion}
+La **c**. Por la [ecuación 1 de A2.4](a2-4.qmd#eq-perturbacion), el cambio de $\lambda_j$ es proporcional a la energía de deformación del modo en el entrepiso modificado, es decir, a $(\varphi_{1j}-\varphi_{2j})^2$. Para el tercer modo este valor es unas treinta veces el de los otros dos.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-2-solido-rigido"}
+Una pasarela flotante está apoyada en el agua y no está anclada. ¿Qué esperas del problema de valores propios de su matriz de rigidez? ¿Cómo lo trataría un programa que calcula modos?
+
+::: {.rubrica}
+- Digo que $\mathbf K$ es semidefinida positiva y tiene valores propios nulos.
+- Relaciono el valor propio nulo con un movimiento de sólido rígido (traslación o giro) que no deforma la estructura.
+- Distingo esos modos de las vibraciones y propongo ignorarlos, anclar la estructura o contar cuántos hay.
+:::
+
+::: {.solucion}
+$\mathbf K$ es singular: sus valores propios nulos corresponden a movimientos de sólido rígido y no son vibraciones. Un programa los detecta por $\omega\approx0$ (con tolerancia, por el redondeo), los separa de los modos flexibles y, si hace falta invertir $\mathbf K$, usa una pseudoinversa o ancla la estructura.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-2-no-simetrica" respuesta="0.0316" tol="2%"}
+Sea $\mathbf A=\begin{bmatrix}1&1000\\0&1\end{bmatrix}$ y $\mathbf A_\epsilon$ la misma matriz con $10^{-6}$ en la posición $(2,1)$. ¿Cuánto se separa de 1 cada uno de sus valores propios? (valor absoluto de la diferencia).
+
+::: {.solucion}
+$\lambda=1\pm\sqrt{1000\cdot10^{-6}}=1\pm0{,}0316$: un desplazamiento unas $3\cdot10^{4}$ veces mayor que la perturbación.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Distingo el problema estándar del generalizado y sé reducir el segundo al primero.
+- [ ] Demuestro que, para $\mathbf K$ y $\mathbf M$ simétricas y $\mathbf M>0$, las frecuencias son reales y los modos ortogonales respecto de $\mathbf M$ y $\mathbf K$.
+- [ ] Normalizo los modos a masa unidad y desacoplo las ecuaciones con $\mathbf u=\boldsymbol\Phi\mathbf q$.
+- [ ] Calculo e interpreto el cociente de Rayleigh y sé qué acota.
+- [ ] Predigo a primer orden el cambio de una frecuencia por un cambio de rigidez y explico por qué unos modos son más sensibles que otros.
+- [ ] Explico por qué las formas modales cambian menos que las frecuencias, y qué implica para detectar daño.
+- [ ] Sé por qué los valores propios de una matriz no simétrica merecen más cautela.
+
+## Qué no dice esta unidad
+
+- Solo se trata el edificio de cortante de masas concentradas. En estructuras reales (puentes, edificios con flexión de vigas y suelo) las frecuencias dependen de más parámetros y los modelos de elementos finitos se calibran con datos.
+- La perturbación de primer orden es una aproximación; no se estudia aquí el caso de valores propios repetidos o muy próximos, donde la teoría es más delicada.
+- No se discuten los modos complejos del amortiguamiento no proporcional; se retoman en [la representación en espacio de estados](../../sistemas/espacio-estados/index.qmd).
+- La comparación de estados con el MAC en presencia de ruido y de variaciones ambientales se hace en [M12](https://me1catrr.github.io/resonancia/mse/m12-caso-real-ii/index.html) y en el caso transversal.

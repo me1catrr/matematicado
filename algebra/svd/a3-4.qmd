@@ -1,0 +1,124 @@
+---
+title: "A3.4 Rango numérico"
+subtitle: "A3 · Descomposición en valores singulares"
+id: A3.4
+unidad: A3
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Random, DelimitedFiles, Printf, Markdown
+include("../../recursos/_tema.jl")
+```
+
+Con aritmética de precisión finita y datos con ruido, el rango «matemático» no existe: una matriz casi nunca tiene valores singulares exactamente nulos. El **rango numérico** es el número de valores singulares por encima de un umbral, y el umbral hay que justificarlo.
+
+- **Por redondeo:** $\tau=\max(m,n)\,\varepsilon\,\sigma_1$, es lo que usa por defecto `rango_numerico` y `rank`.
+- **Por ruido:** si los datos son $\mathbf X=\mathbf X_0+\mathbf E$ y los elementos de $\mathbf E$ son independientes con desviación típica $s$, el mayor valor singular de $\mathbf E$ es, para matrices grandes, $\approx s(\sqrt m+\sqrt n)$. Un valor singular de $\mathbf X$ por debajo de ese nivel no se puede distinguir de ruido.
+- **Por salto:** un cambio brusco entre $\sigma_k$ y $\sigma_{k+1}$ indica el rango, pero solo si existe: en datos reales el espectro suele decaer sin saltos, y entonces el rango es una **decisión** y no un hecho.
+
+```{julia}
+#| label: ej-ruido
+Random.seed!(1)
+s_ruido = 0.5
+E = s_ruido .* randn(2000, 50)
+(medido = opnorm(E), teoria = s_ruido * (sqrt(2000) + sqrt(50)))
+```
+
+Para una matriz de $2000\times50$ con ruido de desviación $0{,}5$, el mayor valor singular medido es `{julia} coma(opnorm(E); d=2)` y la regla $s(\sqrt m+\sqrt n)$ da `{julia} coma(s_ruido * (sqrt(2000) + sqrt(50)); d=2)`.
+
+
+## Laboratorio: aproximación de rango y ruido {#lab-svd}
+
+```{ojs}
+//| echo: false
+import {svd, aproxRango, rng, normal, norma2, normaFro} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 1. Aproximación de rango $r$ de una matriz con ruido.** La matriz es una «película» de 40 instantes por 12 sensores, que combina tres formas espaciales con tres frecuencias diferentes y se contamina con ruido blanco de desviación $s$ (semilla fija). Elige el rango $r$ y el nivel de ruido: se muestran los valores singulares frente al nivel de ruido esperado $s(\sqrt m+\sqrt n)$, la matriz reconstruida y el error, que se compara con el valor singular $\sigma_{r+1}$ del teorema de Eckart–Young–Mirsky.
+
+```{ojs}
+//| echo: false
+viewof r = Inputs.range([0, 12], {value: 3, step: 1, label: "rango r"})
+viewof ruido = Inputs.range([0, 1.5], {value: 0.3, step: 0.05, label: "ruido s (misma unidad que la señal)"})
+```
+
+```{ojs}
+//| echo: false
+datos = {
+  const T = 40, S = 12;
+  const g = rng(11);
+  const limpia = Array.from({length: T}, (_, t) =>
+    Array.from({length: S}, (_, x) =>
+      3.0 * Math.sin(2 * Math.PI * 0.05 * t) * Math.sin(Math.PI * (x + 1) / 13)
+      + 2.0 * Math.sin(2 * Math.PI * 0.13 * t + 0.7) * Math.sin(2 * Math.PI * (x + 1) / 13)
+      + 1.2 * Math.sin(2 * Math.PI * 0.27 * t + 1.9) * Math.sin(3 * Math.PI * (x + 1) / 13)));
+  const z = Array.from({length: T}, () => Array.from({length: S}, () => normal(g)));
+  return {T, S, limpia, z};
+}
+```
+
+```{ojs}
+//| echo: false
+resultado = {
+  const X = datos.limpia.map((f, t) => f.map((v, x) => v + ruido * datos.z[t][x]));
+  const {S: sv} = svd(X);
+  const Xr = r === 0 ? X.map(f => f.map(() => 0)) : aproxRango(X, r);
+  const resta = X.map((f, t) => f.map((v, x) => v - Xr[t][x]));
+  const e2 = norma2(resta), eF = normaFro(resta);
+  const eLimpia = normaFro(datos.limpia.map((f, t) => f.map((v, x) => v - Xr[t][x])));
+  const eRuido = normaFro(datos.limpia.map((f, t) => f.map((v, x) => v - X[t][x])));
+  return {X, sv, Xr, e2, eF, eLimpia, eRuido,
+    siguiente: r < sv.length ? sv[r] : 0,
+    colaF: Math.sqrt(sv.slice(r).reduce((s, v) => s + v * v, 0)),
+    nivel: ruido * (Math.sqrt(datos.T) + Math.sqrt(datos.S)),
+    energia: sv.slice(0, r).reduce((s, v) => s + v * v, 0) / sv.reduce((s, v) => s + v * v, 0)};
+}
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 700, height: 250, marginLeft: 50, x: {label: "componente i", tickFormat: "d", ticks: 12}, y: {label: "σᵢ", grid: true},
+  marks: [
+    Plot.barY(resultado.sv.map((v, i) => ({i: i + 1, v})), {x: "i", y: "v", fill: d => d.i <= r ? "#1B6CA8" : "#9CA3AF"}),
+    Plot.ruleY([resultado.nivel], {stroke: "#D95F02", strokeWidth: 2, strokeDasharray: "6,4"}),
+    Plot.text([{x: 12, y: resultado.nivel, t: "s(√m+√n)"}], {x: "x", y: "y", text: "t", dy: -8, textAnchor: "end", fill: "#D95F02"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+{
+  const celda = (M, titulo) => Plot.plot({
+    width: 220, height: 280, marginLeft: 36, caption: titulo,
+    x: {label: "sensor", ticks: [], axis: null}, y: {label: "instante", reverse: true, ticks: []},
+    color: {scheme: "RdBu", domain: [-6, 6], reverse: true},
+    marks: [Plot.cell(M.flatMap((f, t) => f.map((v, x) => ({t, x, v}))), {x: "x", y: "t", fill: "v"})]
+  });
+  return html`<div style="display:flex; gap:12px; flex-wrap:wrap">${celda(datos.limpia, "Señal sin ruido")}${celda(resultado.X, "Con ruido")}${celda(resultado.Xr, "Aproximación de rango " + r)}</div>`;
+}
+```
+
+```{ojs}
+//| echo: false
+md`**Resultados.** Energía retenida: **${(100 * resultado.energia).toFixed(1).replace(".", ",")} %**. Error en norma 2: **${resultado.e2.toFixed(3).replace(".", ",")}**, y σ<sub>r+1</sub> = **${resultado.siguiente.toFixed(3).replace(".", ",")}** ${Math.abs(resultado.e2 - resultado.siguiente) < 1e-6 * Math.max(1, resultado.siguiente) ? "✓ (coinciden, teorema de Eckart–Young–Mirsky)" : "✗"}. Error en Frobenius: **${resultado.eF.toFixed(3).replace(".", ",")}** (cola de los σ: **${resultado.colaF.toFixed(3).replace(".", ",")}**). Distancia de la aproximación a la señal **sin ruido**: **${resultado.eLimpia.toFixed(3).replace(".", ",")}**; la de la señal ruidosa: **${resultado.eRuido.toFixed(3).replace(".", ",")}**.`
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Datos:** la señal limpia tiene rango 3 exacto (tres componentes, cada una el producto de una historia temporal sinusoidal por una forma espacial); el ruido es gaussiano, blanco y de la misma desviación en todos los sensores. En datos reales el ruido puede estar correlacionado y el espectro de $\sigma_i$ no tiene un salto tan limpio.
+- **Resultado a observar:** con $r$ igual al número de componentes de señal, la aproximación está **más cerca de la señal limpia que la propia señal ruidosa**: eliminar los $\sigma_i$ de ruido filtra. Con $r$ demasiado grande se reincorpora ruido; con $r$ pequeño se pierde señal.
+- **Nivel de ruido teórico:** la línea naranja es una cota aproximada del mayor valor singular del ruido, no una frontera exacta.
+- **Cálculo:** SVD de Hestenes (Jacobi unilateral) en JavaScript, válida para matrices pequeñas y contrastada con Julia en las pruebas del proyecto.
+- **Qué no se puede concluir:** que $r$ óptimo sea el «número de modos». Aquí vale 3 porque la señal se construyó así; una onda viajera, por ejemplo, necesitaría rango 2 por componente.

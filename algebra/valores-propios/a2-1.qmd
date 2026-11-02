@@ -1,0 +1,35 @@
+---
+title: "A2.1 El problema estándar"
+subtitle: "A2 · Valores y vectores propios"
+id: A2.1
+unidad: A2
+bloque: "Álgebra lineal"
+estado: borrador
+format:
+  html:
+    citation-location: margin
+---
+
+::: {.callout-note .historia icon=false title="Un poco de historia: los valores propios antes de las matrices"}
+Los valores propios nacieron de las ecuaciones de las pequeñas oscilaciones y de las formas cuadráticas, no del álgebra matricial. G. W. Stewart recoge que Cauchy (1829) estableció propiedades de los valores propios de los sistemas simétricos, y que Jacobi (1846) dio un método para diagonalizar una matriz simétrica mediante giros sucesivos [@stewart1993]. Ese método de Jacobi es el que se usa, para matrices pequeñas, en las simulaciones de este curso.
+
+<span class="fuentes-caja">Fuente: informe técnico de Stewart (U. de Maryland, TR-92-31), pp. 1–2, versión previa del artículo citado. Consultado el 25-10-2026.</span>
+:::
+
+::: {#def-propio}
+**Valor y vector propio.** Un número $\lambda\in\mathbb C$ es un **valor propio** (*eigenvalue*) de la matriz cuadrada $\mathbf A$ si existe un vector $\mathbf v\neq\mathbf 0$, el **vector propio** (*eigenvector*), con $\mathbf A\mathbf v=\lambda\mathbf v$. Los valores propios son las raíces del polinomio característico $\det(\mathbf A-\lambda\mathbf I)=0$.
+:::
+
+Un vector propio es una dirección que la aplicación $\mathbf A$ no gira: solo la estira o la encoge por un factor $\lambda$. Por eso sirven para *desacoplar*: si el estado se escribe en la base de vectores propios, cada componente evoluciona por separado. En la práctica no se calculan buscando raíces de un polinomio (el problema de hallar raíces de polinomios de grado alto está mal condicionado), sino con algoritmos iterativos como el QR; en Julia, `eigen` y `eigvals`.
+
+::: {#thm-espectral}
+**Teorema espectral (caso real simétrico).** Si $\mathbf A\in\mathbb R^{n\times n}$ es simétrica, todos sus valores propios son reales y existe una base ortonormal de vectores propios: $\mathbf A=\mathbf Q\boldsymbol\Lambda\mathbf Q^{\mathsf T}$ con $\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I$ y $\boldsymbol\Lambda$ diagonal.
+:::
+
+::: {.callout-note .demostracion collapse="true" title="Demostración de las dos primeras afirmaciones"}
+**Valores propios reales.** Sea $\mathbf A\mathbf v=\lambda\mathbf v$ con $\mathbf v\in\mathbb C^n$. Entonces $\mathbf v^{\mathsf H}\mathbf A\mathbf v=\lambda\,\mathbf v^{\mathsf H}\mathbf v$. Como $\mathbf A$ es real y simétrica, $\mathbf A=\mathbf A^{\mathsf H}$ y el número $\mathbf v^{\mathsf H}\mathbf A\mathbf v$ coincide con su conjugado, así que es real; como $\mathbf v^{\mathsf H}\mathbf v>0$, $\lambda$ es real.
+
+**Ortogonalidad.** Si $\mathbf A\mathbf v_1=\lambda_1\mathbf v_1$ y $\mathbf A\mathbf v_2=\lambda_2\mathbf v_2$ con $\lambda_1\neq\lambda_2$, entonces $\lambda_1\mathbf v_1^{\mathsf T}\mathbf v_2=(\mathbf A\mathbf v_1)^{\mathsf T}\mathbf v_2=\mathbf v_1^{\mathsf T}\mathbf A\mathbf v_2=\lambda_2\mathbf v_1^{\mathsf T}\mathbf v_2$, de donde $(\lambda_1-\lambda_2)\mathbf v_1^{\mathsf T}\mathbf v_2=0$ y $\mathbf v_1^{\mathsf T}\mathbf v_2=0$. Si un valor propio está repetido se eligen vectores ortonormales dentro de su subespacio. La existencia de la base completa se obtiene por inducción: se toma un vector propio, se pasa al complemento ortogonal (invariante por $\mathbf A$) y se repite. $\square$
+:::
+
+Las matrices que **no** son simétricas pueden tener valores propios complejos, vectores propios no ortogonales e incluso no tener base completa de vectores propios (matrices *defectuosas*). Sus valores propios son, además, mucho más sensibles a las perturbaciones (véase el recuadro «Matrices que no son simétricas» de [A2.4](a2-4.qmd)).

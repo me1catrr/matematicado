@@ -1,0 +1,146 @@
+---
+title: "Práctica y cierre"
+subtitle: "A3 · Descomposición en valores singulares"
+id: A3-cierre
+unidad: A3
+bloque: "Álgebra lineal"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Lee `escenario_A.csv` y apila las tres aceleraciones en una matriz $N\times3$.
+2. Calcula la SVD de la matriz centrada. ¿Cuántos valores singulares son claramente distintos de cero?
+3. Compara las formas $\mathbf v_i$ con los modos del modelo mediante `matriz_mac`.
+4. Quédate solo con los canales de las plantas 1 y 3 y repite la SVD. ¿Qué rango obtienes y por qué?
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, LinearAlgebra, DelimitedFiles, Statistics
+D = readdlm("escenario_A.csv", ';', skipstart=1)[:, 2:4]
+F = svd(D .- mean(D, dims=1))
+M, C, K = edificio_tres_plantas()
+_, Phi = modos_propios(K, M)
+matriz_mac(F.V, Phi)
+svdvals(D[:, [1, 3]])           # solo plantas 1 y 3
+```
+
+## Python
+
+```python
+import numpy as np
+from scipy import linalg
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+D = np.loadtxt("escenario_A.csv", delimiter=";", skiprows=1)[:, 1:4]
+U, S, Vt = np.linalg.svd(D - D.mean(axis=0), full_matrices=False)
+M, K = mx.edificio_tres_plantas("A")
+_, Phi = linalg.eigh(K, M)
+mac = (Vt @ Phi) ** 2 / (np.sum(Vt**2, axis=1)[:, None] * np.sum(Phi**2, axis=0)[None, :])
+np.linalg.svd(D[:, [0, 2]], compute_uv=False)
+```
+:::
+
+El código Python **no se ejecuta en la web**: su versión probada está en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py), contrastada con Julia mediante `referencia/matrices.json`.
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Tengo `escenario_A.csv`, `escenario_B.csv` y `escenario_C.csv` (aceleraciones de tres plantas a 100 Hz, `;` como separador). Con Julia y el paquete `Resonancia`: (1) calcula la SVD de las aceleraciones centradas de cada escenario; (2) calcula el MAC entre los vectores singulares de A y los de B, y entre A y C; (3) dime si la POD permite distinguir el escenario C del B y por qué. No des conclusiones que no salgan de los números.»
+
+**Verifica.** (a) Que centra los datos y que cada matriz es $N\times3$, no $3\times N$. (b) Que los vectores singulares se comparan con `matriz_mac` y que empareja por mayor MAC, no por orden. (c) Que advierte de que el signo y el orden de los vectores singulares son arbitrarios. (d) Que no concluye «daño» solo por una diferencia de MAC sin comparar con la variabilidad entre registros sin daño (se hace en el caso transversal). (e) Que ejecuta el código y da los números, no solo la interpretación.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-3-norma2" respuesta="falso"}
+La norma 2 de una matriz es el mayor valor absoluto de sus elementos.
+
+::: {.solucion}
+**Falso.** La norma 2 es el mayor valor singular, $\sigma_1$. El mayor elemento en valor absoluto es una cota inferior de $\sigma_1$, pero no tiene por qué coincidir (por ejemplo, para la matriz de unos $2\times2$, $\sigma_1=2$ y el mayor elemento vale 1).
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-3-sigma1" respuesta="6.325" tol="0.5%"}
+Calcula $\lVert\mathbf A\rVert_2$ para $\mathbf A=\begin{bmatrix}4&0\\3&-5\end{bmatrix}$.
+
+::: {.pista}
+$\sigma_1^2$ es el mayor valor propio de $\mathbf A^{\mathsf T}\mathbf A=\begin{bmatrix}25&-15\\-15&25\end{bmatrix}$.
+:::
+
+::: {.solucion}
+Los valores propios de $\mathbf A^{\mathsf T}\mathbf A$ son $40$ y $10$, así que $\sigma_1=\sqrt{40}=6{,}325$ y $\sigma_2=\sqrt{10}=3{,}162$ (y $\kappa_2=2$).
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-3-eym" respuesta="3.162" tol="0.5%"}
+¿Cuánto vale el error en norma 2 de la mejor aproximación de rango 1 de la matriz $\mathbf A$ del ejercicio anterior?
+
+::: {.solucion}
+Por el [Teorema 1 de A3.2](a3-2.qmd#thm-eym), $\lVert\mathbf A-\mathbf A_1\rVert_2=\sigma_2=\sqrt{10}=3{,}162$.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-3-pinv" respuesta="0.1571" tol="1%"}
+Calcula la primera componente de la solución de mínima norma de mínimos cuadrados $\min\lVert\mathbf A\mathbf x-\mathbf b\rVert$ con $\mathbf A=\begin{bmatrix}1&2\\2&4\\3&6\end{bmatrix}$ y $\mathbf b=(1,2,2)^{\mathsf T}$.
+
+::: {.pista}
+Las columnas de $\mathbf A$ son proporcionales: $\mathbf A=\mathbf a\,(1,2)$ con $\mathbf a=(1,2,3)^{\mathsf T}$. Proyecta $\mathbf b$ sobre $\mathbf a$.
+:::
+
+::: {.solucion}
+$\mathbf a^{\mathsf T}\mathbf b/\mathbf a^{\mathsf T}\mathbf a=11/14$ es el valor de $x_1+2x_2$ que minimiza el residuo; entre todos los pares, el de menor norma es proporcional a $(1,2)$: $\mathbf x^{+}=\tfrac{11}{14}\cdot\tfrac{(1,2)}{5}=(0{,}1571;\,0{,}3143)$.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-3-umbral" respuesta="b"}
+Una matriz de $400\times25$ de aceleraciones tiene ruido blanco de desviación $0{,}01$ en cada elemento. ¿Por debajo de qué valor singular de la matriz no se puede distinguir señal de ruido?
+
+::: {.opciones}
+- Por debajo de $0{,}01$, la desviación típica del ruido.
+- Por debajo de, aproximadamente, $0{,}01\,(\sqrt{400}+\sqrt{25})=0{,}25$.
+- Por debajo de $\varepsilon\,\sigma_1$, el épsilon de la máquina.
+- No hay forma de saberlo sin conocer los modos.
+:::
+
+::: {.solucion}
+La **b**: el mayor valor singular de una matriz de ruido $m\times n$ es $\approx s(\sqrt m+\sqrt n)$. El umbral por redondeo (opción c) sirve para datos sin ruido, y la desviación del ruido (a) no tiene en cuenta que se suman $m\cdot n$ elementos.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-3-pod-modos"}
+Un compañero afirma: «la primera componente de la POD de mis aceleraciones es el primer modo de vibración». ¿Qué le responderías? Cita al menos tres condiciones que se necesitan para que sea cierto.
+
+::: {.rubrica}
+- Digo que las componentes POD se ordenan por energía, no por frecuencia, y que en aceleraciones los modos de más frecuencia pesan más.
+- Cito condiciones: masas iguales (o ponderar por la masa), excitación no correlacionada y de intensidad uniforme, amortiguamiento proporcional y suficientes sensores.
+- Propongo comprobarlo con un modelo (MAC con modos calculados) o con la identificación modal, no solo con la POD.
+:::
+
+::: {.solucion}
+No se puede afirmar en general. Para que las componentes POD sean los modos hacen falta masas iguales (o una ponderación por la masa), fuerzas independientes con la misma intensidad en todos los grados de libertad, amortiguamiento proporcional y tantos sensores como modos. Además, la POD ordena por energía de la señal medida (en aceleraciones, el modo de mayor frecuencia puede ser el dominante), no por frecuencia. En el edificio del caso transversal se cumplen las hipótesis y aun así la componente de mayor energía **no** es el primer modo.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Enuncio la SVD y la relaciono con los valores propios de $\mathbf A^{\mathsf T}\mathbf A$ y $\mathbf A\mathbf A^{\mathsf T}$.
+- [ ] Interpreto los valores singulares como semiejes del elipsoide imagen y deduzco $\lVert\mathbf A\rVert_2$ y $\kappa_2$.
+- [ ] Aplico el teorema de Eckart–Young–Mirsky y calculo la energía retenida.
+- [ ] Calculo la pseudoinversa y la solución de mínima norma, también con rango deficiente.
+- [ ] Justifico un umbral de rango numérico y explico por qué en datos reales es una decisión.
+- [ ] Aplico la SVD a varios sensores y explico cuándo sus componentes se parecen a los modos y cuándo no.
+
+## Qué no dice esta unidad
+
+- No se detallan los algoritmos de cálculo de la SVD (bidiagonalización y QR implícito, o Jacobi unilateral); se usa `svd` de Julia y la implementación de Jacobi para matrices pequeñas en JavaScript.
+- La cota $s(\sqrt m+\sqrt n)$ es un resultado asintótico para ruido gaussiano independiente; con ruido coloreado, el umbral cambia.
+- La POD de datos reales con masas distintas, excitación no uniforme o pocos sensores no coincide con los modos; para eso están los métodos de identificación ([M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html)).
+- El caso complejo (SVD de matrices espectrales para FDD) se trata en la parte de identificación modal.

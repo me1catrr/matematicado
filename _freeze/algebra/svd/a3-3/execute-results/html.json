@@ -1,0 +1,12 @@
+{
+  "hash": "313360c43d2561746f9a1c36be4ef7ca",
+  "result": {
+    "engine": "julia",
+    "markdown": "---\ntitle: \"A3.3 Pseudoinversa y mínimos cuadrados\"\nsubtitle: \"A3 · Descomposición en valores singulares\"\nid: A3.3\nunidad: A3\nbloque: \"Álgebra lineal\"\nestado: borrador\nengine: julia\nexecute:\n  warning: false\nformat:\n  html:\n    code-fold: true\n    code-summary: \"Ver el código\"\n---\n\n\n\n::: {#def-pseudoinversa}\n**Pseudoinversa de Moore–Penrose.** Si $\\mathbf A=\\mathbf U\\boldsymbol\\Sigma\\mathbf V^{\\mathsf T}$ tiene rango $r$, $\\mathbf A^{+}=\\mathbf V\\boldsymbol\\Sigma^{+}\\mathbf U^{\\mathsf T}$, donde $\\boldsymbol\\Sigma^{+}$ invierte los $r$ valores singulares no nulos y deja los demás en cero.\n:::\n\n$\\mathbf x^{+}=\\mathbf A^{+}\\mathbf b$ es la solución de **mínima norma** entre las que minimizan $\\lVert\\mathbf A\\mathbf x-\\mathbf b\\rVert_2$. Con rango completo por columnas es la solución habitual de mínimos cuadrados; con rango deficiente hay infinitas soluciones y la pseudoinversa elige la más corta (sin componente en el núcleo). Y si se anulan también los $\\sigma_i$ pequeños, se obtiene la solución **regularizada** (SVD truncada) de [A1](../matrices/a1-1.qmd).\n\n::: {#cell-ej-pinv .cell execution_count=1}\n``` {.julia .cell-code}\nA_rd = [1.0 2; 2 4; 3 6]          # rango 1: la segunda columna es el doble de la primera\nb_rd = [1.0, 2, 2]\nx_pinv = pseudoinversa_svd(A_rd) * b_rd\nx_bs = A_rd \\ b_rd                 # `\\` también da la de mínima norma para rango deficiente\n(rango = rango_numerico(A_rd), x_minima_norma = x_pinv, mismo_que_barra = x_pinv ≈ x_bs, residuo = norm(A_rd * x_pinv - b_rd))\n```\n\n::: {#ej-pinv .cell-output .cell-output-display execution_count=1}\n```\n(rango = 1, x_minima_norma = [0.1571428571428571, 0.3142857142857142], mismo_que_barra = true, residuo = 0.5976143046671968)\n```\n:::\n:::\n\n\n\nLa solución de mínima norma es $\\mathbf x^{+}=($0,1571$,\\;$0,3143$)$ y cualquier otra que minimice el residuo, como $(11/70+2t,\\;11/35-t)$, tiene mayor norma.\n\n",
+    "supporting": [
+      "a3-3_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

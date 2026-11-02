@@ -1,0 +1,140 @@
+---
+title: "A2.4 Sensibilidad a la rigidez"
+subtitle: "A2 · Valores y vectores propios"
+id: A2.4
+unidad: A2
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+_, _, K3C = edificio_tres_plantas(escenario=:C)
+f3C, Phi3C = modos_propios(K3C, M3)
+```
+
+Un daño local suele reducir la rigidez de un elemento. ¿Cuánto cambian las frecuencias y los modos? Para una perturbación pequeña $\Delta\mathbf K$ de la rigidez, la teoría de perturbaciones da, a primer orden,
+
+$$
+\Delta\lambda_j\approx\boldsymbol\varphi_j^{\mathsf T}\,\Delta\mathbf K\,\boldsymbol\varphi_j,\qquad \frac{\Delta f_j}{f_j}\approx\frac{\Delta\lambda_j}{2\lambda_j}.
+$$ {#eq-perturbacion}
+
+::: {.callout-note .demostracion collapse="true" title="Demostración (con modos normalizados a masa unidad)"}
+Derivando $(\mathbf K+\epsilon\Delta\mathbf K)(\boldsymbol\varphi+\epsilon\boldsymbol\varphi')=(\lambda+\epsilon\lambda')\mathbf M(\boldsymbol\varphi+\epsilon\boldsymbol\varphi')$ respecto de $\epsilon$ en $\epsilon=0$ se obtiene $\Delta\mathbf K\boldsymbol\varphi+\mathbf K\boldsymbol\varphi'=\lambda'\mathbf M\boldsymbol\varphi+\lambda\mathbf M\boldsymbol\varphi'$. Multiplicando por $\boldsymbol\varphi^{\mathsf T}$ y usando $\boldsymbol\varphi^{\mathsf T}\mathbf K=\lambda\boldsymbol\varphi^{\mathsf T}\mathbf M$, los términos con $\boldsymbol\varphi'$ se cancelan y queda $\boldsymbol\varphi^{\mathsf T}\Delta\mathbf K\boldsymbol\varphi=\lambda'\,\boldsymbol\varphi^{\mathsf T}\mathbf M\boldsymbol\varphi=\lambda'$. $\square$
+:::
+
+La @eq-perturbacion dice que el cambio de $\lambda_j$ es la energía de deformación del modo $j$ *en la parte de la estructura que se ha modificado*. Si el entrepiso 2 pierde un $10\,\%$ de rigidez, $\Delta\mathbf K=-0{,}1\,k_2\,\mathbf e\mathbf e^{\mathsf T}$ con $\mathbf e=(1,-1,0)^{\mathsf T}$, y el cambio de cada frecuencia es proporcional al cuadrado de la **deriva** $\varphi_{1j}-\varphi_{2j}$ de ese modo entre las plantas 1 y 2.
+
+```{julia}
+#| label: tbl-sensibilidad
+#| tbl-cap: "Efecto de una pérdida del 10 % de rigidez en el entrepiso 2 (escenario C). Variación relativa de la frecuencia: predicción lineal (@eq-perturbacion) y cálculo exacto; MAC entre la forma del estado de referencia y la del dañado."
+k2 = 5.0e7
+dK = -0.1 * k2 * [1 -1 0; -1 1 0; 0 0 0.0]
+dl = [Phi3[:, j]' * dK * Phi3[:, j] for j in 1:3]
+lin = dl ./ (2π .* f3) .^ 2 ./ 2
+exa = f3C ./ f3 .- 1
+macs = [mac(Phi3[:, j], Phi3C[:, j]) for j in 1:3]
+pct(x) = coma(100x; d=2) * " %"
+filas = ["| $j | $(pct(lin[j])) | $(pct(exa[j])) | $(coma(macs[j]; d=4)) |" for j in 1:3]
+Markdown.parse("| Modo | Δf/f lineal | Δf/f exacto | MAC |\n|:--:|--:|--:|--:|\n" * join(filas, "\n"))
+```
+
+Tres observaciones, comprobables en la @tbl-sensibilidad:
+
+- La aproximación lineal acierta el signo y el orden de magnitud, con error de décimas de punto porcentual para un cambio del $10\,\%$; empeora si el cambio crece.
+- **No todos los modos «ven» el daño por igual.** El tercer modo tiene mucha deriva entre las plantas 1 y 2 y baja más de un $3\,\%$; el segundo, que apenas se deforma ahí, baja unas décimas. Elegir qué modos se vigilan es decidir qué daños se pueden ver.
+- **Las formas cambian mucho menos que las frecuencias**: con MAC $\ge0{,}999$, dos formas medidas con ruido se parecen *más* que el cambio que se quiere detectar. Es lo que se retoma en la comparación de estados de [M12](https://me1catrr.github.io/resonancia/mse/m12-caso-real-ii/index.html).
+
+::: {.callout-warning}
+## Matrices que no son simétricas
+
+Si $\mathbf A$ no es simétrica, los valores propios pueden ser *mucho* más sensibles. Ejemplo: $\mathbf A=\begin{bmatrix}1&1000\\0&1\end{bmatrix}$ tiene el valor propio $1$ doble. Con un cambio de $10^{-6}$ en el elemento $(2,1)$, los valores propios pasan a $1\pm\sqrt{1000\cdot10^{-6}}\approx1\pm0{,}0316$: la perturbación se multiplica por unos $3\cdot10^{4}$. Para una matriz simétrica, el desplazamiento nunca supera la norma de la perturbación (teorema de Weyl). En la forma de estado de una estructura con amortiguamiento no proporcional, $\mathbf A$ no es simétrica, y por eso conviene calcular los polos con algoritmos estables y no fiarse de pequeñas diferencias entre ellos.
+:::
+
+## Laboratorio: modos de un edificio de tres plantas {#lab-modos}
+
+```{ojs}
+//| echo: false
+import {edificioCortante, modosPropios, mac} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 1. Modos de un edificio de tres plantas.** Modifica la rigidez de cada entrepiso (como porcentaje del valor de referencia) y la masa de la cubierta. El gráfico compara las formas modales del estado de referencia (línea gris) con las del modificado (línea de color); la tabla da las frecuencias, el MAC y la predicción lineal de @eq-perturbacion.
+
+```{ojs}
+//| echo: false
+viewof dk1 = Inputs.range([-30, 30], {value: 0, step: 1, label: "Δk₁ (% de 5·10⁷ N/m)"})
+viewof dk2 = Inputs.range([-30, 30], {value: -10, step: 1, label: "Δk₂ (% de 5·10⁷ N/m)"})
+viewof dk3 = Inputs.range([-30, 30], {value: 0, step: 1, label: "Δk₃ (% de 4·10⁷ N/m)"})
+viewof dmasa = Inputs.range([-30, 30], {value: 0, step: 1, label: "Δm₃ (% de 2·10⁵ kg)"})
+```
+
+```{ojs}
+//| echo: false
+modelo = {
+  const m0 = [2e5, 2e5, 2e5], k0 = [5e7, 5e7, 4e7];
+  const m1 = [2e5, 2e5, 2e5 * (1 + dmasa / 100)];
+  const k1 = [k0[0] * (1 + dk1 / 100), k0[1] * (1 + dk2 / 100), k0[2] * (1 + dk3 / 100)];
+  const a = edificioCortante(m0, k0), b = edificioCortante(m1, k1);
+  const A = modosPropios(a.K, a.M), B = modosPropios(b.K, b.M);
+  // predicción lineal: Δλ_j = φᵀ (ΔK − λ ΔM) φ con los modos del estado de referencia
+  const dK = b.K.map((f, i) => f.map((v, j) => v - a.K[i][j]));
+  const dM = b.M.map((f, i) => f.map((v, j) => v - a.M[i][j]));
+  const lin = [0, 1, 2].map((j) => {
+    const p = A.Phi.map((f) => f[j]), lam = (2 * Math.PI * A.f[j]) ** 2;
+    const q = (X) => p.reduce((s, pi, i) => s + pi * p.reduce((t, pk, k) => t + X[i][k] * pk, 0), 0);
+    return (q(dK) - lam * q(dM)) / lam / 2;
+  });
+  const col = (X, j) => { const v = X.Phi.map((f) => f[j]); const mx = v.reduce((s, x) => Math.abs(x) > Math.abs(s) ? x : s, 0); return v.map((x) => x / mx); };
+  return {A, B, lin, col};
+}
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 700, height: 260, marginLeft: 50,
+  fx: {label: null, tickFormat: d => `Modo ${d + 1}`},
+  x: {domain: [-1.3, 1.3], label: "desplazamiento relativo", ticks: 5},
+  y: {domain: [0, 3.2], label: "planta", ticks: [0, 1, 2, 3]},
+  marks: [
+    Plot.ruleX([0], {stroke: "#6B7280", strokeDasharray: "4,4"}),
+    ...[0, 1, 2].flatMap(j => [
+      Plot.line([0, ...modelo.col(modelo.A, j)].map((x, i) => ({x, y: i, j})), {fx: "j", x: "x", y: "y", stroke: "#9CA3AF", strokeWidth: 2}),
+      Plot.line([0, ...modelo.col(modelo.B, j).map((x) => x * Math.sign(modelo.col(modelo.A, j).reduce((s, a, i) => s + a * modelo.col(modelo.B, j)[i], 0) || 1))].map((x, i) => ({x, y: i, j})), {fx: "j", x: "x", y: "y", stroke: "#1B6CA8", strokeWidth: 2.5}),
+      Plot.dot([0, ...modelo.col(modelo.B, j).map((x) => x * Math.sign(modelo.col(modelo.A, j).reduce((s, a, i) => s + a * modelo.col(modelo.B, j)[i], 0) || 1))].map((x, i) => ({x, y: i, j})), {fx: "j", x: "x", y: "y", fill: "#1B6CA8", r: 4})
+    ])
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+html`<table class="table" style="max-width:640px"><thead><tr><th>Modo</th><th>f referencia (Hz)</th><th>f modificado (Hz)</th><th>Δf/f exacto</th><th>Δf/f lineal</th><th>MAC</th></tr></thead><tbody>${
+[0, 1, 2].map((j) => {
+  const fa = modelo.A.f[j], fb = modelo.B.f[j];
+  const a = modelo.A.Phi.map((f) => f[j]), b = modelo.B.Phi.map((f) => f[j]);
+  const fmt = (x, d) => x.toFixed(d).replace(".", ",");
+  return `<tr><td>${j + 1}</td><td>${fmt(fa, 3)}</td><td>${fmt(fb, 3)}</td><td>${fmt(100 * (fb / fa - 1), 2)} %</td><td>${fmt(100 * modelo.lin[j], 2)} %</td><td>${fmt(mac(a, b), 4)}</td></tr>`;
+}).join("")}</tbody></table>`
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Modelo:** edificio de cortante de tres plantas (masas concentradas, plantas rígidas, entrepisos sin masa); no incluye la cimentación ni el suelo.
+- **Sin amortiguamiento:** las frecuencias son las no amortiguadas; el amortiguamiento de un 1 % las cambia en menos de una parte por diez mil.
+- **Cálculo:** los modos se obtienen con el método de Jacobi implementado en `recursos/js/matematicas.js` y contrastado con Julia; es válido para matrices pequeñas.
+- **Predicción lineal:** es la @eq-perturbacion, buena para cambios de unos pocos por cien y que empeora al crecer el cambio. Compárala con el cálculo exacto.
+- **Qué se puede concluir y qué no:** muestra *cómo se mueven* las frecuencias y las formas en un modelo ideal. No dice cuánto de este cambio sería detectable con sensores reales, ruido y variaciones de temperatura: eso se estudia con los escenarios B y C en [el caso transversal](../../caso/edificio/index.qmd).
+
+**Para explorar.** (1) Con $\Delta k_2=-10\,\%$ y el resto en cero, comprueba que se reproduce la @tbl-sensibilidad. (2) Cambia solo $\Delta k_3$ y observa qué modos se mueven; ¿es el mismo conjunto que con $\Delta k_1$? (3) Sube la masa de la cubierta: ¿qué frecuencia baja más?

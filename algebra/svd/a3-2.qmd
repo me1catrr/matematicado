@@ -1,0 +1,25 @@
+---
+title: "A3.2 La mejor aproximación de rango $r$"
+subtitle: "A3 · Descomposición en valores singulares"
+id: A3.2
+unidad: A3
+bloque: "Álgebra lineal"
+estado: borrador
+---
+
+::: {#thm-eym}
+**Eckart–Young–Mirsky.** Sea $\mathbf A_r=\sum_{i=1}^{r}\sigma_i\mathbf u_i\mathbf v_i^{\mathsf T}$. Entre todas las matrices $\mathbf B$ de rango a lo sumo $r$,
+$$
+\lVert\mathbf A-\mathbf A_r\rVert_2=\sigma_{r+1}\le\lVert\mathbf A-\mathbf B\rVert_2,
+\qquad
+\lVert\mathbf A-\mathbf A_r\rVert_F=\Big(\sum_{i>r}\sigma_i^2\Big)^{1/2}\le\lVert\mathbf A-\mathbf B\rVert_F.
+$$
+:::
+
+::: {.callout-note .demostracion collapse="true" title="Demostración de la norma 2"}
+$\mathbf A-\mathbf A_r=\sum_{i>r}\sigma_i\mathbf u_i\mathbf v_i^{\mathsf T}$ tiene mayor valor singular $\sigma_{r+1}$. Para otra $\mathbf B$ de rango $\le r$, su núcleo tiene dimensión $\ge n-r$, y corta al subespacio $\operatorname{gen}\{\mathbf v_1,\dots,\mathbf v_{r+1}\}$ (dimensión $r+1$) en algún vector unitario $\mathbf z$. Entonces $\mathbf B\mathbf z=\mathbf 0$ y $\lVert(\mathbf A-\mathbf B)\mathbf z\rVert=\lVert\mathbf A\mathbf z\rVert\ge\sigma_{r+1}$, porque $\mathbf z$ es combinación de los $r+1$ primeros $\mathbf v_i$. Por tanto $\lVert\mathbf A-\mathbf B\rVert_2\ge\sigma_{r+1}$. $\square$
+:::
+
+Es la justificación de «quedarse con lo importante»: ninguna matriz de rango $r$ se parece más a $\mathbf A$ que la truncada, y el error es exactamente el primer valor singular descartado. En datos, la **fracción de energía** retenida es $\sum_{i\le r}\sigma_i^2/\sum_i\sigma_i^2$, que es el número que suele darse al hablar de «el 99 % de la varianza».
+
+Hay una advertencia importante: el teorema habla de aproximación, no de causas. Los $\sigma_i$ grandes indican componentes de gran amplitud, **no necesariamente mecanismos físicos distintos**; cuántos $\sigma_i$ corresponden a un modo, o a ruido, es otra cuestión (A3.4 y A3.5).

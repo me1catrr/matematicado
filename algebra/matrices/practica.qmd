@@ -1,0 +1,142 @@
+---
+title: "Práctica y cierre"
+subtitle: "A1 · Matrices estructuradas"
+id: A1-cierre
+unidad: A1
+bloque: "Álgebra lineal"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, SparseArrays, Statistics, Random, Markdown
+include("../../recursos/_tema.jl")
+TORROJA = "../../datos/torroja/"
+```
+
+## Práctica guiada
+
+Un ejemplo que une varias piezas con los datos de Torroja: la autocorrelación de un registro real, su Toeplitz, un modelo AR y la matriz de trayectoria de la misma señal.
+
+1. Lee la medida 1 de la estación GS1 con `leer_torroja` y quédate con el eje vertical.
+2. Calcula la autocorrelación hasta el retardo 100 con `autocorrelacion` y construye la matriz de Toeplitz $101\times101$ con `toeplitz`. Calcula su número de condición y sus valores propios.
+3. Ajusta un AR($p$) con `yule_walker` para $p=8$ y para $p=32$ y calcula el error de predicción.
+4. Construye la matriz de trayectoria de las 600 primeras muestras con $L=100$ (`hankel_trayectoria`) y calcula sus valores singulares con `svd`.
+5. Compara cuántos valores singulares superan el 1 % del mayor con el número de picos de la PSD de [R1](https://me1catrr.github.io/resonancia/recursos/r1-datos/torroja/index.html).
+
+```{julia}
+_, a, _ = leer_torroja(TORROJA * "s1_medida01.txt")   # registro de GS1, como en A1.4
+x_pg = a[:, 3] .* 1e3
+r_pg = autocorrelacion(x_pg, 100)
+T_pg = toeplitz(r_pg)
+Sp = svd(hankel_trayectoria(x_pg[1:600], 100)).S
+n_sing = count(>(0.01 * Sp[1]), Sp)
+(cond_T = cond(T_pg), min_eig = minimum(eigvals(Symmetric(T_pg))), valores_singulares_sobre_1pct = n_sing)
+```
+
+La Toeplitz de 101×101 tiene $\kappa_2=$ `{julia} replace(@sprintf("%.1e", cond(T_pg)), "." => ",")` y `{julia} n_sing` valores singulares de la matriz de trayectoria superan el 1 % del mayor: **mucho menos que 100**, porque la señal real está dominada por unas pocas componentes (cada modo es un par de valores singulares). Es, de forma cuantitativa, la idea que sostiene a ERA y SSI.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, LinearAlgebra
+t, a, fs, = leer_torroja("s1_medida01.txt")
+x = a[:, 3] .* 1e3
+r = autocorrelacion(x, 100)
+phi, sigma2 = yule_walker(r, 8)
+S = svd(hankel_trayectoria(x[1:600], 100)).S
+```
+
+## Python
+
+```python
+import numpy as np
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+x = np.loadtxt("s1_medida01.txt", skiprows=4, usecols=3) * 1e3   # eje Z, mg
+r = mx.autocorrelacion(x, 100)
+phi, sigma2 = mx.yule_walker(r, 8)
+S = np.linalg.svd(mx.hankel_trayectoria(x[:600], 100), compute_uv=False)
+```
+:::
+
+El código de la pestaña Python **no se ejecuta en la web**: su versión probada está en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py), con pruebas de `pytest` que la comparan con Julia mediante los datos comunes de `referencia/matrices.json`.
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Tengo un fichero de aceleraciones a 100 Hz (`s1_medida01.txt`, cuatro líneas de cabecera y luego hora y tres ejes). Con Julia y el paquete `Resonancia`: (1) lee el eje vertical; (2) construye la matriz de trayectoria con ventana L=100 y calcula sus valores singulares; (3) reconstruye la señal con SSA para r = 2, 4, 6 y 10; (4) dime cuántos componentes crees que hay y por qué. No inventes valores: si algo no sale, dilo.»
+
+**Verifica.** (a) Que usa `hankel_trayectoria`, `ssa` y `svd` del paquete, no código copiado. (b) Que la matriz tiene $L\times(N-L+1)$ elementos y que `promedio_antidiagonal` de la matriz de trayectoria devuelve la señal original. (c) Que el error de reconstrucción baja al subir $r$ y se estabiliza donde acaban los valores singulares de señal. (d) Que su respuesta distingue **componentes** de **modos físicos** (cada modo da dos valores singulares). (e) Que no afirma como resultado ningún valor que no haya calculado.
+:::
+
+## Ejercicios
+
+Los ejercicios cortos están intercalados en cada apartado. Estos tres integran varios.
+
+::: {.ejercicio tipo="abierta" id="m2-1-estructura"}
+Una amiga mide una aceleración durante 10 minutos y propone calcular la matriz de covarianza de las $N$ muestras ($N=60\,000$) y su inversa para «blanquear» la señal. Explica por qué eso es una mala idea y cómo usarías la estructura de la matriz.
+
+::: {.rubrica}
+- Señalo el tamaño ($60\,000^2$ elementos) y el coste ($O(N^3)$ de invertir, $O(N^2)$ de guardar).
+- Reconozco que la covarianza de una señal estacionaria es de Toeplitz y que solo hacen falta $N$ números ($r_k$).
+- Propongo un método estructurado (Levinson–Durbin, filtro AR o FFT) en lugar de la matriz completa.
+- Menciono el mal condicionamiento de la Toeplitz de una señal con picos espectrales.
+:::
+
+::: {.solucion}
+La covarianza de una señal estacionaria es de Toeplitz: basta la autocorrelación $r_0,\dots,r_{N-1}$ (60 000 números en vez de 3 600 millones). Blanquear equivale a filtrar con el AR$(p)$ ajustado por Yule–Walker: se resuelve con Levinson–Durbin en $O(p^2)$ y se aplica con una convolución (rápida con la FFT). Además, la inversa explícita estaría mal condicionada si la señal tiene picos espectrales marcados.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-1-que-matriz" respuesta="a"}
+Quieres identificar los polos de un sistema a partir de su respuesta impulsional medida. ¿Qué matriz construyes primero?
+
+::: {.opciones}
+- Una matriz de Hankel con los valores de la respuesta impulsional (ERA).
+- La matriz de Vandermonde de los instantes de medida.
+- Una matriz circulante con la respuesta impulsional.
+- La matriz de Gram de los modos.
+:::
+
+::: {.solucion}
+La **a**. La matriz de Hankel de los parámetros de Markov se factoriza como observabilidad por controlabilidad, y su SVD y el desplazamiento de una muestra dan $\widehat{\mathbf A}$ ([ecuación 2 de A1.5](a1-5.qmd#eq-era)), cuyos autovalores son los polos.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-1-pierdes-cifras" respuesta="8" tol="10%"}
+Resuelves un sistema con una matriz de $\kappa_2=10^{8}$ en doble precisión ($\varepsilon\approx10^{-16}$). ¿Cuántas cifras decimales significativas esperas conservar en la solución, como mucho?
+
+::: {.solucion}
+$16-\log_{10}\kappa=16-8=8$ cifras (la cota $\kappa\varepsilon\approx10^{-8}$ de error relativo). Es una cota superior: el error real puede ser menor.
+:::
+:::
+
+## La doy por superada si… {#superada}
+
+- [ ] Sé calcular las normas 1, $\infty$, 2 y de Frobenius y explico qué mide cada una.
+- [ ] Interpreto un número de condición: cuántas cifras pierdo y por qué no es culpa del algoritmo.
+- [ ] Reconozco cuándo una matriz es semidefinida y no definida positiva (movimientos de sólido rígido, covarianza con pocas muestras).
+- [ ] Construyo las matrices $\mathbf M$ y $\mathbf K$ de una cadena de masas y muelles y estimo el ahorro de memoria y tiempo de usar matrices dispersas.
+- [ ] Construyo una Toeplitz a partir de una autocorrelación, escribo las ecuaciones de Yule–Walker y ajusto un AR($p$).
+- [ ] Construyo una matriz de trayectoria, explico por qué una sinusoide da rango 2 y reconstruyo una señal con SSA.
+- [ ] Distingo la Hankel de trayectoria, la de parámetros de Markov, la de covarianzas y la de datos.
+- [ ] Calculo una convolución circular con la FFT y sé cuándo coincide con la lineal.
+- [ ] Comparo dos formas modales con el MAC y sé que las formas son menos sensibles que las frecuencias.
+
+## Qué no dice esta unidad
+
+- Los algoritmos de identificación (FDD, SSI, ERA completos, diagramas de estabilización) se desarrollan en [M7.5](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html#m7-5)–[M7.9](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html#m7-9), con incertidumbre y validación; aquí solo se prepara la matemática y se muestra el caso ideal.
+- Los tiempos de la [Tabla 1 de A1.3](a1-3.qmd#tbl-dispersas) son de un ordenador y una versión concretos; las tendencias son las generales.
+- La estimación de Yule–Walker de la sección de Torroja es dentro de la muestra; no se ha hecho validación cruzada.
+- Las implementaciones en JavaScript (SVD y autovalores por el método de Jacobi) son válidas para matrices pequeñas; no sustituyen a LAPACK.
+- Las cápsulas históricas se apoyan en las fuentes citadas; donde no se ha leído el original se dice.

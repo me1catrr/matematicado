@@ -1,0 +1,24 @@
+---
+title: "A3.1 Definición y geometría"
+subtitle: "A3 · Descomposición en valores singulares"
+id: A3.1
+unidad: A3
+bloque: "Álgebra lineal"
+estado: borrador
+---
+
+::: {#thm-svd}
+**SVD.** Toda matriz real $\mathbf A\in\mathbb R^{m\times n}$ se escribe como $\mathbf A=\mathbf U\boldsymbol\Sigma\mathbf V^{\mathsf T}$, con $\mathbf U\in\mathbb R^{m\times m}$ y $\mathbf V\in\mathbb R^{n\times n}$ ortogonales y $\boldsymbol\Sigma$ «diagonal» con $\sigma_1\ge\sigma_2\ge\dots\ge\sigma_p\ge0$, $p=\min(m,n)$. Los $\sigma_i$ son únicos y se llaman **valores singulares**; las columnas $\mathbf u_i$ y $\mathbf v_i$, **vectores singulares** por la izquierda y por la derecha.
+:::
+
+::: {.callout-note .demostracion collapse="true" title="Demostración (esquema)"}
+$\mathbf A^{\mathsf T}\mathbf A$ es simétrica y semidefinida positiva, así que, por el teorema espectral de [A2](../valores-propios/a2-1.qmd), existe una base ortonormal $\mathbf v_i$ con $\mathbf A^{\mathsf T}\mathbf A\mathbf v_i=\lambda_i\mathbf v_i$ y $\lambda_i\ge0$. Se define $\sigma_i=\sqrt{\lambda_i}$ y, para $\sigma_i>0$, $\mathbf u_i=\mathbf A\mathbf v_i/\sigma_i$. Estos $\mathbf u_i$ son ortonormales porque $\mathbf u_i^{\mathsf T}\mathbf u_j=\mathbf v_i^{\mathsf T}\mathbf A^{\mathsf T}\mathbf A\mathbf v_j/(\sigma_i\sigma_j)=\lambda_j\delta_{ij}/(\sigma_i\sigma_j)=\delta_{ij}$. Se completan hasta una base de $\mathbb R^m$ y queda $\mathbf A\mathbf V=\mathbf U\boldsymbol\Sigma$. $\square$
+:::
+
+Tres lecturas de lo mismo:
+
+1. **Geometría.** La imagen de la esfera unidad por $\mathbf A$ es un elipsoide de semiejes $\sigma_i\mathbf u_i$. $\mathbf A$ gira ($\mathbf V^{\mathsf T}$), estira ($\boldsymbol\Sigma$) y vuelve a girar ($\mathbf U$). De aquí salen $\lVert\mathbf A\rVert_2=\sigma_1$, $\lVert\mathbf A\rVert_F^2=\sum\sigma_i^2$ y $\kappa_2(\mathbf A)=\sigma_1/\sigma_n$ para una matriz cuadrada invertible.
+2. **Suma de capas.** $\mathbf A=\sum_{i=1}^{r}\sigma_i\,\mathbf u_i\mathbf v_i^{\mathsf T}$: una suma de matrices de rango 1 ordenadas por importancia, con $r=\operatorname{rango}(\mathbf A)$ el número de $\sigma_i>0$.
+3. **Subespacios.** $\mathbf u_1,\dots,\mathbf u_r$ generan la imagen; $\mathbf v_{r+1},\dots,\mathbf v_n$ generan el núcleo. Es la forma numérica de decir qué parte de un vector $\mathbf A$ ve y qué parte ignora.
+
+La SVD no es lo mismo que la diagonalización: los vectores $\mathbf u_i$ y $\mathbf v_i$ son distintos, existen siempre y son ortonormales. Para una matriz simétrica definida positiva coinciden con los vectores propios y los $\sigma_i$ con los valores propios; con signos negativos, $\sigma_i=\lvert\lambda_i\rvert$.
