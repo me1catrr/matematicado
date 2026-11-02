@@ -1,0 +1,115 @@
+---
+title: "Práctica y cierre"
+subtitle: "F2 · Transformada de Hilbert y señal analítica"
+id: F2-cierre
+unidad: F2
+bloque: "Señales"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Simula la respuesta libre del edificio (`espacio_estados` y `discretizar_zoh`) a 100 Hz durante 41 s.
+2. Aísla el primer modo con un filtro paso banda ideal en la FFT (0,8–1,5 Hz).
+3. Calcula la señal analítica y ajusta una recta a $\ln A(t)$ en el tramo central; deduce $\zeta$.
+4. Repite sin filtrar y comprueba que la frecuencia instantánea carece de sentido.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia
+z = hilbert_analitica(modo1)               # modo1: respuesta del modo aislado, N potencia de 2
+env, fase = abs.(z), fase_instantanea(z)
+tramo = 300:2500
+pendiente = ([ones(length(tramo)) t[tramo]] \ log.(env[tramo]))[2]
+zeta = -pendiente / (2π * f1)               # f1: frecuencia del modo (Hz)
+```
+
+## Python
+
+```python
+import numpy as np
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+z = mx.hilbert_analitica(modo1)
+env, fase = np.abs(z), np.unwrap(np.angle(z))
+tramo = slice(300, 2500)
+pendiente = np.polyfit(t[tramo], np.log(env[tramo]), 1)[0]
+zeta = -pendiente / (2 * np.pi * f1)
+```
+:::
+
+El código Python **no se ejecuta en la web**: `hilbert_analitica` está probada con `pytest` frente a Julia y a `scipy.signal.hilbert` en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y `Resonancia`: simula la respuesta libre del edificio de tres plantas con `edificio_tres_plantas`, `espacio_estados` y `discretizar_zoh` a 100 Hz durante 41 s con un impulso en la cubierta. Aísla el primer modo con un filtro paso banda, calcula la envolvente con `hilbert_analitica` y estima ζ ajustando una recta a ln A(t) en un tramo sin bordes. Repite añadiendo ruido blanco de σ = 1 % del máximo y dime cómo cambia la estimación.»
+
+**Verifica.** (a) Que aísla un modo antes de calcular la envolvente. (b) Que ajusta el tramo central y no los bordes. (c) Que $\zeta=-\text{pendiente}/\omega_n$ y que el resultado ronda el $1\,\%$ sin ruido. (d) Que con ruido restringe el ajuste a donde la envolvente supera el ruido. (e) Que da el sesgo y la dispersión, no una sola cifra.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-8-multi" respuesta="falso"}
+La frecuencia instantánea de la señal analítica de un registro con tres modos es la frecuencia del modo dominante.
+
+::: {.solucion}
+**Falso.** Con varios componentes la señal no es de banda estrecha; la frecuencia instantánea oscila por el batido y puede salirse del rango de los modos.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-8-zeta" respuesta="0.01" tol="1%"}
+Una respuesta libre de un modo de $f=2$ Hz tiene una envolvente que cae de $1$ a $0{,}3$ en $9{,}6$ s. ¿Cuánto vale $\zeta$?
+
+::: {.pista}
+$\ln(0{,}3)=-1{,}204$; pendiente $=-1{,}204/9{,}6$; $\omega_n=2\pi\cdot2$.
+:::
+
+::: {.solucion}
+Pendiente $=-0{,}1254$ s$^{-1}=-\zeta\omega_n$, luego $\zeta=0{,}1254/12{,}566=0{,}00998\approx1\,\%$.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-8-hilbert-coseno" respuesta="1" tol="1%"}
+La señal analítica de $x(t)=\cos(2\pi f_0t)$ es $e^{\mathrm j2\pi f_0t}$. ¿Cuánto vale su envolvente?
+
+::: {.solucion}
+$\lvert z\rvert=1$: es constante y igual a la amplitud.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-8-hilbert-ruido"}
+Estimas el amortiguamiento de un modo con la envolvente de Hilbert, pero la recta de $\ln A$ se dobla hacia arriba al final del registro. ¿Qué ha pasado y qué haces?
+
+::: {.rubrica}
+- Reconozco que al decaer la señal, el ruido domina y la envolvente deja de decaer (suelo de ruido).
+- Propongo ajustar solo el tramo donde la señal supera claramente el ruido.
+- Menciono los bordes de la FFT u otras causas (otro modo, no linealidad) como comprobaciones.
+:::
+
+::: {.solucion}
+La envolvente se aplana porque el ruido sustituye a la señal. Se ajusta solo el tramo con señal por encima del ruido (por ejemplo, hasta que la envolvente baja a 3–5 veces la desviación del ruido) y se comprueba que el resultado no depende mucho del tramo elegido.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Calculo la señal analítica con la FFT y obtengo envolvente, fase y frecuencia instantáneas.
+- [ ] Sé que solo tienen sentido para señales de banda estrecha y aíslo un modo antes.
+- [ ] Estimo $\zeta$ con la pendiente de $\ln A(t)$ y descarto bordes y suelo de ruido.
+- [ ] Reconozco un batido de dos componentes en la envolvente.
+
+## Qué no dice esta unidad
+
+- No se demuestra la condición de Bedrosian ni se trata el valor principal de Cauchy de la definición integral de la transformada.
+- El filtro paso banda es una máscara ideal en frecuencia; en la práctica se usan filtros FIR/IIR de fase cero ([M3](https://me1catrr.github.io/resonancia/mse/m03-senales-i/index.html)), con sus propios efectos de borde.
+- El método de la envolvente es uno entre varios para estimar $\zeta$; su incertidumbre con ruido real no se ha estudiado con simulaciones de Monte Carlo.
+- La interpretación de la frecuencia instantánea en sistemas no lineales (curvas de «esqueleto») no se desarrolla.
+- La historia procede de una fuente enciclopédica y no cubre la señal analítica de procesado de señales.

@@ -1,0 +1,42 @@
+---
+title: "F1.5 La resolución en el edificio"
+subtitle: "F1 · Series y transformada de Fourier"
+id: F1.5
+unidad: F1
+bloque: "Señales"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, DelimitedFiles, Printf, Markdown
+include("../../recursos/_tema.jl")
+```
+
+El edificio de tres plantas del [caso transversal](../../caso/edificio/index.qmd) tiene modos de $\zeta\approx1\,\%$: el primero, a $1{,}105$ Hz, tiene un ancho a $-3$ dB de $2\zeta f\approx0{,}022$ Hz. Para **resolver** un pico así hace falta una resolución $\Delta f$ menor que su anchura, es decir, segmentos de, al menos, unos $45$ s; con segmentos más cortos, el pico se ve más ancho de lo que es.
+
+```{julia}
+#| label: fig-resolucion
+#| fig-cap: "Pico del primer modo del edificio (escenario A, aceleración de la cubierta) con el método de Welch y segmentos de 256, 1024 y 4096 muestras (2,6 s, 10,2 s y 41 s). Con segmentos cortos, el pico es ancho y bajo; con segmentos largos se resuelve su anchura real, a costa de menos promedios y más variabilidad."
+#| fig-alt: "Tres curvas con un pico alrededor de 1,1 hercios: la de segmentos cortos es ancha y baja; la de segmentos largos es estrecha, alta y más irregular."
+D = readdlm("../../datos/edificio-3-plantas/escenario_A.csv", ';', skipstart=1)
+xr = D[:, 4] .- mean(D[:, 4])
+fig = Figure(size=(780, 360))
+ax = Axis(fig[1, 1]; xlabel="f (Hz)", ylabel="PSD (m/s²)²/Hz", yscale=log10, limits=(0.6, 1.7, nothing, nothing))
+for (ns, c) in [(256, NARANJA), (1024, AZUL), (4096, VERDE)]
+    f, P = psd_welch(xr, 100.0; nseg=ns)
+    lines!(ax, f, P; color=c, linewidth=1.8, label="nseg = $ns (Δf = $(coma(100 / ns; d=3)) Hz)")
+end
+vlines!(ax, [1.1048]; color=GRIS, linestyle=:dash)
+axislegend(ax; position=:lt)
+fig
+```
+
+Este compromiso — más resolución frente a más promedios — es el que gobierna el análisis espectral de registros ambientales, y se retoma con el método de Welch en [M3.6](https://me1catrr.github.io/resonancia/mse/m03-senales-i/index.html#m3-6).

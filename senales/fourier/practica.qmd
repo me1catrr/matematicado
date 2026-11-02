@@ -1,0 +1,127 @@
+---
+title: "Práctica y cierre"
+subtitle: "F1 · Series y transformada de Fourier"
+id: F1-cierre
+unidad: F1
+bloque: "Señales"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Genera una sinusoide de 10,5 ciclos en 256 muestras y calcula su amplitud estimada con cuatro ventanas.
+2. Calcula $\Delta f$ y la anchura a $-3$ dB del primer pico del edificio (escenario A) con segmentos de 1024 y 4096 muestras.
+3. Comprueba que `psd_welch` cumple Parseval: $\sum P\,\Delta f\approx\operatorname{var}(x)$.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, Statistics
+N = 256
+x = cos.(2π * 10.5 .* (0:N-1) ./ N)
+for s in (:rectangular, :hann, :flattop)
+    w = ventana(s, N)
+    X = fft_radix2(x .* w)
+    println(s, " ", maximum(abs.(X[1:N÷2])) * 2 / sum(w))
+end
+f, P = psd_welch(randn(8192), 100.0; nseg=1024)
+sum(P) * (f[2] - f[1])           # ≈ 1 = varianza
+```
+
+## Python
+
+```python
+import numpy as np
+from scipy import signal
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+N = 256
+x = np.cos(2 * np.pi * 10.5 * np.arange(N) / N)
+for nombre in ("rectangular", "hann", "flattop"):
+    w = mx.ventana(nombre, N)
+    X = np.fft.rfft(x * w)
+    print(nombre, np.abs(X).max() * 2 / w.sum())
+f, P = signal.welch(np.random.default_rng(1).standard_normal(8192), fs=100.0, nperseg=1024)
+P.sum() * (f[1] - f[0])
+```
+:::
+
+El código Python **no se ejecuta en la web**: `ventana` está probada con `pytest` frente a Julia en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y `Resonancia`: toma `escenario_A.csv` (aceleración de la cubierta a 100 Hz). Calcula la PSD por Welch con segmentos de 512, 2048 y 8192 muestras y ventana de Hann, y dime para cada uno la resolución, el número de promedios y la anchura a −3 dB del primer pico. Después verifica el teorema de Parseval y explica qué configuración usarías para estimar la frecuencia del primer modo.»
+
+**Verifica.** (a) Que usa `psd_welch` y no una FFT sin ventana de todo el registro. (b) Que $\Delta f=f_{\mathrm s}/N_{\mathrm{seg}}$ y que el número de promedios cuadra con el solape del 50 %. (c) Que $\sum P\Delta f$ coincide con la varianza (error del orden del $1\,\%$). (d) Que reconoce que más resolución implica menos promedios (más ruido). (e) Que no afirma que el relleno de ceros mejore la resolución.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="numerico" id="m2-5-resolucion" respuesta="0.0488" tol="1%" unidad="Hz"}
+Un registro de $N=4096$ muestras a $f_{\mathrm s}=200$ Hz se transforma con la DFT. ¿Cuánto vale la resolución $\Delta f$?
+
+::: {.solucion}
+$\Delta f=f_{\mathrm s}/N=200/4096=0{,}0488$ Hz.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-5-duracion" respuesta="20" tol="1%" unidad="s"}
+Quieres separar dos modos que distan $0{,}05$ Hz con una ventana rectangular (que da $\Delta f=1/T$). ¿Cuánto debe durar, como mínimo, el registro?
+
+::: {.solucion}
+$T=1/\Delta f=1/0{,}05=20$ s. Con una ventana de Hann el lóbulo principal es el doble de ancho, y hacen falta unos $40$ s.
+:::
+:::
+
+::: {.ejercicio tipo="vf" id="m2-5-relleno" respuesta="falso"}
+Rellenar con ceros un registro antes de la FFT permite separar dos picos que antes estaban fundidos.
+
+::: {.solucion}
+**Falso.** El relleno de ceros interpola el espectro, pero la resolución está fijada por la duración del registro original.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-5-enbw" respuesta="1.5" tol="1%" unidad="bins"}
+¿Cuánto vale el ancho de banda equivalente de ruido de la ventana de Hann?
+
+::: {.solucion}
+$N\sum w^2/(\sum w)^2=1{,}5$ bins ($\sum w=N/2$ y $\sum w^2=3N/8$).
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-5-ventana-modal"}
+Vas a medir con precisión la **amplitud** de una vibración armónica de un puente (una máquina que gira) y, por otro lado, a identificar las **frecuencias** de los modos en una medida ambiental. ¿Qué ventana usarías en cada caso y por qué?
+
+::: {.rubrica}
+- Digo que para amplitud de una sinusoide conviene una ventana con poca pérdida por escalonamiento (flat-top).
+- Digo que para frecuencias con picos próximos conviene un lóbulo principal estrecho y fuga moderada (Hann).
+- Menciono el compromiso entre resolución y rechazo de fuga.
+:::
+
+::: {.solucion}
+Flat-top para amplitud (error de amplitud de alrededor del $0{,}1\,\%$ en cualquier frecuencia) y Hann para frecuencias ambientales (buen equilibrio entre fuga y resolución). La rectangular solo para señales que decaen dentro del registro.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Escribo la serie de Fourier y la DFT y sé en qué frecuencias da el espectro.
+- [ ] Calculo la resolución, la frecuencia de Nyquist y el número de bins útiles.
+- [ ] Explico la fuga espectral y por qué se usan ventanas.
+- [ ] Elijo una ventana según el objetivo (amplitud, resolución, fuga).
+- [ ] Distingo resolución (duración) de interpolación (relleno de ceros).
+- [ ] Escalo correctamente un espectro de amplitud y una PSD.
+
+## Qué no dice esta unidad
+
+- No se desarrolla el método de Welch (solape, número de promedios, intervalos de confianza) ni el análisis tiempo–frecuencia; están en [M3](https://me1catrr.github.io/resonancia/mse/m03-senales-i/index.html).
+- Las cifras de la [Tabla 1 de F1.4](f1-4.qmd#tbl-ventanas) son para $N=256$ y una sinusoide pura; con ruido o con resonancias amortiguadas cambian en detalle.
+- La DFT se usa como herramienta, sin demostrar la convergencia de las series de Fourier ni el teorema de muestreo.
+- Los tiempos y los números de bins de «Aplicación» son los de los datos sintéticos del edificio; no sirven por sí solos para planificar una campaña real.

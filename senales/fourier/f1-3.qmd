@@ -1,0 +1,31 @@
+---
+title: "F1.3 La DFT"
+subtitle: "F1 · Series y transformada de Fourier"
+id: F1.3
+unidad: F1
+bloque: "Señales"
+estado: borrador
+---
+
+Un sensor da $N$ muestras $x[n]=x(n/f_{\mathrm s})$. La **transformada discreta de Fourier** es
+
+$$
+X[k]=\sum_{n=0}^{N-1}x[n]\,e^{-\mathrm j2\pi kn/N},\qquad k=0,\dots,N-1,
+$$ {#eq-dft}
+
+que da el espectro en las frecuencias $f_k=kf_{\mathrm s}/N$. Se calcula con la FFT en $O(N\log N)$ (en `Resonancia`, `fft_radix2`, para $N$ potencia de 2). Tres números lo gobiernan:
+
+| Magnitud | Fórmula | Qué significa |
+|:--|:--|:--|
+| Resolución | $\Delta f=f_{\mathrm s}/N=1/T$ | separación entre bins; la fija la **duración** $T$ del registro |
+| Frecuencia de Nyquist | $f_{\mathrm s}/2$ | por encima, aliasing ([S3](../../sistemas/transformada-z/s3-2.qmd)) |
+| Bins útiles | $0,\dots,N/2$ | para una señal real, la segunda mitad es el espejo conjugado |
+
+: Parámetros de la DFT. {#tbl-dft}
+
+**Escalado.** Con $X[k]$ sin normalizar, una sinusoide de amplitud $A$ centrada en un bin da $\lvert X[k]\rvert=AN/2$. Por eso el espectro de **amplitud** se escala como $2\lvert X[k]\rvert/N$ (y $\sum w[n]$ en lugar de $N$ si hay ventana), mientras que la **densidad espectral de potencia** (PSD) se escala por $2/(f_{\mathrm s}\sum w^2)$, para que la integral $\sum P[k]\Delta f$ sea la varianza (Parseval; es lo que hace `psd_welch`).
+
+::: {.callout-warning}
+## Resolución no es interpolación
+**Rellenar con ceros** (*zero-padding*) un registro antes de la FFT da más puntos en el espectro, y hace que se vea más suave, pero **no separa picos** que antes no se separaban: la resolución está fijada por la duración del registro original. Dos modos separados $0{,}05$ Hz solo se distinguen con un registro de, al menos, unos $20$ s (más con una ventana, que ensancha el lóbulo principal).
+:::

@@ -1,0 +1,64 @@
+---
+title: "F2.2 Cuándo tienen sentido"
+subtitle: "F2 · Transformada de Hilbert y señal analítica"
+id: F2.2
+unidad: F2
+bloque: "Señales"
+estado: borrador
+---
+
+Las magnitudes de la [ecuación 1 de F2.1](f2-1.qmd#eq-instantaneas) siempre se pueden calcular, pero solo son **interpretables** si la señal es de **banda estrecha**: si $x(t)=a(t)\cos\phi(t)$ con $a(t)$ que varía despacio frente a $\cos\phi(t)$ (condición de Bedrosian, de forma aproximada: el espectro de $a$ y el de $\cos\phi$ no se solapan), entonces $A(t)\approx a(t)$ y $f_{\mathrm i}$ es la frecuencia de la portadora. Para una suma de dos sinusoides de frecuencias próximas, $A(t)$ oscila (batido) y $f_{\mathrm i}(t)$ puede salirse de la banda e incluso hacerse negativa: es un resultado matemáticamente correcto y físicamente engañoso.
+
+::: {.callout-warning}
+## Una señal, un modo
+Una respuesta de una estructura con varios modos no es de banda estrecha. **Antes de aplicar Hilbert hay que aislar un modo con un filtro paso banda** estrecho. Con el modo aislado, la envolvente de una respuesta libre es $A(t)=A_0e^{-\zeta\omega_nt}$, de modo que $\ln A(t)$ es una **recta de pendiente $-\zeta\omega_n$**, y de ella sale $\zeta$.
+:::
+
+
+## Laboratorio: banda estrecha y batidos {#lab-hilbert}
+
+```{ojs}
+//| echo: false
+import {hilbert} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 1. Envolvente y frecuencia instantánea.** La señal es una oscilación de $10$ Hz que decae, más una segunda sinusoide de frecuencia y amplitud ajustables ($f_{\mathrm s}=100$ Hz, $N=1024$). Con la amplitud de la segunda en 0 se cumple la condición de banda estrecha; al subirla, la envolvente deja de ser la del primer modo.
+
+```{ojs}
+//| echo: false
+viewof alfa = Inputs.range([0.1, 1.5], {value: 0.5, step: 0.05, label: "decaimiento α (1/s)"})
+viewof a2 = Inputs.range([0, 1], {value: 0, step: 0.02, label: "amplitud de la 2.ª componente"})
+viewof f2 = Inputs.range([10.2, 16], {value: 12, step: 0.1, label: "f₂ (Hz)"})
+```
+
+```{ojs}
+//| echo: false
+hil = {
+  const N = 1024, fs = 100, t = Array.from({length: N}, (_, n) => n / fs);
+  const x = t.map(tt => Math.exp(-alfa * tt) * Math.cos(2 * Math.PI * 10 * tt) + a2 * Math.exp(-alfa * tt) * Math.cos(2 * Math.PI * f2 * tt));
+  const z = hilbert(x);
+  const env = z.re.map((r, i) => Math.hypot(r, z.im[i]));
+  let ph = z.re.map((r, i) => Math.atan2(z.im[i], r));
+  for (let k = 1; k < N; k++) { const d = ph[k] - ph[k - 1]; ph[k] -= 2 * Math.PI * Math.round(d / (2 * Math.PI)); }
+  const fi = ph.slice(1).map((p, k) => (p - ph[k]) * fs / (2 * Math.PI));
+  return {t, x, env, fi, fs};
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const p = (xs, ys) => xs.map((x, i) => ({t: x, v: ys[i]}));
+  const a = Plot.plot({width: 720, height: 230, marginLeft: 50, x: {label: "t (s)", domain: [0, 6]}, y: {label: "señal"},
+    marks: [Plot.ruleY([0]), Plot.line(p(hil.t, hil.x), {x: "t", y: "v", stroke: "#1B6CA8"}), Plot.line(p(hil.t, hil.env), {x: "t", y: "v", stroke: "#D95F02", strokeWidth: 2}), Plot.line(p(hil.t, hil.env.map(v => -v)), {x: "t", y: "v", stroke: "#D95F02", strokeWidth: 2})]});
+  const b = Plot.plot({width: 720, height: 200, marginLeft: 50, x: {label: "t (s)", domain: [0, 6]}, y: {label: "f instantánea (Hz)", domain: [0, 25], grid: true},
+    marks: [Plot.ruleY([10], {stroke: "#9CA3AF", strokeDasharray: "4,4"}), Plot.line(p(hil.t.slice(1), hil.fi), {x: "t", y: "v", stroke: "#2A9D8F"})]});
+  return html`${a}${b}`;
+}
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Señal:** dos componentes con el mismo decaimiento, sin ruido. Los efectos de borde se ven en los primeros y últimos instantes.
+- **Qué se observa:** con $a_2=0$, la envolvente es $e^{-\alpha t}$ y la frecuencia instantánea vale $10$ Hz (la línea punteada); con $a_2>0$ y $f_2$ próxima, la envolvente oscila con la frecuencia de batido $\lvert f_2-10\rvert$ y la frecuencia instantánea oscila alrededor de 10 Hz, y con $f_2$ lejana, sus oscilaciones son muy rápidas.
+- **Qué no se puede concluir:** que la frecuencia instantánea de una señal multicomponente sea «la frecuencia» de algo. Hay que separar primero las componentes.

@@ -1,0 +1,75 @@
+---
+title: "F2.4 Amortiguamiento del primer modo del edificio"
+subtitle: "F2 · Transformada de Hilbert y señal analítica"
+id: F2.4
+unidad: F2
+bloque: "Señales"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf, Markdown
+include("../../recursos/_tema.jl")
+```
+
+Se simula la respuesta libre del edificio de tres plantas a un impulso en la cubierta ([S2](../../sistemas/espacio-estados/index.qmd)); se aísla el primer modo con una máscara espectral entre $0{,}8$ y $1{,}5$ Hz, y se calcula la señal analítica.
+
+```{julia}
+#| label: ej-hilbert-edificio
+function respuesta_libre(N, dt)
+    M, C, K = edificio_tres_plantas()
+    A, B = espacio_estados(M, C, K, [0.0, 0.0, 1.0])
+    Ad, Bd = discretizar_zoh(A, B, dt)
+    Mi = inv(M)
+    x = zeros(6)
+    a = zeros(N)
+    for k in 1:N
+        u = k == 1 ? 1.0e6 : 0.0
+        acc = Mi * ([0.0, 0.0, u] - C * x[4:6] - K * x[1:3])
+        a[k] = acc[3]
+        x = Ad * x + Bd * [u]
+    end
+    return a
+end
+N, dt = 4096, 0.01
+a = respuesta_libre(N, dt)
+t = (0:N-1) .* dt
+fr = [(k <= N ÷ 2 ? k : k - N) / (N * dt) for k in 0:N-1]
+modo1 = real(ifft_radix2(fft_radix2(a) .* (0.8 .< abs.(fr) .< 1.5)))
+z1 = hilbert_analitica(modo1)
+env1, ph1 = abs.(z1), fase_instantanea(z1)
+ajuste = 300:2500                                           # sin los bordes
+pendiente = ([ones(length(ajuste)) t[ajuste]] \ log.(env1[ajuste]))[2]
+f_inst = diff(ph1[ajuste]) ./ (2π * dt)
+M0, _, K0 = edificio_tres_plantas()
+ω1 = 2π * modos_propios(K0, M0)[1][1]
+zeta_est = -pendiente / ω1
+(zeta_estimada = zeta_est, frecuencia_media = mean(f_inst), desviacion = std(f_inst))
+```
+
+La pendiente de $\ln A(t)$ da $\zeta=$ `{julia} coma(100 * zeta_est; d=3)` % (verdadero: $1{,}000\,\%$) y la frecuencia instantánea media es `{julia} coma(mean(f_inst); d=4)` Hz (verdadero: $1{,}1048$ Hz), con una desviación de `{julia} coma(std(f_inst); d=4)` Hz que es, básicamente, el efecto del filtrado y del redondeo.
+
+```{julia}
+#| label: fig-envolvente
+#| fig-cap: "Respuesta libre de la cubierta tras aislar el primer modo (banda 0,8–1,5 Hz). Arriba, la señal y su envolvente (naranja). Abajo, el logaritmo de la envolvente con el ajuste lineal (negro) en el tramo sin bordes; su pendiente es $-\\zeta\\omega_n$."
+#| fig-alt: "Arriba, una oscilación que decae con la envolvente superpuesta. Abajo, el logaritmo de la envolvente, casi una recta decreciente, con la recta de ajuste superpuesta."
+fig = Figure(size=(780, 520))
+ax1 = Axis(fig[1, 1]; xlabel="t (s)", ylabel="a (m/s²)", limits=(0, 40, nothing, nothing))
+lines!(ax1, t, modo1; color=AZUL, linewidth=1)
+lines!(ax1, t, env1; color=NARANJA, linewidth=2)
+ax2 = Axis(fig[2, 1]; xlabel="t (s)", ylabel="ln A", limits=(0, 40, nothing, nothing))
+lines!(ax2, t, log.(env1); color=NARANJA, linewidth=1.8)
+ajus = ([ones(length(ajuste)) t[ajuste]] \ log.(env1[ajuste]))
+lines!(ax2, t[ajuste], ajus[1] .+ ajus[2] .* t[ajuste]; color=TINTA, linewidth=2, linestyle=:dash)
+fig
+```
+
+**Qué falla si no se filtra.** Con la respuesta completa (tres modos), la «frecuencia instantánea» oscila entre valores como `{julia} coma(minimum(diff(fase_instantanea(hilbert_analitica(a))[300:2500]) ./ (2π * dt)); d=0)` Hz y `{julia} coma(maximum(diff(fase_instantanea(hilbert_analitica(a))[300:2500]) ./ (2π * dt)); d=0)` Hz: es el batido de tres componentes, no la frecuencia de nada.

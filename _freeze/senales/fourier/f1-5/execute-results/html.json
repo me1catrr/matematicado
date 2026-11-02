@@ -1,0 +1,12 @@
+{
+  "hash": "f5f6be6d63e80e7265ff03afb8f2caa5",
+  "result": {
+    "engine": "julia",
+    "markdown": "---\ntitle: \"F1.5 La resolución en el edificio\"\nsubtitle: \"F1 · Series y transformada de Fourier\"\nid: F1.5\nunidad: F1\nbloque: \"Señales\"\nestado: borrador\nengine: julia\nexecute:\n  warning: false\nformat:\n  html:\n    code-fold: true\n    code-summary: \"Ver el código\"\n---\n\n\n\nEl edificio de tres plantas del [caso transversal](../../caso/edificio/index.qmd) tiene modos de $\\zeta\\approx1\\,\\%$: el primero, a $1{,}105$ Hz, tiene un ancho a $-3$ dB de $2\\zeta f\\approx0{,}022$ Hz. Para **resolver** un pico así hace falta una resolución $\\Delta f$ menor que su anchura, es decir, segmentos de, al menos, unos $45$ s; con segmentos más cortos, el pico se ve más ancho de lo que es.\n\n::: {#cell-fig-resolucion .cell execution_count=1}\n``` {.julia .cell-code}\nD = readdlm(\"../../datos/edificio-3-plantas/escenario_A.csv\", ';', skipstart=1)\nxr = D[:, 4] .- mean(D[:, 4])\nfig = Figure(size=(780, 360))\nax = Axis(fig[1, 1]; xlabel=\"f (Hz)\", ylabel=\"PSD (m/s²)²/Hz\", yscale=log10, limits=(0.6, 1.7, nothing, nothing))\nfor (ns, c) in [(256, NARANJA), (1024, AZUL), (4096, VERDE)]\n    f, P = psd_welch(xr, 100.0; nseg=ns)\n    lines!(ax, f, P; color=c, linewidth=1.8, label=\"nseg = $ns (Δf = $(coma(100 / ns; d=3)) Hz)\")\nend\nvlines!(ax, [1.1048]; color=GRIS, linestyle=:dash)\naxislegend(ax; position=:lt)\nfig\n```\n\n::: {.cell-output .cell-output-display execution_count=1}\n![Pico del primer modo del edificio (escenario A, aceleración de la cubierta) con el método de Welch y segmentos de 256, 1024 y 4096 muestras (2,6 s, 10,2 s y 41 s). Con segmentos cortos, el pico es ancho y bajo; con segmentos largos se resuelve su anchura real, a costa de menos promedios y más variabilidad.](f1-5_files/figure-html/fig-resolucion-output-1.svg){#fig-resolucion fig-alt='Tres curvas con un pico alrededor de 1,1 hercios: la de segmentos cortos es ancha y baja; la de segmentos largos es estrecha, alta y más irregular.'}\n:::\n:::\n\n\n\nEste compromiso — más resolución frente a más promedios — es el que gobierna el análisis espectral de registros ambientales, y se retoma con el método de Welch en [M3.6](https://me1catrr.github.io/resonancia/mse/m03-senales-i/index.html#m3-6).\n\n",
+    "supporting": [
+      "f1-5_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

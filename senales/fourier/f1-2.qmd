@@ -1,0 +1,16 @@
+---
+title: "F1.2 Transformada de Fourier"
+subtitle: "F1 · Series y transformada de Fourier"
+id: F1.2
+unidad: F1
+bloque: "Señales"
+estado: borrador
+---
+
+Si la señal no es periódica, el espectro pasa a ser continuo:
+
+$$
+X(f)=\int_{-\infty}^{\infty}x(t)\,e^{-\mathrm j2\pi ft}\,\mathrm dt,\qquad x(t)=\int_{-\infty}^{\infty}X(f)\,e^{\mathrm j2\pi ft}\,\mathrm df .
+$$ {#eq-fourier}
+
+Es la transformada de Laplace sobre el eje imaginario ($s=\mathrm j2\pi f$). Propiedades que se usan todo el tiempo: la **linealidad**; el **desplazamiento temporal** (multiplica por una fase, no cambia el módulo); la **convolución** $x*h\leftrightarrow XH$; y la relación **ancho–duración**: cuanto más corta es una señal, más ancho es su espectro (un impulso lo tiene plano; una sinusoide infinita, una línea). Parseval también vale aquí: $\int\lvert x\rvert^2\mathrm dt=\int\lvert X\rvert^2\mathrm df$.

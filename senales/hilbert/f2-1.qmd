@@ -1,0 +1,28 @@
+---
+title: "F2.1 Señal analítica"
+subtitle: "F2 · Transformada de Hilbert y señal analítica"
+id: F2.1
+unidad: F2
+bloque: "Señales"
+estado: borrador
+---
+
+::: {.callout-note .historia icon=false title="Un poco de historia: de un problema de Riemann a la señal analítica"}
+Según el resumen histórico de la Wikipedia en inglés, la transformada surgió en 1905 del trabajo de David Hilbert sobre un problema planteado por Riemann acerca de funciones analíticas (hoy llamado problema de Riemann–Hilbert); Hilbert la estudió sobre todo para funciones en la circunferencia, Schur extendió sus resultados al caso integral y Marcel Riesz mostró en 1928 que está acotada en los espacios $L^p$ con $1<p<\infty$. La interpretación como «señal analítica» para el procesado de señales **no** aparece en esa sección y no se atribuye aquí. Es una fuente enciclopédica: las atribuciones deben contrastarse con los originales.
+
+<span class="fuentes-caja">Fuente: [Wikipedia, «Hilbert transform», sección «History»](https://en.wikipedia.org/wiki/Hilbert_transform). Consultado el 25-10-2026.</span>
+:::
+
+::: {#def-analitica}
+**Señal analítica.** Para una señal real $x(t)$, $z(t)=x(t)+\mathrm j\,\mathcal H\{x\}(t)$, donde $\mathcal H\{x\}$ es la **transformada de Hilbert** de $x$: la señal que se obtiene desfasando $-90^\circ$ todas las componentes de frecuencia positiva (y $+90^\circ$ las de frecuencia negativa). Equivalentemente, $Z(f)=2X(f)$ para $f>0$, $Z(0)=X(0)$ y $Z(f)=0$ para $f<0$.
+:::
+
+La definición en frecuencia es la que se calcula: se hace la FFT, se anulan las frecuencias negativas, se duplican las positivas y se invierte (`hilbert_analitica`). Para $x(t)=\cos(2\pi f_0t)$ resulta $\mathcal H\{x\}=\sin(2\pi f_0t)$ y $z(t)=e^{\mathrm j2\pi f_0t}$, que gira a velocidad constante con módulo 1.
+
+Si se escribe $z(t)=A(t)\,e^{\mathrm j\phi(t)}$, se definen
+
+$$
+A(t)=\lvert z(t)\rvert\;\text{(envolvente)},\qquad
+\phi(t)=\arg z(t)\;\text{(fase instantánea)},\qquad
+f_{\mathrm i}(t)=\frac{1}{2\pi}\frac{\mathrm d\phi}{\mathrm dt}\;\text{(frecuencia instantánea)}.
+$$ {#eq-instantaneas}

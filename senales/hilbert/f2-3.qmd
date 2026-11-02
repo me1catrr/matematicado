@@ -1,0 +1,10 @@
+---
+title: "F2.3 Efectos de borde y ruido"
+subtitle: "F2 · Transformada de Hilbert y señal analítica"
+id: F2.3
+unidad: F2
+bloque: "Señales"
+estado: borrador
+---
+
+La FFT supone un registro periódico: al principio y al final, la señal analítica sufre un efecto de borde (como la fuga de [F1](../../senales/fourier/index.qmd)). Por eso las estimaciones se hacen **sin los extremos**. Y con ruido, la fase instantánea es muy ruidosa donde la envolvente es pequeña (un ruido pequeño puede dar un giro completo de fase si la amplitud tiende a cero), de modo que hay que ajustar solo mientras la señal sobresale claramente del ruido.

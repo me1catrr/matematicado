@@ -1,0 +1,25 @@
+---
+title: "F1.1 Series de Fourier"
+subtitle: "F1 · Series y transformada de Fourier"
+id: F1.1
+unidad: F1
+bloque: "Señales"
+estado: borrador
+format:
+  html:
+    citation-location: margin
+---
+
+::: {.callout-note .historia icon=false title="Un poco de historia: de Gauss a Cooley y Tukey"}
+Según el resumen histórico de la Wikipedia en inglés, Gauss usó hacia 1805, sin publicarlo, un método parecido al de la FFT para interpolar las órbitas de los asteroides Pallas y Juno a partir de observaciones, aunque no analizó su coste. Cooley y Tukey redescubrieron de forma independiente estos algoritmos y publicaron en 1965 una versión general (válida para longitudes compuestas, no solo potencias de 2) que mostraba el coste $O(N\log N)$ [@cooley1965]. Que Gauss se les había anticipado lo documentan Heideman, Johnson y Burrus en 1984 [@heideman1984]. Es una fuente enciclopédica: las atribuciones deben contrastarse con los artículos citados antes de usarlas en un trabajo formal.
+
+<span class="fuentes-caja">Fuente: [Wikipedia, «Fast Fourier transform», sección «History»](https://en.wikipedia.org/wiki/Fast_Fourier_transform). Consultado el 25-10-2026.</span>
+:::
+
+Una señal $x(t)$ periódica de periodo $T$ se escribe como suma de armónicos de la frecuencia fundamental $f_0=1/T$:
+
+$$
+x(t)=\sum_{k=-\infty}^{\infty}c_k\,e^{\mathrm j2\pi kf_0t},\qquad c_k=\frac1T\int_0^Tx(t)\,e^{-\mathrm j2\pi kf_0t}\,\mathrm dt .
+$$ {#eq-serie}
+
+Para una señal real, $c_{-k}=\overline{c_k}$ y $x(t)=c_0+2\sum_{k\ge1}\lvert c_k\rvert\cos(2\pi kf_0t+\arg c_k)$. La energía se conserva (**relación de Parseval**): $\frac1T\int_0^T\lvert x\rvert^2\mathrm dt=\sum_k\lvert c_k\rvert^2$. Una sinusoide pura tiene un único armónico; una señal con discontinuidades, muchos.
