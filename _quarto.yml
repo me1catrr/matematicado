@@ -49,34 +49,173 @@ website:
   sidebar:
     style: docked
     search: true
+    collapse-level: 1
     contents:
-      - index.qmd
-      - como-estudiar.qmd
-      - section: "E · Caso transversal"
+      - text: Inicio
+        href: index.qmd
+      - text: Cómo estudiar aquí
+        href: como-estudiar.qmd
+      - section: "E · Caso transversal: un edificio de tres plantas"
+        href: caso/edificio/index.qmd
         contents:
-          - caso/edificio/index.qmd
+          - text: "E.1 El modelo y los tres escenarios"
+            href: caso/edificio/e-1.qmd
+          - text: "E.2 Primer vistazo a los datos"
+            href: caso/edificio/e-2.qmd
+          - text: "Práctica y cierre"
+            href: caso/edificio/practica.qmd
       - section: "A · Álgebra lineal"
         href: algebra/index.qmd
         contents:
-          - algebra/matrices/index.qmd
-          - algebra/valores-propios/index.qmd
-          - algebra/svd/index.qmd
+          - section: "A1 · Matrices estructuradas"
+            href: algebra/matrices/index.qmd
+            contents:
+              - text: "A1.1 Fundamentos de álgebra matricial"
+                href: algebra/matrices/a1-1.qmd
+              - text: "A1.2 Matrices fundamentales"
+                href: algebra/matrices/a1-2.qmd
+              - text: "A1.3 Matrices dispersas, de banda y por bloques"
+                href: algebra/matrices/a1-3.qmd
+              - text: "A1.4 Matrices de Toeplitz"
+                href: algebra/matrices/a1-4.qmd
+              - text: "A1.5 Matrices de Hankel"
+                href: algebra/matrices/a1-5.qmd
+              - text: "A1.6 Matrices circulantes"
+                href: algebra/matrices/a1-6.qmd
+              - text: "A1.7 Otras matrices con aplicación dinámica"
+                href: algebra/matrices/a1-7.qmd
+              - text: "Práctica y cierre"
+                href: algebra/matrices/practica.qmd
+          - section: "A2 · Valores y vectores propios"
+            href: algebra/valores-propios/index.qmd
+            contents:
+              - text: "A2.1 El problema estándar"
+                href: algebra/valores-propios/a2-1.qmd
+              - text: "A2.2 El problema generalizado de una estructura"
+                href: algebra/valores-propios/a2-2.qmd
+              - text: "A2.3 Los modos del edificio"
+                href: algebra/valores-propios/a2-3.qmd
+              - text: "A2.4 Sensibilidad a la rigidez"
+                href: algebra/valores-propios/a2-4.qmd
+              - text: "Práctica y cierre"
+                href: algebra/valores-propios/practica.qmd
+          - section: "A3 · Descomposición en valores singulares"
+            href: algebra/svd/index.qmd
+            contents:
+              - text: "A3.1 Definición y geometría"
+                href: algebra/svd/a3-1.qmd
+              - text: "A3.2 La mejor aproximación de rango r"
+                href: algebra/svd/a3-2.qmd
+              - text: "A3.3 Pseudoinversa y mínimos cuadrados"
+                href: algebra/svd/a3-3.qmd
+              - text: "A3.4 Rango numérico"
+                href: algebra/svd/a3-4.qmd
+              - text: "A3.5 La SVD de registros de varios sensores (POD)"
+                href: algebra/svd/a3-5.qmd
+              - text: "Práctica y cierre"
+                href: algebra/svd/practica.qmd
       - section: "S · Sistemas dinámicos"
         href: sistemas/index.qmd
         contents:
-          - sistemas/laplace/index.qmd
-          - sistemas/espacio-estados/index.qmd
-          - sistemas/transformada-z/index.qmd
+          - section: "S1 · Transformada de Laplace y función de transferencia"
+            href: sistemas/laplace/index.qmd
+            contents:
+              - text: "S1.1 La transformada de Laplace"
+                href: sistemas/laplace/s1-1.qmd
+              - text: "S1.2 Función de transferencia"
+                href: sistemas/laplace/s1-2.qmd
+              - text: "S1.3 Polos, estabilidad y valores propios"
+                href: sistemas/laplace/s1-3.qmd
+              - text: "S1.4 Ceros y antirresonancias"
+                href: sistemas/laplace/s1-4.qmd
+              - text: "S1.5 Respuesta en frecuencia y respuesta impulsional"
+                href: sistemas/laplace/s1-5.qmd
+              - text: "Práctica y cierre"
+                href: sistemas/laplace/practica.qmd
+          - section: "S2 · Espacio de estados"
+            href: sistemas/espacio-estados/index.qmd
+            contents:
+              - text: "S2.1 De la ecuación de segundo orden a la de primer orden"
+                href: sistemas/espacio-estados/s2-1.qmd
+              - text: "S2.2 Controlabilidad y observabilidad"
+                href: sistemas/espacio-estados/s2-2.qmd
+              - text: "S2.3 Discretización exacta"
+                href: sistemas/espacio-estados/s2-3.qmd
+              - text: "S2.4 Simulación de la respuesta"
+                href: sistemas/espacio-estados/s2-4.qmd
+              - text: "Práctica y cierre"
+                href: sistemas/espacio-estados/practica.qmd
+          - section: "S3 · Transformada Z y sistemas discretos"
+            href: sistemas/transformada-z/index.qmd
+            contents:
+              - text: "S3.1 La transformada Z"
+                href: sistemas/transformada-z/s3-1.qmd
+              - text: "S3.2 Del plano s al plano z"
+                href: sistemas/transformada-z/s3-2.qmd
+              - text: "S3.3 Modelos AR y sus polos"
+                href: sistemas/transformada-z/s3-3.qmd
+              - text: "Práctica y cierre"
+                href: sistemas/transformada-z/practica.qmd
       - section: "F · Señales"
         href: senales/index.qmd
         contents:
-          - senales/fourier/index.qmd
-          - senales/hilbert/index.qmd
+          - section: "F1 · Series y transformada de Fourier"
+            href: senales/fourier/index.qmd
+            contents:
+              - text: "F1.1 Series de Fourier"
+                href: senales/fourier/f1-1.qmd
+              - text: "F1.2 Transformada de Fourier"
+                href: senales/fourier/f1-2.qmd
+              - text: "F1.3 La DFT"
+                href: senales/fourier/f1-3.qmd
+              - text: "F1.4 Fuga espectral y ventanas"
+                href: senales/fourier/f1-4.qmd
+              - text: "F1.5 La resolución en el edificio"
+                href: senales/fourier/f1-5.qmd
+              - text: "Práctica y cierre"
+                href: senales/fourier/practica.qmd
+          - section: "F2 · Transformada de Hilbert y señal analítica"
+            href: senales/hilbert/index.qmd
+            contents:
+              - text: "F2.1 Señal analítica"
+                href: senales/hilbert/f2-1.qmd
+              - text: "F2.2 Cuándo tienen sentido"
+                href: senales/hilbert/f2-2.qmd
+              - text: "F2.3 Efectos de borde y ruido"
+                href: senales/hilbert/f2-3.qmd
+              - text: "F2.4 Amortiguamiento del primer modo del edificio"
+                href: senales/hilbert/f2-4.qmd
+              - text: "Práctica y cierre"
+                href: senales/hilbert/practica.qmd
       - section: "P · Probabilidad y procesos"
         href: probabilidad/index.qmd
         contents:
-          - probabilidad/estocasticos/index.qmd
-          - probabilidad/correlacion/index.qmd
+          - section: "P1 · Variables aleatorias y procesos estocásticos"
+            href: probabilidad/estocasticos/index.qmd
+            contents:
+              - text: "P1.1 Variables aleatorias"
+                href: probabilidad/estocasticos/p1-1.qmd
+              - text: "P1.2 Procesos estocásticos"
+                href: probabilidad/estocasticos/p1-2.qmd
+              - text: "P1.3 Respuesta de un sistema lineal a ruido blanco"
+                href: probabilidad/estocasticos/p1-3.qmd
+              - text: "P1.4 El registro del edificio"
+                href: probabilidad/estocasticos/p1-4.qmd
+              - text: "Práctica y cierre"
+                href: probabilidad/estocasticos/practica.qmd
+          - section: "P2 · Covarianza, autocorrelación y correlación cruzada"
+            href: probabilidad/correlacion/index.qmd
+            contents:
+              - text: "P2.1 Definiciones y estimación"
+                href: probabilidad/correlacion/p2-1.qmd
+              - text: "P2.2 Estimar un retardo"
+                href: probabilidad/correlacion/p2-2.qmd
+              - text: "P2.3 La correlación como respuesta libre"
+                href: probabilidad/correlacion/p2-3.qmd
+              - text: "P2.4 Los modos del edificio a partir de correlaciones"
+                href: probabilidad/correlacion/p2-4.qmd
+              - text: "Práctica y cierre"
+                href: probabilidad/correlacion/practica.qmd
   page-footer:
     left: "Contenido CC BY-SA 4.0 · código MIT · Rafael Castro Triguero"
     right: "Material hermano de [Resonancia](https://me1catrr.github.io/resonancia/)"

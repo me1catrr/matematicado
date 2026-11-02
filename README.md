@@ -31,7 +31,7 @@ Python (opcional) con [uv](https://docs.astral.sh/uv/): `uv sync` y `uv run pyte
 
 ## Estructura
 
-- `algebra/`, `sistemas/`, `senales/`, `probabilidad/`, `caso/`: una carpeta por página, con su `index.qmd` y sus figuras TikZ en `fig/`.
+- `algebra/`, `sistemas/`, `senales/`, `probabilidad/`, `caso/`: una carpeta por unidad, con su portada (`index.qmd`), una página por apartado (`a1-1.qmd`…), la «Práctica y cierre» (`practica.qmd`) y sus figuras TikZ en `fig/`.
 - `_freeze/`: resultados de Julia ya calculados. La publicación en GitHub Actions no tiene Julia y los lee de aquí.
 - `recursos/`: bibliografía, estilos TikZ, tema de las figuras de Makie y JavaScript de los laboratorios y los ejercicios.
 - `scripts/`: filtros de Quarto, compilación de figuras TikZ y generación de datos y referencias.

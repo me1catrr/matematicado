@@ -1,4 +1,4 @@
-"""Laboratorios OJS de M2.2–M2.6 (valores propios, SVD, Laplace y espacio de estados).
+"""Laboratorios OJS de A2, A3, S1 y S2 (valores propios, SVD, Laplace y espacio de estados).
 
 Requiere el sitio renderizado (`quarto render`) y Chromium; véase test_simulaciones.py.
 """
@@ -38,7 +38,7 @@ def abre(navegador, pagina, esperar):
     errores = []
     pag.on("pageerror", lambda e: errores.append(str(e)))
     pag.on("console", lambda m: errores.append(m.text) if m.type == "error" else None)
-    pag.goto(f"http://127.0.0.1:{puerto}/{BASE}{pagina}/index.html", wait_until="networkidle")
+    pag.goto(f"http://127.0.0.1:{puerto}/{BASE}{pagina}", wait_until="networkidle")
     pag.wait_for_function(
         "(t) => Array.from(document.querySelectorAll('.observablehq')).some(e => e.innerText.includes(t))", arg=esperar, timeout=30000)
     pag.errores = errores
@@ -62,7 +62,7 @@ def sin_errores(pag):
 
 
 def test_valores_propios_prediccion_lineal_y_mac(navegador):
-    pag = abre(navegador, "algebra/valores-propios", "f referencia (Hz)")
+    pag = abre(navegador, "algebra/valores-propios/a2-4.html", "f referencia (Hz)")
     sin_errores(pag)
     t = salidas(pag, "f referencia (Hz)")[0]
     # Δk₂ = −10 %: −1,85 % exacto y −1,70 % lineal en el primer modo; MAC ≥ 0,999
@@ -74,7 +74,7 @@ def test_valores_propios_prediccion_lineal_y_mac(navegador):
 
 
 def test_svd_eckart_young_y_ruido(navegador):
-    pag = abre(navegador, "algebra/svd", "Energía retenida")
+    pag = abre(navegador, "algebra/svd/a3-4.html", "Energía retenida")
     sin_errores(pag)
     t = salidas(pag, "Energía retenida")[0]
     assert "✓" in t                                         # el error en norma 2 coincide con σ_{r+1}
@@ -91,13 +91,13 @@ def test_svd_eckart_young_y_ruido(navegador):
 
 
 def test_laplace_frf_antirresonancia_puntual(navegador):
-    pag = abre(navegador, "sistemas/laplace", "")
+    pag = abre(navegador, "sistemas/laplace/s1-4.html", "")
     sin_errores(pag)
     assert pag.locator("svg").count() > 3
 
 
 def test_espacio_estados_observabilidad(navegador):
-    pag = abre(navegador, "sistemas/espacio-estados", "Rango de la matriz de observabilidad")
+    pag = abre(navegador, "sistemas/espacio-estados/s2-2.html", "Rango de la matriz de observabilidad")
     sin_errores(pag)
     rango = lambda: int(re.search(r"observabilidad: (\d)", salidas(pag, "Rango de la matriz")[0]).group(1))
     assert rango() == 4                                     # cadena simétrica con sensor central

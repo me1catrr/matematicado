@@ -8,13 +8,26 @@ https://me1catrr.github.io/matematicado/. Procede de la sesión M2 de Resonancia
 
 ## Temario e identificadores
 Cinco bloques: E (`caso/`), A (`algebra/`), S (`sistemas/`), F (`senales/`) y P (`probabilidad/`).
-Cada página declara en su cabecera `id`, `bloque`, `requiere` (ids de esta web) y
-`previo-resonancia` (unidades de Resonancia). La barra lateral está en `_quarto.yml`; la tabla
-del temario, el mapa de dependencias (`recursos/fig/mapa.tex`) y los itinerarios, en `index.qmd`.
+Cada unidad (A1, S2…) es una carpeta con tres tipos de página:
+- `index.qmd`, la **portada**: introducción, «Cómo se lee esta unidad», objetivos y prerrequisitos
+  y la tabla de apartados. Su cabecera declara `id`, `bloque`, `requiere` (ids de esta web) y
+  `previo-resonancia` (unidades de Resonancia).
+- `a1-1.qmd`, `a1-2.qmd`…, **un apartado por página**, con `id: A1.1` y `unidad: A1`. Su título
+  empieza por el id. Los ejercicios intercalados y el laboratorio del apartado van en su página.
+- `practica.qmd`, **«Práctica y cierre»**: práctica guiada, «Pídeselo a Claude», ejercicios,
+  «La doy por superada si…» y «Qué no dice esta unidad».
+
+La barra lateral (bloque → unidad → apartados) está en `_quarto.yml`. La tabla del temario, el
+mapa de dependencias (`recursos/fig/mapa.tex`) y los itinerarios están en `index.qmd`.
 No inventes páginas ni identificadores: propón el cambio y espera aprobación.
-Las anclas de los apartados siguen el id (`{#a1-4}`, `{#f1-3}`). Los `id` de los ejercicios
-(`m2-…`) se conservan de Resonancia porque son las claves de `localStorage`: no los cambies.
-Resonancia enlaza a estas anclas desde su M2, M3, M7, J1 y J3: si renombras una, avisa.
+Cada apartado repite el bloque de configuración de Julia de su unidad (`using`, `include` del tema
+y datos) y recalcula lo que necesite; las funciones nuevas van a Resonancia.jl. Las referencias
+cruzadas a otra página se escriben como enlace (`[Teorema 1 de A2.1](a2-1.qmd#thm-espectral)`),
+porque Quarto no numera entre páginas de un sitio web.
+Los `id` de los ejercicios (`m2-…`) se conservan de Resonancia porque son las claves de
+`localStorage`: no los cambies. Resonancia enlaza a los apartados desde su M2, M3, M7, J1 y J3.
+Las anclas de la antigua página única (`index.html#a1-4`) redirigen al apartado con el script
+del final de cada portada: si mueves un apartado, actualiza ese mapa y avisa.
 
 ## Convenciones de contenido
 - Español de España. Término técnico inglés entre paréntesis la primera vez. Unidades SI.
@@ -26,9 +39,9 @@ Resonancia enlaza a estas anclas desde su M2, M3, M7, J1 y J3: si renombras una,
 - No reproduzcas texto de libros ni de fuentes con copyright: redacta con palabras propias y cita
   con `recursos/bibliografia.bib` (campos `keywords` y `verificado`). Las páginas que citan llevan
   `citation-location: margin`.
-- Plantilla de página: objetivos y prerrequisitos; teoría en tres capas (intuición, fundamento,
-  aplicación); laboratorios; práctica guiada; «Pídeselo a Claude» con *Verifica*; ejercicios;
-  «La doy por superada si…»; «Qué no dice esta página».
+- Plantilla de unidad: portada (objetivos y prerrequisitos); apartados con teoría en tres capas
+  (intuición, fundamento, aplicación) y laboratorios; «Práctica y cierre» (práctica guiada,
+  «Pídeselo a Claude» con *Verifica*, ejercicios, «La doy por superada si…», «Qué no dice esta unidad»).
 - Cajas, ejercicios intercalados (`::: {.ejercicio tipo="…" id="…" respuesta="…"}`) y laboratorios
   (`.laboratorio .solo-pantalla` con su figura en `.solo-impresion`): como en Resonancia; véanse
   `styles.css`, `scripts/ejercicios.lua` y `recursos/js/ejercicios.js`. Toda respuesta numérica

@@ -6,17 +6,19 @@ format:
     citation-location: margin
 ---
 
-## Cada página, el mismo esquema
+## Cada unidad, el mismo esquema
 
-1. **Objetivos y prerrequisitos.** Qué sabrás hacer y qué páginas necesitas antes (el [mapa de dependencias](index.qmd#fig-mapa) las resume todas).
-2. **Teoría breve en tres capas.** La **intuición**, con figuras y laboratorios; el **fundamento**, con definiciones, resultados y demostraciones plegables; y la **aplicación**, sobre el edificio de tres plantas o sobre registros reales. Si vas justo de tiempo, la intuición y la aplicación dan una idea del tema; el fundamento es lo que permite justificar los resultados.
+Cada unidad (A1, S2…) tiene una **portada**, una página por **apartado** y una página final de **práctica y cierre**. La barra lateral las ordena y los enlaces «anterior» y «siguiente» del pie de cada página las recorren en orden.
+
+1. **Objetivos y prerrequisitos**, en la portada. Qué sabrás hacer y qué unidades necesitas antes (el [mapa de dependencias](index.qmd#fig-mapa) las resume todas).
+2. **Teoría en tres capas**, en cada apartado. La **intuición**, con figuras y laboratorios; el **fundamento**, con definiciones, resultados y demostraciones plegables; y la **aplicación**, sobre el edificio de tres plantas o sobre registros reales. Si vas justo de tiempo, la intuición y la aplicación dan una idea del tema; el fundamento es lo que permite justificar los resultados.
 3. **Laboratorios.** Simulaciones con deslizadores que se calculan en tu navegador, rotuladas «Simulación n». Cada una explica qué se ve y, sobre todo, **qué no se puede concluir** de ella.
-4. **Práctica guiada.** Código en Julia, con su equivalente en Python en otra pestaña.
+4. **Práctica guiada**, en la práctica y cierre (como los puntos 5 a 7). Código en Julia, con su equivalente en Python en otra pestaña.
 5. **«Pídeselo a Claude».** Una propuesta de trabajo para un asistente de programación, con un apartado *Verifica* que dice cómo comprobar lo que te devuelva.
-6. **Ejercicios.** Intercalados tras cada apartado y reunidos al final.
+6. **Ejercicios.** Intercalados en cada apartado y reunidos en la práctica y cierre.
 7. **«La doy por superada si…».** Una lista que puedes marcar.
 
-Cada página termina con un apartado «Qué no dice esta página», que marca los límites de lo que has aprendido.
+Cada unidad termina con «Qué no dice esta unidad», que marca los límites de lo que has aprendido.
 
 ## Los ejercicios
 

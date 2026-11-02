@@ -1,11 +1,11 @@
-"""Laboratorios OJS de M2.5, M2.8, M2.9 y M2.10 (Fourier, Hilbert, estocásticos y correlación)."""
+"""Laboratorios OJS de F1, F2, P1 y P2 (Fourier, Hilbert, estocásticos y correlación)."""
 import re
 
 from test_fase2 import abre, fija, navegador, salidas, sin_errores  # noqa: F401
 
 
 def test_fourier_fuga_y_ventanas(navegador):
-    pag = abre(navegador, "senales/fourier", "Pico:")
+    pag = abre(navegador, "senales/fourier/f1-4.html", "Pico:")
     sin_errores(pag)
     t = salidas(pag, "Pico:")[0]
     amp = float(re.search(r"amplitud estimada ([0-9,]+)", t).group(1).replace(",", "."))
@@ -20,7 +20,7 @@ def test_fourier_fuga_y_ventanas(navegador):
 
 
 def test_hilbert_banda_estrecha(navegador):
-    pag = abre(navegador, "senales/hilbert", "")
+    pag = abre(navegador, "senales/hilbert/f2-2.html", "")
     sin_errores(pag)
     assert pag.locator("svg").count() > 3
     fija(pag, "amplitud de la 2", 0.6)                      # la segunda componente: sigue sin errores
@@ -28,7 +28,7 @@ def test_hilbert_banda_estrecha(navegador):
 
 
 def test_estocasticos_avisos(navegador):
-    pag = abre(navegador, "probabilidad/estocasticos", "Media de conjunto")
+    pag = abre(navegador, "probabilidad/estocasticos/p1-2.html", "Media de conjunto")
     sin_errores(pag)
     assert "compatible con estacionario" in salidas(pag, "Media de conjunto")[0]
     pag.get_by_label("proceso", exact=True).select_option(index=1)
@@ -37,7 +37,7 @@ def test_estocasticos_avisos(navegador):
 
 
 def test_correlacion_retardo(navegador):
-    pag = abre(navegador, "probabilidad/correlacion", "Retardo estimado")
+    pag = abre(navegador, "probabilidad/correlacion/p2-2.html", "Retardo estimado")
     sin_errores(pag)
     assert "✓ Coincide" in salidas(pag, "Retardo estimado")[0]
     fija(pag, "retardo real d", -7)

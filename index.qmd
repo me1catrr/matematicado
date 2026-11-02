@@ -48,18 +48,18 @@ Un orden de lectura válido es E → A1 → A2 → A3 → S1 → S2 → S3 → F
 ## Tres itinerarios
 
 ::: {.callout-tip .idea-clave title="Elige según el tiempo que tengas"}
-**Exprés (4 h).** Lo que se da por sabido en todo lo demás: [E](caso/edificio/index.qmd); de A1, la simetría y la definición positiva ([A1.2](algebra/matrices/index.qmd#a1-2)) y el MAC ([A1.7](algebra/matrices/index.qmd#a1-7)); [A2](algebra/valores-propios/index.qmd) completa; los polos y su relación con los valores propios ([S1.1](sistemas/laplace/index.qmd#s1-1) a [S1.3](sistemas/laplace/index.qmd#s1-3)); la DFT, la resolución y la fuga ([F1.3](senales/fourier/index.qmd#f1-3) y [F1.4](senales/fourier/index.qmd#f1-4)) y el aliasing ([S3.2](sistemas/transformada-z/index.qmd#s3-2)). Es el recorrido de la [sesión M2 de Resonancia](https://me1catrr.github.io/resonancia/mse/m02-matematicas/index.html), que lo condensa en una clase.
+**Exprés (4 h).** Lo que se da por sabido en todo lo demás: [E](caso/edificio/index.qmd); de A1, la simetría y la definición positiva ([A1.2](algebra/matrices/a1-2.qmd)) y el MAC ([A1.7](algebra/matrices/a1-7.qmd)); [A2](algebra/valores-propios/index.qmd) completa; los polos y su relación con los valores propios ([S1.1](sistemas/laplace/s1-1.qmd) a [S1.3](sistemas/laplace/s1-3.qmd)); la DFT, la resolución y la fuga ([F1.3](senales/fourier/f1-3.qmd) y [F1.4](senales/fourier/f1-4.qmd)) y el aliasing ([S3.2](sistemas/transformada-z/s3-2.qmd)). Es el recorrido de la [sesión M2 de Resonancia](https://me1catrr.github.io/resonancia/mse/m02-matematicas/index.html), que lo condensa en una clase.
 
 **Esencial (unas 12 h).** E, A2, S1 y F1 completas, más A1.2, A1.7 y S3.2. Con esto se lee con criterio un espectro y una tabla de modos.
 
-**Identificación (unas 20 h).** El esencial más [A1.4–A1.5](algebra/matrices/index.qmd#a1-4) (Toeplitz y Hankel), S3, P1 y P2. Es la base matemática de los métodos de identificación modal operacional (ERA, FDD y SSI).
+**Identificación (unas 20 h).** El esencial más [A1.4–A1.5](algebra/matrices/a1-4.qmd) (Toeplitz y Hankel), S3, P1 y P2. Es la base matemática de los métodos de identificación modal operacional (ERA, FDD y SSI).
 
 **Completo (unas 33 h).** Todas las páginas, en el orden del mapa.
 :::
 
 ## Cómo se trabaja
 
-Cada página sigue el mismo esquema: objetivos y prerrequisitos, teoría breve en tres capas (intuición, fundamento y aplicación), laboratorios interactivos, práctica guiada en Julia y Python, una propuesta de trabajo con Claude con su apartado *Verifica*, ejercicios y una lista de comprobación final. Los detalles, y cómo montar el entorno, están en [Cómo estudiar aquí](como-estudiar.qmd).
+Cada unidad tiene una portada con sus objetivos y prerrequisitos, una página por apartado con la teoría en tres capas (intuición, fundamento y aplicación), laboratorios interactivos, práctica guiada en Julia y Python, una propuesta de trabajo con Claude con su apartado *Verifica*, ejercicios y una lista de comprobación final, reunidos en su página de práctica y cierre. Los detalles, y cómo montar el entorno, están en [Cómo estudiar aquí](como-estudiar.qmd).
 
 ::: {.ejercicio tipo="abierta" id="mat-tres-caminos"}
 Para medir tu punto de partida: tienes un registro de aceleración de la cubierta del edificio de tres plantas y quieres estimar la frecuencia y el amortiguamiento del primer modo. Nombra tres caminos distintos que lo permitan y, para cada uno, la condición que exige. Vuelve a esta pregunta cuando termines el itinerario de identificación.
