@@ -1,0 +1,106 @@
+---
+title: "Práctica y cierre"
+subtitle: "E · Caso transversal: un edificio de tres plantas"
+id: E-cierre
+unidad: E
+bloque: "Caso transversal"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Lee los tres registros y calcula el valor eficaz (RMS) de cada canal. ¿Se parecen entre escenarios?
+2. Estima la PSD de la cubierta en A, B y C y localiza los tres picos con `buscar_picos`.
+3. Compara con las frecuencias verdaderas de `modos_propios` y calcula el error relativo.
+4. Divide cada registro en bloques de 60 s y mira la dispersión de la frecuencia del primer pico.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, DelimitedFiles, Statistics
+D = readdlm("escenario_A.csv", ';', skipstart=1)
+t, a1, a2, a3 = eachcol(D)
+f, P = psd_welch(a3 .- mean(a3), 100.0; nseg=2048)
+picos = f[buscar_picos(f, P; fmin=0.5, fmax=6.0, n=3, separacion=0.5)]
+```
+
+## Python
+
+```python
+import numpy as np
+from scipy import signal
+
+D = np.loadtxt("escenario_A.csv", delimiter=";", skiprows=1)
+f, P = signal.welch(D[:, 3] - D[:, 3].mean(), fs=100.0, nperseg=2048)
+picos = f[signal.find_peaks(P, distance=20)[0]]
+```
+:::
+
+El código Python **no se ejecuta en la web**; los modelos del edificio están probados con `pytest` en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y `Resonancia`: lee `escenario_A.csv`, `escenario_B.csv` y `escenario_C.csv`. Para cada uno, divide la aceleración de la cubierta en bloques de 60 s, estima la frecuencia del primer pico con Welch e interpolación parabólica y dame media y desviación típica. Dime qué escenarios se distinguen del A con un criterio de dos desviaciones típicas de la media, y qué limitaciones tiene esa conclusión.»
+
+**Verifica.** (a) Que usa `psd_welch` y `buscar_picos` del paquete. (b) Que compara contra las frecuencias verdaderas de `edificio_tres_plantas`. (c) Que usa el error típico de la media y no la desviación de un bloque al comparar medias. (d) Que dice que el sesgo del estimador existe y no lo oculta. (e) Que no llama «daño» a lo que solo es un cambio estadístico.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="numerico" id="m2-edif-df-c" respuesta="-1.85" tol="2%" unidad="%"}
+¿Cuánto varía, en porcentaje, la frecuencia del primer modo en el escenario C respecto del A?
+
+::: {.solucion}
+$-1{,}85\,\%$ ($1{,}105\to1{,}084$ Hz).
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-edif-modo-sensible" respuesta="c"}
+¿Qué modo cambia más su frecuencia en el escenario C?
+
+::: {.opciones}
+- El primero.
+- El segundo.
+- El tercero.
+- Los tres igual.
+:::
+
+::: {.solucion}
+La **c**: $-3{,}11\,\%$ frente a $-1{,}85\,\%$ y $-0{,}24\,\%$; el tercer modo tiene la mayor deriva en el entrepiso 2.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-edif-b-vs-c"}
+¿Por qué se incluye un escenario B si el objetivo es detectar daño?
+
+::: {.rubrica}
+- Digo que en una estructura real las frecuencias cambian sin daño (temperatura, humedad, carga).
+- Explico que un detector debe distinguir el cambio de C de la variabilidad de B, y no tomar todo cambio por daño.
+- Menciono que sin ese contraste habría falsas alarmas.
+:::
+
+::: {.solucion}
+B reproduce la variabilidad ambiental sana. Un método útil debe dar alarma en C y no en B; si no distingue ambos, tendría falsas alarmas o dejaría pasar el daño.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Describo el modelo del edificio y sus tres escenarios.
+- [ ] Obtengo las frecuencias de cada escenario a partir de los datos y las comparo con las verdaderas.
+- [ ] Explico por qué hay que medir la dispersión del estimador antes de afirmar que algo cambió.
+- [ ] Distingo variabilidad (B) de daño (C).
+
+## Qué no dice esta unidad
+
+- Los datos son sintéticos y lineales, con ruido blanco; no incluyen no linealidades, ruido coloreado ni efectos reales de la temperatura.
+- La variabilidad ambiental se modela solo como un cambio uniforme de rigidez; en estructuras reales es más compleja.
+- Los resultados de la tabla de picos son de un registro por escenario y una semilla; no se ha hecho un estudio de Monte Carlo.
+- La detección con criterios estadísticos rigurosos se trata en [M12](https://me1catrr.github.io/resonancia/mse/m12-caso-real-ii/index.html).
