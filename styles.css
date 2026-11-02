@@ -387,3 +387,9 @@ body:has(.referencias-unidad) #TOC li:has(> #toc-bibliography) { display: none; 
 
 /* Código en línea largo: puede partirse en pantallas estrechas (los bloques <pre> siguen desplazándose). */
 .content :not(pre) > code { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+
+/* Tabla de apartados de una unidad (sin columna de duración) */
+.indice-apartados td:last-child { white-space: normal; }
+@media (max-width: 767.98px) {
+  .indice-apartados td:last-child::before { content: none; }
+}

@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>A1.4 Matrices de Toeplitz – matematicado</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../algebra/matrices/a1-5.html" rel="next">
+<link href="../../algebra/matrices/a1-3.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-b2ea2da3fd2edaf786370f1c25e4bed2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+<script type="module" src="../../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="../../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed slimcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">matematicado</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../como-estudiar.html"> 
+<span class="menu-text">Cómo estudiar</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../algebra/index.html"> 
+<span class="menu-text">Álgebra</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../sistemas/index.html"> 
+<span class="menu-text">Sistemas</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../senales/index.html"> 
+<span class="menu-text">Señales</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../probabilidad/index.html"> 
+<span class="menu-text">Probabilidad</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../caso/edificio/index.html"> 
+<span class="menu-text">Caso</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://me1catrr.github.io/resonancia/"> 
+<span class="menu-text">Resonancia</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/me1catrr/matematicado"> <i class="bi bi-github" role="img" aria-label="Repositorio en GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../algebra/index.html">A · Álgebra lineal</a></li><li class="breadcrumb-item"><a href="../../algebra/matrices/index.html">A1 · Matrices estructuradas</a></li><li class="breadcrumb-item"><a href="../../algebra/matrices/a1-4.html">A1.4 Matrices de Toeplitz</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inicio</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../como-estudiar.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cómo estudiar aquí</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../caso/edificio/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">E · Caso transversal: un edificio de tres plantas</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../caso/edificio/e-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">E.1 El modelo y los tres escenarios</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../caso/edificio/e-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">E.2 Primer vistazo a los datos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../caso/edificio/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../algebra/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A · Álgebra lineal</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../algebra/matrices/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1 · Matrices estructuradas</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1.1 Fundamentos de álgebra matricial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1.2 Matrices fundamentales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1.3 Matrices dispersas, de banda y por bloques</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-4.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">A1.4 Matrices de Toeplitz</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1.5 Matrices de Hankel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1.6 Matrices circulantes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/a1-7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A1.7 Otras matrices con aplicación dinámica</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/matrices/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../algebra/valores-propios/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A2 · Valores y vectores propios</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/valores-propios/a2-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A2.1 El problema estándar</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/valores-propios/a2-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A2.2 El problema generalizado de una estructura</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/valores-propios/a2-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A2.3 Los modos del edificio</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/valores-propios/a2-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A2.4 Sensibilidad a la rigidez</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/valores-propios/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../algebra/svd/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A3 · Descomposición en valores singulares</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/svd/a3-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A3.1 Definición y geometría</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/svd/a3-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A3.2 La mejor aproximación de rango r</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/svd/a3-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A3.3 Pseudoinversa y mínimos cuadrados</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/svd/a3-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A3.4 Rango numérico</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/svd/a3-5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A3.5 La SVD de registros de varios sensores (POD)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../algebra/svd/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../sistemas/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S · Sistemas dinámicos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../sistemas/laplace/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S1 · Transformada de Laplace y función de transferencia</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/laplace/s1-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S1.1 La transformada de Laplace</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/laplace/s1-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S1.2 Función de transferencia</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/laplace/s1-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S1.3 Polos, estabilidad y valores propios</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/laplace/s1-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S1.4 Ceros y antirresonancias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/laplace/s1-5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S1.5 Respuesta en frecuencia y respuesta impulsional</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/laplace/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../sistemas/espacio-estados/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S2 · Espacio de estados</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/espacio-estados/s2-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S2.1 De la ecuación de segundo orden a la de primer orden</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/espacio-estados/s2-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S2.2 Controlabilidad y observabilidad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/espacio-estados/s2-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S2.3 Discretización exacta</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/espacio-estados/s2-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S2.4 Simulación de la respuesta</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/espacio-estados/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../sistemas/transformada-z/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S3 · Transformada Z y sistemas discretos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/transformada-z/s3-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S3.1 La transformada Z</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/transformada-z/s3-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S3.2 Del plano s al plano z</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/transformada-z/s3-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">S3.3 Modelos AR y sus polos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../sistemas/transformada-z/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../senales/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F · Señales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../senales/fourier/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F1 · Series y transformada de Fourier</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/fourier/f1-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F1.1 Series de Fourier</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/fourier/f1-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F1.2 Transformada de Fourier</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/fourier/f1-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F1.3 La DFT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/fourier/f1-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F1.4 Fuga espectral y ventanas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/fourier/f1-5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F1.5 La resolución en el edificio</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/fourier/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../senales/hilbert/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F2 · Transformada de Hilbert y señal analítica</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/hilbert/f2-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F2.1 Señal analítica</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/hilbert/f2-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F2.2 Cuándo tienen sentido</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/hilbert/f2-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F2.3 Efectos de borde y ruido</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/hilbert/f2-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F2.4 Amortiguamiento del primer modo del edificio</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../senales/hilbert/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../probabilidad/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P · Probabilidad y procesos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../probabilidad/estocasticos/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P1 · Variables aleatorias y procesos estocásticos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/estocasticos/p1-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P1.1 Variables aleatorias</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/estocasticos/p1-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P1.2 Procesos estocásticos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/estocasticos/p1-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P1.3 Respuesta de un sistema lineal a ruido blanco</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/estocasticos/p1-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P1.4 El registro del edificio</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/estocasticos/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../probabilidad/correlacion/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2 · Covarianza, autocorrelación y correlación cruzada</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/correlacion/p2-1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2.1 Definiciones y estimación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/correlacion/p2-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2.2 Estimar un retardo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/correlacion/p2-3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2.3 La correlación como respuesta libre</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/correlacion/p2-4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2.4 Los modos del edificio a partir de correlaciones</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../probabilidad/correlacion/practica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Práctica y cierre</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#modelos-autorregresivos-y-yulewalker" id="toc-modelos-autorregresivos-y-yulewalker" class="nav-link active" data-scroll-target="#modelos-autorregresivos-y-yulewalker">Modelos autorregresivos y Yule–Walker</a></li>
+  <li><a href="#lab-toeplitz" id="toc-lab-toeplitz" class="nav-link" data-scroll-target="#lab-toeplitz">Laboratorio: Toeplitz, AR y predicción</a></li>
+  <li><a href="#referencias-unidad" id="toc-referencias-unidad" class="nav-link" data-scroll-target="#referencias-unidad">Referencias</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">Referencias</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/me1catrr/matematicado/edit/main/algebra/matrices/a1-4.qmd" class="toc-action"><i class="bi bi-github"></i>Editar esta página</a></li><li><a href="https://github.com/me1catrr/matematicado/issues/new" class="toc-action"><i class="bi empty"></i>Informar sobre problema</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../algebra/index.html">A · Álgebra lineal</a></li><li class="breadcrumb-item"><a href="../../algebra/matrices/index.html">A1 · Matrices estructuradas</a></li><li class="breadcrumb-item"><a href="../../algebra/matrices/a1-4.html">A1.4 Matrices de Toeplitz</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">A1.4 Matrices de Toeplitz</h1>
+<p class="subtitle lead">A1 · Matrices estructuradas</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="historia callout callout-style-default callout-note no-icon callout-titled" title="Un poco de historia: de las formas bilineales a las series temporales">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Un poco de historia: de las formas bilineales a las series temporales
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El nombre procede de Otto Toeplitz, que publicó en 1911 un trabajo sobre formas cuadráticas y bilineales de infinitas variables <span class="citation" data-cites="toeplitz1911">(<a href="#ref-toeplitz1911" role="doc-biblioref">Toeplitz 1911</a>)</span>. El resultado más famoso sobre estas matrices es el teorema de Szegő sobre el comportamiento asintótico de sus valores propios, que enlaza la matriz con una serie de Fourier. Robert M. Gray, en su repaso para ingenieros, explica por qué interesan en procesamiento de señal: la covarianza de un proceso débilmente estacionario es una matriz de Toeplitz, y un filtro causal e invariante en el tiempo actúa mediante una Toeplitz triangular; las circulantes surgen al trabajar con la transformada discreta de Fourier <span class="citation" data-cites="gray2006">(<a href="#ref-gray2006" role="doc-biblioref">Gray 2006</a>)</span>.</p>
+<p><span class="fuentes-caja">Fuente: Gray (2006), cap. 1, pp.&nbsp;1–5. No se han consultado trabajos originales de Toeplitz ni de Szegő. Consultado el 25-10-2026.</span></p>
+</div>
+</div>
+<div class="no-row-height column-margin column-container"><div id="ref-gray2006" class="csl-entry" role="listitem">
+Gray, Robert M. 2006. <span>«Toeplitz and Circulant Matrices: A Review»</span>. <em>Foundations and Trends in Communications and Information Theory</em> 2 (3): 155-239. <a href="https://doi.org/10.1561/0100000006">https://doi.org/10.1561/0100000006</a>.
+</div></div><div class="no-row-height column-margin column-container"><div id="ref-toeplitz1911" class="csl-entry" role="listitem">
+Toeplitz, Otto. 1911. <span>«Zur Theorie der quadratischen und bilinearen Formen von unendlichvielen Ver<span>ä</span>nderlichen»</span>. <em>Mathematische Annalen</em> 70 (3): 351-76. <a href="https://doi.org/10.1007/BF01564502">https://doi.org/10.1007/BF01564502</a>.
+</div></div><p>Una matriz de <strong>Toeplitz</strong> es la que tiene las diagonales constantes:</p>
+<p><span id="eq-toeplitz"><span class="math display">\[
+T_{ij}=t_{i-j},\qquad
+\mathbf T=\begin{bmatrix}t_0&amp;t_{-1}&amp;t_{-2}&amp;t_{-3}\\t_1&amp;t_0&amp;t_{-1}&amp;t_{-2}\\t_2&amp;t_1&amp;t_0&amp;t_{-1}\\t_3&amp;t_2&amp;t_1&amp;t_0\end{bmatrix}.
+\tag{1}\]</span></span></p>
+<p>Hay <span class="math inline">\(2n-1\)</span> números libres, no <span class="math inline">\(n^2\)</span>. Es <strong>simétrica</strong> si <span class="math inline">\(t_{-k}=t_k\)</span> y <strong>hermítica</strong> si <span class="math inline">\(t_{-k}=\overline{t_k}\)</span>.</p>
+<div id="fig-patrones-estructuras" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Cuatro cuadrículas de seis por seis. La tridiagonal tiene color solo en la diagonal principal y las dos adyacentes. En la de Toeplitz, las celdas de cada diagonal tienen el mismo tono. En la de Hankel, las celdas de cada antidiagonal tienen el mismo tono. En la circulante, el patrón de diagonales se repite de forma cíclica.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-patrones-estructuras-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="fig/patrones.svg" class="img-fluid figure-img" alt="Cuatro cuadrículas de seis por seis. La tridiagonal tiene color solo en la diagonal principal y las dos adyacentes. En la de Toeplitz, las celdas de cada diagonal tienen el mismo tono. En la de Hankel, las celdas de cada antidiagonal tienen el mismo tono. En la circulante, el patrón de diagonales se repite de forma cíclica.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-patrones-estructuras-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;1: Cuatro estructuras de <span class="math inline">\(6\times6\)</span>. Las celdas del mismo color tienen el mismo valor: en Toeplitz, a lo largo de cada diagonal (<span class="math inline">\(i-j\)</span> constante); en Hankel, a lo largo de cada antidiagonal (<span class="math inline">\(i+j\)</span> constante); en la circulante, además, cada fila es la anterior desplazada cíclicamente. La tridiagonal solo tiene tres diagonales no nulas.
+</figcaption>
+</figure>
+</div>
+<p><strong>Relación con la convolución.</strong> Si un filtro causal tiene respuesta impulsional <span class="math inline">\(h_0,h_1,\dots\)</span>, su salida a una entrada <span class="math inline">\(\mathbf x\)</span> es <span class="math inline">\(y_k=\sum_{i\le k}h_{k-i}x_i\)</span>: es el producto <span class="math inline">\(\mathbf y=\mathbf T\mathbf x\)</span> con <span class="math inline">\(\mathbf T\)</span> la Toeplitz triangular inferior de primera columna <span class="math inline">\(\mathbf h\)</span>.</p>
+<p><strong>Relación con la autocorrelación.</strong> Si <span class="math inline">\(x_t\)</span> es un proceso débilmente estacionario de media cero, su autocovarianza solo depende del retardo, <span class="math inline">\(r_k=\mathbb E[x_{t+k}x_t]\)</span> con <span class="math inline">\(r_{-k}=r_k\)</span>, y la matriz de covarianzas de <span class="math inline">\((x_1,\dots,x_n)\)</span> es la Toeplitz simétrica <span class="math inline">\(\mathbf T_n=[r_{|i-j|}]\)</span>. Es <strong>semidefinida positiva</strong>: <span class="math inline">\(\mathbf a^{\mathsf T}\mathbf T_n\mathbf a=\operatorname{var}(\sum a_ix_i)\ge0\)</span>. Dicho al revés, solo si todas las matrices <span class="math inline">\(\mathbf T_n\)</span> formadas con una secuencia <span class="math inline">\(r_k\)</span> son semidefinidas positivas puede ser <span class="math inline">\(r_k\)</span> una autocorrelación.</p>
+<section id="modelos-autorregresivos-y-yulewalker" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="modelos-autorregresivos-y-yulewalker">Modelos autorregresivos y Yule–Walker</h2>
+<p>Un modelo <strong>autorregresivo</strong> de orden <span class="math inline">\(p\)</span>, AR(<span class="math inline">\(p\)</span>), supone que cada muestra depende linealmente de las <span class="math inline">\(p\)</span> anteriores y de una innovación <span class="math inline">\(e_t\)</span> de ruido blanco (media cero y varianza <span class="math inline">\(\sigma^2\)</span>):</p>
+<p><span id="eq-ar"><span class="math display">\[
+x_t=\sum_{j=1}^p\phi_j\,x_{t-j}+e_t .
+\tag{2}\]</span></span></p>
+<p>Multiplicando por <span class="math inline">\(x_{t-k}\)</span> y tomando esperanzas, para <span class="math inline">\(k\ge1\)</span> resulta <span class="math inline">\(r_k=\sum_j\phi_jr_{k-j}\)</span>, que escrito para <span class="math inline">\(k=1,\dots,p\)</span> es un sistema con una matriz de Toeplitz: las <strong>ecuaciones de Yule–Walker</strong></p>
+<p><span id="eq-yw"><span class="math display">\[
+\underbrace{\begin{bmatrix}r_0&amp;r_1&amp;\cdots&amp;r_{p-1}\\r_1&amp;r_0&amp;\cdots&amp;r_{p-2}\\\vdots&amp;&amp;\ddots&amp;\vdots\\r_{p-1}&amp;r_{p-2}&amp;\cdots&amp;r_0\end{bmatrix}}_{\mathbf T_p}\begin{bmatrix}\phi_1\\\phi_2\\\vdots\\\phi_p\end{bmatrix}=\begin{bmatrix}r_1\\r_2\\\vdots\\r_p\end{bmatrix},\qquad \sigma^2=r_0-\sum_{j=1}^p\phi_jr_j .
+\tag{3}\]</span></span></p>
+<div class="demostracion callout callout-style-default callout-note callout-titled" title="Demostración de la segunda ecuación (varianza de la innovación)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Demostración de la segunda ecuación (varianza de la innovación)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Multiplicando (<a href="#eq-ar" class="quarto-xref">ecuación&nbsp;2</a>) por <span class="math inline">\(x_t\)</span> y tomando esperanzas: <span class="math inline">\(r_0=\sum_j\phi_jr_j+\mathbb E[e_tx_t]\)</span>. Como <span class="math inline">\(e_t\)</span> no está correlada con las muestras pasadas, <span class="math inline">\(\mathbb E[e_tx_t]=\mathbb E[e_t^2]=\sigma^2\)</span>, y se obtiene <span class="math inline">\(\sigma^2=r_0-\sum_j\phi_jr_j\)</span>. <span class="math inline">\(\square\)</span></p>
+</div>
+</div>
+</div>
+<p>Con las autocorrelaciones estimadas <span class="math inline">\(\hat r_k\)</span> se obtienen los coeficientes del modelo, y con ellos la <strong>predicción lineal</strong> a un paso, <span class="math inline">\(\hat x_t=\sum_j\phi_jx_{t-j}\)</span>. Cuanto más «predecible» sea la señal, menor es el error. Yule (1927) y Walker (1931) estudiaron la periodicidad de series perturbadas y dieron nombre a estas ecuaciones <span class="citation" data-cites="yule1927 walker1931">(<a href="#ref-yule1927" role="doc-biblioref">Yule 1927</a>; <a href="#ref-walker1931" role="doc-biblioref">Walker 1931</a>)</span>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-yule1927" class="csl-entry" role="listitem">
+Yule, G. Udny. 1927. <span>«On a method of investigating periodicities in disturbed series, with special reference to <span>W</span>olfer’s sunspot numbers»</span>. <em>Philosophical Transactions of the Royal Society of London. Series A</em> 226: 267-98. <a href="https://doi.org/10.1098/rsta.1927.0007">https://doi.org/10.1098/rsta.1927.0007</a>.
+</div><div id="ref-walker1931" class="csl-entry" role="listitem">
+Walker, Gilbert T. 1931. <span>«On periodicity in series of related terms»</span>. <em>Proceedings of the Royal Society of London. Series A</em> 131 (818): 518-32. <a href="https://doi.org/10.1098/rspa.1931.0069">https://doi.org/10.1098/rspa.1931.0069</a>.
+</div><div id="ref-golub2013" class="csl-entry" role="listitem">
+Golub, Gene H., y Charles F. Van Loan. 2013. <em>Matrix Computations</em>. 4.ª ed. Johns Hopkins University Press.
+</div></div><p><strong>Algoritmos estructurados.</strong> Como <span class="math inline">\(\mathbf T_p\)</span> es Toeplitz, hay una recursión (<strong>Levinson–Durbin</strong>) que resuelve (<a href="#eq-yw" class="quarto-xref">ecuación&nbsp;3</a>) con <span class="math inline">\(O(p^2)\)</span> operaciones en lugar de <span class="math inline">\(O(p^3)\)</span>, y calcula de paso los <strong>coeficientes de reflexión</strong> <span class="math inline">\(\kappa_k\)</span>, que cumplen <span class="math inline">\(\lvert\kappa_k\rvert&lt;1\)</span> si <span class="math inline">\(\mathbf T_p\)</span> es definida positiva. Es útil para órdenes grandes, pero tiene una <strong>limitación numérica</strong>: con matrices mal condicionadas pierde precisión, y un <span class="math inline">\(\hat r_k\)</span> calculado con ruido puede no ser una autocorrelación válida; conviene entonces regularizar o usar la autocorrelación sesgada (dividir por <span class="math inline">\(N\)</span> y no por <span class="math inline">\(N-k\)</span>), que garantiza matrices semidefinidas positivas <span class="citation" data-cites="golub2013">(<a href="#ref-golub2013" role="doc-biblioref">Golub y Van Loan 2013</a>)</span>.</p>
+<div id="exm-toeplitz-manual" class="theorem example">
+<p><span class="theorem-title"><strong>Ejemplo 1</strong></span> <strong>Una Toeplitz de dimensión 4.</strong> Con <span class="math inline">\(t_0=3\)</span>, <span class="math inline">\(t_{\pm1}=2\)</span>, <span class="math inline">\(t_{\pm2}=1\)</span>, <span class="math inline">\(t_{\pm3}=0\)</span> se obtiene la Toeplitz simétrica del código siguiente. Es de banda (<span class="math inline">\(b=2\)</span>) y, por ser diagonalmente dominante, definida positiva.</p>
+</div>
+<div id="4" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>T4 <span class="op">=</span> <span class="fu">toeplitz</span>([<span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>])</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>(T4, <span class="fu">isposdef</span>(<span class="fu">Symmetric</span>(<span class="fu">float</span>.(T4))))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>([3 2 1 0; 2 3 2 1; 1 2 3 2; 0 1 2 3], true)</code></pre>
+</div>
+</div>
+<div id="exm-ar1" class="theorem example">
+<p><span class="theorem-title"><strong>Ejemplo 2</strong></span> <strong>Un proceso AR(1).</strong> Con <span class="math inline">\(\phi\)</span> y varianza de innovación <span class="math inline">\(\sigma^2\)</span>, <span class="math inline">\(r_k=\sigma^2\phi^{k}/(1-\phi^2)\)</span>: la autocorrelación decae geométricamente. La persistencia temporal (<span class="math inline">\(\phi\)</span> cercano a 1) se refleja en el condicionamiento de su matriz de Toeplitz.</p>
+</div>
+<details class="code-fold">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>filas <span class="op">=</span> <span class="fu">map</span>((<span class="fl">0.2</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span>)) <span class="cf">do</span> ρ</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> [ρ<span class="op">^</span>k for k <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="fl">29</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> <span class="fu">toeplitz</span>(r)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    λ <span class="op">=</span> <span class="fu">eigvals</span>(<span class="fu">Symmetric</span>(T))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"| </span><span class="sc">$</span>(<span class="fu">coma</span>(ρ))<span class="st"> | </span><span class="sc">$</span>(<span class="fu">coma</span>(<span class="fu">minimum</span>(λ); d<span class="op">=</span><span class="fl">3</span>))<span class="st"> | </span><span class="sc">$</span>(<span class="fu">coma</span>(<span class="fu">maximum</span>(λ); d<span class="op">=</span><span class="fl">2</span>))<span class="st"> | </span><span class="sc">$</span>(<span class="fu">coma</span>(<span class="fu">cond</span>(T); d<span class="op">=</span><span class="fl">0</span>))<span class="st"> |"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span>(<span class="st">"| ρ = φ | λ mín | λ máx | κ₂ |</span><span class="sc">\n</span><span class="st">|---|---|---|---|</span><span class="sc">\n</span><span class="st">"</span> <span class="op">*</span> <span class="fu">join</span>(filas, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-ar1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ar1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Tabla&nbsp;1: Matriz de Toeplitz <span class="math inline">\(30\times30\)</span> de un AR(1) normalizado (<span class="math inline">\(r_k=\phi^k\)</span>).
+</figcaption>
+<div aria-describedby="tbl-ar1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>ρ = φ</th>
+<th>λ mín</th>
+<th>λ máx</th>
+<th>κ₂</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0,20</td>
+<td>0,668</td>
+<td>1,50</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>0,90</td>
+<td>0,053</td>
+<td>13,54</td>
+<td>257</td>
+</tr>
+<tr class="odd">
+<td>0,99</td>
+<td>0,005</td>
+<td>27,21</td>
+<td>5401</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Cuando <span class="math inline">\(\phi\to1\)</span> la señal cambia muy despacio, las muestras vecinas son casi iguales y la matriz tiende a ser singular: el condicionamiento crece rápido.</p>
+<div id="exm-toeplitz-torroja" class="theorem example page-columns page-full">
+<p><span class="theorem-title"><strong>Ejemplo 3</strong></span> <strong>Aceleración de un puente real.</strong> Se estima la autocorrelación de la aceleración vertical de la estación GS1 del puente de Torroja (medida 1, 100 Hz; véase <a href="https://me1catrr.github.io/resonancia/recursos/r1-datos/torroja/index.html">R1</a> y <span class="citation" data-cites="pachon2018">(<a href="#ref-pachon2018" role="doc-biblioref">Pachón et&nbsp;al. 2018</a>)</span>), hasta un retardo de 0,5 s. La matriz de Toeplitz resultante y el modelo AR de la señal se calculan a continuación.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-pachon2018" class="csl-entry" role="listitem">
+Pachón, Pablo, Rafael Castro, Enrique García-Macías, Víctor Compán, y Esther Puertas. 2018. <span>«E. Torroja’s bridge: Tailored experimental setup for <span>SHM</span> of a historical bridge with a reduced number of sensors»</span>. <em>Engineering Structures</em> 162: 11-21. <a href="https://doi.org/10.1016/j.engstruct.2018.02.035">https://doi.org/10.1016/j.engstruct.2018.02.035</a>.
+</div></div></div>
+<div id="8" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t, a, fs, <span class="op">=</span> <span class="fu">leer_torroja</span>(TORROJA <span class="op">*</span> <span class="st">"s1_medida01.txt"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> a[<span class="op">:</span>, <span class="fl">3</span>] <span class="op">.*</span> <span class="fl">1e3</span>                               <span class="co"># mg</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">autocorrelacion</span>(x, <span class="fl">200</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Tt <span class="op">=</span> <span class="fu">toeplitz</span>(r[<span class="fl">1</span><span class="op">:</span><span class="fl">51</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>λT <span class="op">=</span> <span class="fu">eigvals</span>(<span class="fu">Symmetric</span>(Tt))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ordenes <span class="op">=</span> [<span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">8</span>, <span class="fl">16</span>, <span class="fl">32</span>]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>razon <span class="op">=</span> <span class="fu">map</span>(ordenes) <span class="cf">do</span> p</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    phi, _ <span class="op">=</span> <span class="fu">yule_walker</span>(r, p)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> [<span class="fu">sum</span>(phi[j] <span class="op">*</span> (x[s<span class="op">-</span>j] <span class="op">-</span> <span class="fu">mean</span>(x)) for j <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>p) <span class="op">+</span> <span class="fu">mean</span>(x) for s <span class="kw">in</span> p<span class="op">+</span><span class="fl">1</span><span class="op">:</span><span class="fu">length</span>(x)]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sqrt</span>(<span class="fu">mean</span>((x[p<span class="op">+</span><span class="fl">1</span><span class="op">:</span><span class="kw">end</span>] <span class="op">.-</span> pred) <span class="op">.^</span> <span class="fl">2</span>)) <span class="op">/</span> <span class="fu">std</span>(x)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="cn">nothing</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="cell-fig-torroja-toeplitz" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>(size<span class="op">=</span>(<span class="fl">860</span>, <span class="fl">360</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> <span class="fu">Axis</span>(fig[<span class="fl">1</span>, <span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"retardo (s)"</span>, ylabel<span class="op">=</span><span class="st">"r_k / r_0"</span>, title<span class="op">=</span><span class="st">"autocorrelación"</span>, titlealign<span class="op">=:</span>left, titlesize<span class="op">=</span><span class="fl">13</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(ax1, (<span class="fl">0</span><span class="op">:</span><span class="fl">200</span>) <span class="op">./</span> fs, r <span class="op">./</span> r[<span class="fl">1</span>]; color<span class="op">=</span>AZUL)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hlines!</span>(ax1, [<span class="fl">0</span>]; color<span class="op">=</span>GRIS, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> <span class="fu">Axis</span>(fig[<span class="fl">1</span>, <span class="fl">2</span>]; xlabel<span class="op">=</span><span class="st">"orden p del modelo AR"</span>, ylabel<span class="op">=</span><span class="st">"RMS(error) / σ"</span>, title<span class="op">=</span><span class="st">"predicción a un paso"</span>, titlealign<span class="op">=:</span>left, titlesize<span class="op">=</span><span class="fl">13</span>, xscale<span class="op">=</span>log2, xticks<span class="op">=</span>ordenes)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">scatterlines!</span>(ax2, ordenes, razon; color<span class="op">=</span>NARANJA, markersize<span class="op">=</span><span class="fl">9</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ylims!</span>(ax2, <span class="fl">0</span>, <span class="fl">1</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>fig</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div id="fig-torroja-toeplitz" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A la izquierda, la autocorrelación de la señal oscilando y decayendo despacio con el retardo desde uno hasta valores cercanos a cero a los dos segundos. A la derecha, el error relativo de predicción descendiendo desde cerca de 0,8 con orden 1 hasta 0,37 con orden 32.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-torroja-toeplitz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="a1-4_files/figure-html/fig-torroja-toeplitz-output-1.svg" class="img-fluid figure-img" alt="A la izquierda, la autocorrelación de la señal oscilando y decayendo despacio con el retardo desde uno hasta valores cercanos a cero a los dos segundos. A la derecha, el error relativo de predicción descendiendo desde cerca de 0,8 con orden 1 hasta 0,37 con orden 32.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-torroja-toeplitz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;2: Aceleración vertical de la estación GS1 (puente de Torroja, medida 1). Izquierda: autocorrelación muestral hasta 2 s. Derecha: error de predicción a un paso del modelo AR(<span class="math inline">\(p\)</span>) de Yule–Walker, relativo a la desviación típica de la señal.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>La matriz de Toeplitz <span class="math inline">\(51\times51\)</span> tiene todos sus valores propios positivos (el menor es 6,8e-07), como debe ser en una autocorrelación sesgada, aunque está mal condicionada (<span class="math inline">\(\kappa_2=\)</span> 3,6e+06): la señal tiene unos pocos picos espectrales dominantes (los modos del puente) y muy poca energía en el resto. Por eso un modelo AR de orden 32 deja un error de predicción de 37 % de la desviación típica de la señal, frente al 81 % del orden 1. Es una predicción <strong>dentro de la muestra</strong> (los coeficientes se estiman con los mismos datos), así que mide el ajuste del modelo, no su capacidad de predecir datos nuevos.</p>
+</section>
+<section id="lab-toeplitz" class="level2">
+<h2 class="anchored" data-anchor-id="lab-toeplitz">Laboratorio: Toeplitz, AR y predicción</h2>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="134" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 133;"><span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {simulaAR<span class="op">,</span> autocorrelacion<span class="op">,</span> toeplitz<span class="op">,</span> autoSimetrica<span class="op">,</span> yuleWalker<span class="op">,</span> rng<span class="op">,</span> normal} <span class="im">from</span> <span class="st">"../../recursos/js/matematicas.js"</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<p><strong>Simulación 2. Un proceso AR(2) oscilante.</strong> La señal tiene una frecuencia propia <span class="math inline">\(f_0\)</span> y una persistencia (el módulo <span class="math inline">\(r\)</span> de los polos): <span class="math inline">\(x_t=2r\cos(2\pi f_0/f_s)\,x_{t-1}-r^2x_{t-2}+e_t\)</span>, con <span class="math inline">\(f_s=100\)</span> Hz. Se observa con un ruido blanco de medida de desviación <span class="math inline">\(\sigma_{\text{med}}\)</span>. Mira cómo cambian la autocorrelación, los valores propios y el condicionamiento de la Toeplitz, y cómo el ruido de medida <strong>sesga</strong> la estimación de Yule–Walker.</p>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb7" data-startfrom="142" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 141;"><span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>viewof ar_r <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.5</span><span class="op">,</span> <span class="fl">0.99</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.95</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.005</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"persistencia r (adimensional)"</span>})</span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>viewof ar_f0 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.5</span><span class="op">,</span> <span class="dv">30</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">8</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.5</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"frecuencia f₀ (Hz)"</span>})</span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a>viewof ar_N <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">200</span><span class="op">,</span> <span class="dv">4000</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">1500</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"longitud N (muestras)"</span>})</span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a>viewof ar_ruido <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">2</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.3</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"ruido de medida σ_med (unidades de x)"</span>})</span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>viewof ar_p <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">8</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"orden p del modelo ajustado"</span>})</span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>viewof ar_sem <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">50</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"semilla"</span>})</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-5" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb8" data-startfrom="151" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 150;"><span id="cb8-151"><a href="#cb8-151" aria-hidden="true" tabindex="-1"></a>ar <span class="op">=</span> {</span>
+<span id="cb8-152"><a href="#cb8-152" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> fs <span class="op">=</span> <span class="dv">100</span><span class="op">,</span> th <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="cn">PI</span> <span class="op">*</span> ar_f0 <span class="op">/</span> fs<span class="op">;</span></span>
+<span id="cb8-153"><a href="#cb8-153" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> phi <span class="op">=</span> [<span class="dv">2</span> <span class="op">*</span> ar_r <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">cos</span>(th)<span class="op">,</span> <span class="op">-</span>ar_r <span class="op">*</span> ar_r]<span class="op">;</span></span>
+<span id="cb8-154"><a href="#cb8-154" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> x <span class="op">=</span> <span class="fu">simulaAR</span>(phi<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> ar_N<span class="op">,</span> ar_sem)<span class="op">;</span></span>
+<span id="cb8-155"><a href="#cb8-155" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> u <span class="op">=</span> <span class="fu">rng</span>(<span class="dv">1000</span> <span class="op">+</span> ar_sem)<span class="op">;</span></span>
+<span id="cb8-156"><a href="#cb8-156" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> y <span class="op">=</span> x<span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> v <span class="op">+</span> ar_ruido <span class="op">*</span> <span class="fu">normal</span>(u))<span class="op">;</span></span>
+<span id="cb8-157"><a href="#cb8-157" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> kmax <span class="op">=</span> <span class="dv">40</span><span class="op">;</span></span>
+<span id="cb8-158"><a href="#cb8-158" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> r <span class="op">=</span> <span class="fu">autocorrelacion</span>(y<span class="op">,</span> kmax)<span class="op">;</span></span>
+<span id="cb8-159"><a href="#cb8-159" aria-hidden="true" tabindex="-1"></a>  <span class="co">// autocorrelación teórica del AR(2) (sin ruido), por la recursión de Yule–Walker</span></span>
+<span id="cb8-160"><a href="#cb8-160" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> rho <span class="op">=</span> [<span class="dv">1</span><span class="op">,</span> phi[<span class="dv">0</span>] <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> phi[<span class="dv">1</span>])]<span class="op">;</span></span>
+<span id="cb8-161"><a href="#cb8-161" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">2</span><span class="op">;</span> k <span class="op">&lt;=</span> kmax<span class="op">;</span> k<span class="op">++</span>) rho<span class="op">.</span><span class="fu">push</span>(phi[<span class="dv">0</span>] <span class="op">*</span> rho[k <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> phi[<span class="dv">1</span>] <span class="op">*</span> rho[k <span class="op">-</span> <span class="dv">2</span>])<span class="op">;</span></span>
+<span id="cb8-162"><a href="#cb8-162" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> r0x <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> phi[<span class="dv">1</span>]) <span class="op">/</span> ((<span class="dv">1</span> <span class="op">+</span> phi[<span class="dv">1</span>]) <span class="op">*</span> ((<span class="dv">1</span> <span class="op">-</span> phi[<span class="dv">1</span>]) <span class="op">**</span> <span class="dv">2</span> <span class="op">-</span> phi[<span class="dv">0</span>] <span class="op">**</span> <span class="dv">2</span>))<span class="op">;</span>      <span class="co">// varianza del AR(2) con innovación unidad</span></span>
+<span id="cb8-163"><a href="#cb8-163" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> teor <span class="op">=</span> rho<span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> k) <span class="kw">=&gt;</span> v <span class="op">*</span> r0x <span class="op">+</span> (k <span class="op">===</span> <span class="dv">0</span> <span class="op">?</span> ar_ruido <span class="op">**</span> <span class="dv">2</span> <span class="op">:</span> <span class="dv">0</span>))<span class="op">;</span></span>
+<span id="cb8-164"><a href="#cb8-164" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> m <span class="op">=</span> <span class="dv">14</span><span class="op">;</span></span>
+<span id="cb8-165"><a href="#cb8-165" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> T <span class="op">=</span> <span class="fu">toeplitz</span>(r<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> m))<span class="op">;</span></span>
+<span id="cb8-166"><a href="#cb8-166" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> {valores} <span class="op">=</span> <span class="fu">autoSimetrica</span>(T)<span class="op">;</span></span>
+<span id="cb8-167"><a href="#cb8-167" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> yw <span class="op">=</span> <span class="fu">yuleWalker</span>(r<span class="op">,</span> ar_p)<span class="op">;</span></span>
+<span id="cb8-168"><a href="#cb8-168" aria-hidden="true" tabindex="-1"></a>  <span class="co">// predicción a un paso con los coeficientes estimados</span></span>
+<span id="cb8-169"><a href="#cb8-169" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> media <span class="op">=</span> y<span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span> v) <span class="kw">=&gt;</span> s <span class="op">+</span> v<span class="op">,</span> <span class="dv">0</span>) <span class="op">/</span> y<span class="op">.</span><span class="at">length</span><span class="op">;</span></span>
+<span id="cb8-170"><a href="#cb8-170" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> pred <span class="op">=</span> y<span class="op">.</span><span class="fu">map</span>((_<span class="op">,</span> t) <span class="kw">=&gt;</span> t <span class="op">&lt;</span> ar_p <span class="op">?</span> <span class="kw">null</span> <span class="op">:</span> yw<span class="op">.</span><span class="at">phi</span><span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span> ph<span class="op">,</span> j) <span class="kw">=&gt;</span> s <span class="op">+</span> ph <span class="op">*</span> (y[t <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> j] <span class="op">-</span> media)<span class="op">,</span> media))<span class="op">;</span></span>
+<span id="cb8-171"><a href="#cb8-171" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> err <span class="op">=</span> y<span class="op">.</span><span class="fu">slice</span>(ar_p)<span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> i) <span class="kw">=&gt;</span> v <span class="op">-</span> pred[i <span class="op">+</span> ar_p])<span class="op">;</span></span>
+<span id="cb8-172"><a href="#cb8-172" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> rmsErr <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(err<span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span> e) <span class="kw">=&gt;</span> s <span class="op">+</span> e <span class="op">*</span> e<span class="op">,</span> <span class="dv">0</span>) <span class="op">/</span> err<span class="op">.</span><span class="at">length</span>)<span class="op">;</span></span>
+<span id="cb8-173"><a href="#cb8-173" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> sdY <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(r[<span class="dv">0</span>])<span class="op">;</span></span>
+<span id="cb8-174"><a href="#cb8-174" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {fs<span class="op">,</span> phi<span class="op">,</span> y<span class="op">,</span> r<span class="op">,</span> teor<span class="op">,</span> T<span class="op">,</span> valores<span class="op">,</span> yw<span class="op">,</span> pred<span class="op">,</span> rmsErr<span class="op">,</span> sdY<span class="op">,</span> <span class="dt">kappa</span><span class="op">:</span> valores[<span class="dv">0</span>] <span class="op">/</span> valores[valores<span class="op">.</span><span class="at">length</span> <span class="op">-</span> <span class="dv">1</span>]<span class="op">,</span> m}<span class="op">;</span></span>
+<span id="cb8-175"><a href="#cb8-175" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb9" data-startfrom="180" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 179;"><span id="cb9-180"><a href="#cb9-180" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`&lt;div style="display:flex;flex-wrap:wrap;gap:1rem"&gt;</span></span>
+<span id="cb9-181"><a href="#cb9-181" aria-hidden="true" tabindex="-1"></a><span class="sc">${</span>Plot<span class="op">.</span><span class="fu">plot</span>({<span class="dt">width</span><span class="op">:</span> <span class="dv">520</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">260</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"t (s)"</span>}<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"x"</span>}<span class="op">,</span></span>
+<span id="cb9-182"><a href="#cb9-182" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [Plot<span class="op">.</span><span class="fu">line</span>(ar<span class="op">.</span><span class="at">y</span><span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">300</span>)<span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> i) <span class="kw">=&gt;</span> [i <span class="op">/</span> ar<span class="op">.</span><span class="at">fs</span><span class="op">,</span> v])<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#1B6CA8"</span>})<span class="op">,</span></span>
+<span id="cb9-183"><a href="#cb9-183" aria-hidden="true" tabindex="-1"></a>          Plot<span class="op">.</span><span class="fu">line</span>(ar<span class="op">.</span><span class="at">pred</span><span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">300</span>)<span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> i) <span class="kw">=&gt;</span> [i <span class="op">/</span> ar<span class="op">.</span><span class="at">fs</span><span class="op">,</span> v])<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d[<span class="dv">1</span>] <span class="op">!==</span> <span class="kw">null</span>)<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#D95F02"</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"4,3"</span>})]<span class="op">,</span></span>
+<span id="cb9-184"><a href="#cb9-184" aria-hidden="true" tabindex="-1"></a>  <span class="dt">caption</span><span class="op">:</span> <span class="st">"Señal observada (azul) y predicción a un paso (naranja, discontinua), primeros 3 s."</span>})<span class="sc">}</span></span>
+<span id="cb9-185"><a href="#cb9-185" aria-hidden="true" tabindex="-1"></a><span class="sc">${</span>Plot<span class="op">.</span><span class="fu">plot</span>({<span class="dt">width</span><span class="op">:</span> <span class="dv">520</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">260</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"retardo k"</span>}<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"r_k"</span>}<span class="op">,</span></span>
+<span id="cb9-186"><a href="#cb9-186" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">0</span>])<span class="op">,</span> Plot<span class="op">.</span><span class="fu">line</span>(ar<span class="op">.</span><span class="at">teor</span><span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> k) <span class="kw">=&gt;</span> [k<span class="op">,</span> v])<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#1F2937"</span>})<span class="op">,</span></span>
+<span id="cb9-187"><a href="#cb9-187" aria-hidden="true" tabindex="-1"></a>          Plot<span class="op">.</span><span class="fu">dot</span>(ar<span class="op">.</span><span class="at">r</span><span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> k) <span class="kw">=&gt;</span> [k<span class="op">,</span> v])<span class="op">,</span> {<span class="dt">fill</span><span class="op">:</span> <span class="st">"#D95F02"</span><span class="op">,</span> <span class="dt">r</span><span class="op">:</span> <span class="dv">3</span>})]<span class="op">,</span></span>
+<span id="cb9-188"><a href="#cb9-188" aria-hidden="true" tabindex="-1"></a>  <span class="dt">caption</span><span class="op">:</span> <span class="st">"Autocorrelación teórica sin ruido de medida más σ² en r₀ (línea) y estimada (puntos)."</span>})<span class="sc">}</span></span>
+<span id="cb9-189"><a href="#cb9-189" aria-hidden="true" tabindex="-1"></a><span class="sc">${</span>Plot<span class="op">.</span><span class="fu">plot</span>({<span class="dt">width</span><span class="op">:</span> <span class="dv">320</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">300</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">40</span><span class="op">,</span> <span class="dt">padding</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"columna"</span>}<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"fila"</span><span class="op">,</span> <span class="dt">reverse</span><span class="op">:</span> <span class="kw">true</span>}<span class="op">,</span> <span class="dt">color</span><span class="op">:</span> {<span class="dt">scheme</span><span class="op">:</span> <span class="st">"RdBu"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span>ar<span class="op">.</span><span class="at">r</span>[<span class="dv">0</span>]<span class="op">,</span> ar<span class="op">.</span><span class="at">r</span>[<span class="dv">0</span>]]}<span class="op">,</span></span>
+<span id="cb9-190"><a href="#cb9-190" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [Plot<span class="op">.</span><span class="fu">cell</span>(ar<span class="op">.</span><span class="at">T</span><span class="op">.</span><span class="fu">flatMap</span>((f<span class="op">,</span> i) <span class="kw">=&gt;</span> f<span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> j) <span class="kw">=&gt;</span> ({i<span class="op">,</span> j<span class="op">,</span> v})))<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"j"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"i"</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"v"</span>})]<span class="op">,</span></span>
+<span id="cb9-191"><a href="#cb9-191" aria-hidden="true" tabindex="-1"></a>  <span class="dt">caption</span><span class="op">:</span> <span class="st">"Toeplitz (14×14) de la autocorrelación estimada."</span>})<span class="sc">}</span></span>
+<span id="cb9-192"><a href="#cb9-192" aria-hidden="true" tabindex="-1"></a><span class="sc">${</span>Plot<span class="op">.</span><span class="fu">plot</span>({<span class="dt">width</span><span class="op">:</span> <span class="dv">320</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">300</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span> <span class="st">"log"</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"valor propio"</span>}<span class="op">,</span> <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"índice"</span>}<span class="op">,</span></span>
+<span id="cb9-193"><a href="#cb9-193" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [Plot<span class="op">.</span><span class="fu">dot</span>(ar<span class="op">.</span><span class="at">valores</span><span class="op">.</span><span class="fu">slice</span>()<span class="op">.</span><span class="fu">reverse</span>()<span class="op">.</span><span class="fu">map</span>((v<span class="op">,</span> i) <span class="kw">=&gt;</span> [i <span class="op">+</span> <span class="dv">1</span><span class="op">,</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(v<span class="op">,</span> <span class="fl">1e-12</span>)])<span class="op">,</span> {<span class="dt">fill</span><span class="op">:</span> <span class="st">"#6F42C1"</span><span class="op">,</span> <span class="dt">r</span><span class="op">:</span> <span class="dv">4</span>})]<span class="op">,</span></span>
+<span id="cb9-194"><a href="#cb9-194" aria-hidden="true" tabindex="-1"></a>  <span class="dt">caption</span><span class="op">:</span> <span class="st">"Valores propios de la Toeplitz."</span>})<span class="sc">}</span></span>
+<span id="cb9-195"><a href="#cb9-195" aria-hidden="true" tabindex="-1"></a><span class="vs">&lt;/div&gt;`</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-4" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb10" data-startfrom="200" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 199;"><span id="cb10-200"><a href="#cb10-200" aria-hidden="true" tabindex="-1"></a><span class="fu">md</span><span class="vs">`**</span><span class="sc">${</span>ar<span class="op">.</span><span class="at">valores</span>[<span class="dv">0</span>] <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">"κ₂(Toeplitz) = "</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">/</span> ar<span class="op">.</span><span class="at">kappa</span>)<span class="op">.</span><span class="fu">toExponential</span>(<span class="dv">1</span>) <span class="op">:</span> <span class="st">"Toeplitz no definida positiva (el menor valor propio es ≤ 0 por redondeo)"</span><span class="sc">}</span><span class="vs">**. Coeficientes teóricos del AR(2): φ = (</span><span class="sc">${</span>ar<span class="op">.</span><span class="at">phi</span><span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> v<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>))<span class="op">.</span><span class="fu">join</span>(<span class="st">", "</span>)<span class="sc">}</span><span class="vs">). Estimados con Yule–Walker de orden </span><span class="sc">${</span>ar_p<span class="sc">}</span><span class="vs">: φ̂ = (</span><span class="sc">${</span>ar<span class="op">.</span><span class="at">yw</span><span class="op">.</span><span class="at">phi</span><span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> v<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>))<span class="op">.</span><span class="fu">join</span>(<span class="st">", "</span>)<span class="sc">}</span><span class="vs">). **Error de predicción** RMS = </span><span class="sc">${</span>ar<span class="op">.</span><span class="at">rmsErr</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">, desviación típica de la señal = </span><span class="sc">${</span>ar<span class="op">.</span><span class="at">sdY</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs"> (cociente </span><span class="sc">${</span>(ar<span class="op">.</span><span class="at">rmsErr</span> <span class="op">/</span> ar<span class="op">.</span><span class="at">sdY</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">).`</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-5" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Hipótesis y límites de la simulación 2
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El modelo supone un AR(2) estacionario con innovación gaussiana; la señal real de una estructura es más rica. Con <span class="math inline">\(\sigma_{\text{med}}=0\)</span> y <span class="math inline">\(p=2\)</span>, Yule–Walker recupera los coeficientes teóricos con un error que baja con <span class="math inline">\(N\)</span>. Con ruido de medida, los coeficientes estimados quedan <strong>sesgados</strong> (el ruido infla <span class="math inline">\(r_0\)</span> pero no <span class="math inline">\(r_k\)</span>): el modelo AR(2) deja de ser el verdadero, y subir <span class="math inline">\(p\)</span> lo compensa en parte. La predicción se evalúa sobre los mismos datos con que se estiman los coeficientes.</p>
+</div>
+</div>
+<div id="m2-1-4-ar1" class="ejercicio" data-tipo="numerico" data-respuesta="0.9375" data-tol="1%">
+<p>Un proceso AR(1) tiene <span class="math inline">\(\phi=0{,}6\)</span> y varianza de innovación <span class="math inline">\(\sigma^2=1\)</span>. Calcula su autocorrelación en el retardo 1, <span class="math inline">\(r_1\)</span>.</p>
+<div class="solucion">
+<p><span class="math inline">\(r_0=\sigma^2/(1-\phi^2)=1/0{,}64=1{,}5625\)</span> y <span class="math inline">\(r_1=\phi\,r_0=0{,}6\cdot1{,}5625=0{,}9375\)</span> (Yule–Walker con <span class="math inline">\(p=1\)</span>: <span class="math inline">\(\phi=r_1/r_0\)</span>).</p>
+</div>
+</div>
+<div id="m2-1-4-semidef" class="ejercicio" data-tipo="vf" data-respuesta="verdadero">
+<p>La matriz de Toeplitz construida con la autocorrelación muestral sesgada (dividiendo por <span class="math inline">\(N\)</span>) de una señal es siempre simétrica y semidefinida positiva.</p>
+<div class="solucion">
+<p>Verdadero. Con la media restada y la señal prolongada con ceros, <span class="math inline">\(\mathbf T_n=\tfrac1N\mathbf X^{\mathsf T}\mathbf X\)</span>, con <span class="math inline">\(\mathbf X\)</span> la matriz rectangular de datos desplazados: es una matriz de Gram, simétrica y semidefinida positiva (pueden aparecer valores propios ligeramente negativos solo por redondeo). Con el divisor <span class="math inline">\(N-k\)</span> esta garantía se pierde.</p>
+</div>
+</div>
+
+
+</section>
+<section id="referencias-unidad" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="referencias-unidad">Referencias</h2>
+<p><em>Son las mismas que aparecen en el margen, junto al texto.</em> La lista completa del curso, con el estado de verificación de cada ficha, está en <code>recursos/bibliografia.bib</code> del repositorio.</p>
+<div id="refs-unidad" class="referencias-unidad">
+<div class="ref-final">
+<p>Golub, Gene H., y Charles F. Van Loan. 2013. <em>Matrix Computations</em>. 4.ª ed. Johns Hopkins University Press.</p>
+</div>
+<div class="ref-final">
+<p>Gray, Robert M. 2006. <span>«Toeplitz and Circulant Matrices: A Review»</span>. <em>Foundations and Trends in Communications and Information Theory</em> 2 (3): 155-239. <a href="https://doi.org/10.1561/0100000006">https://doi.org/10.1561/0100000006</a>.</p>
+</div>
+<div class="ref-final">
+<p>Pachón, Pablo, Rafael Castro, Enrique García-Macías, Víctor Compán, y Esther Puertas. 2018. <span>«E. Torroja’s bridge: Tailored experimental setup for <span>SHM</span> of a historical bridge with a reduced number of sensors»</span>. <em>Engineering Structures</em> 162: 11-21. <a href="https://doi.org/10.1016/j.engstruct.2018.02.035">https://doi.org/10.1016/j.engstruct.2018.02.035</a>.</p>
+</div>
+<div class="ref-final">
+<p>Toeplitz, Otto. 1911. <span>«Zur Theorie der quadratischen und bilinearen Formen von unendlichvielen Ver<span>ä</span>nderlichen»</span>. <em>Mathematische Annalen</em> 70 (3): 351-76. <a href="https://doi.org/10.1007/BF01564502">https://doi.org/10.1007/BF01564502</a>.</p>
+</div>
+<div class="ref-final">
+<p>Walker, Gilbert T. 1931. <span>«On periodicity in series of related terms»</span>. <em>Proceedings of the Royal Society of London. Series A</em> 131 (818): 518-32. <a href="https://doi.org/10.1098/rspa.1931.0069">https://doi.org/10.1098/rspa.1931.0069</a>.</p>
+</div>
+<div class="ref-final">
+<p>Yule, G. Udny. 1927. <span>«On a method of investigating periodicities in disturbed series, with special reference to <span>W</span>olfer’s sunspot numbers»</span>. <em>Philosophical Transactions of the Royal Society of London. Series A</em> 226: 267-98. <a href="https://doi.org/10.1098/rsta.1927.0007">https://doi.org/10.1098/rsta.1927.0007</a>.</p>
+</div>
+</div>
+<script>(function(){var a=document.getElementById('toc-bibliography');if(a&&a.parentElement)a.parentElement.remove();})();</script>
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">Referencias</h1>
+
+</section>
+
+</main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImltcG9ydCB7c2ltdWxhQVIsIGF1dG9jb3JyZWxhY2lvbiwgdG9lcGxpdHosIGF1dG9TaW1ldHJpY2EsIHl1bGVXYWxrZXIsIHJuZywgbm9ybWFsfSBmcm9tIFwiLi4vLi4vcmVjdXJzb3MvanMvbWF0ZW1hdGljYXMuanNcIlxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0yIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIGFyX3IgPSBJbnB1dHMucmFuZ2UoWzAuNSwgMC45OV0sIHt2YWx1ZTogMC45NSwgc3RlcDogMC4wMDUsIGxhYmVsOiBcInBlcnNpc3RlbmNpYSByIChhZGltZW5zaW9uYWwpXCJ9KVxudmlld29mIGFyX2YwID0gSW5wdXRzLnJhbmdlKFswLjUsIDMwXSwge3ZhbHVlOiA4LCBzdGVwOiAwLjUsIGxhYmVsOiBcImZyZWN1ZW5jaWEgZuKCgCAoSHopXCJ9KVxudmlld29mIGFyX04gPSBJbnB1dHMucmFuZ2UoWzIwMCwgNDAwMF0sIHt2YWx1ZTogMTUwMCwgc3RlcDogMTAwLCBsYWJlbDogXCJsb25naXR1ZCBOIChtdWVzdHJhcylcIn0pXG52aWV3b2YgYXJfcnVpZG8gPSBJbnB1dHMucmFuZ2UoWzAsIDJdLCB7dmFsdWU6IDAuMywgc3RlcDogMC4wNSwgbGFiZWw6IFwicnVpZG8gZGUgbWVkaWRhIM+DX21lZCAodW5pZGFkZXMgZGUgeClcIn0pXG52aWV3b2YgYXJfcCA9IElucHV0cy5yYW5nZShbMSwgOF0sIHt2YWx1ZTogMiwgc3RlcDogMSwgbGFiZWw6IFwib3JkZW4gcCBkZWwgbW9kZWxvIGFqdXN0YWRvXCJ9KVxudmlld29mIGFyX3NlbSA9IElucHV0cy5yYW5nZShbMSwgNTBdLCB7dmFsdWU6IDMsIHN0ZXA6IDEsIGxhYmVsOiBcInNlbWlsbGFcIn0pXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTMiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJhciA9IHtcbiAgY29uc3QgZnMgPSAxMDAsIHRoID0gMiAqIE1hdGguUEkgKiBhcl9mMCAvIGZzO1xuICBjb25zdCBwaGkgPSBbMiAqIGFyX3IgKiBNYXRoLmNvcyh0aCksIC1hcl9yICogYXJfcl07XG4gIGNvbnN0IHggPSBzaW11bGFBUihwaGksIDEsIGFyX04sIGFyX3NlbSk7XG4gIGNvbnN0IHUgPSBybmcoMTAwMCArIGFyX3NlbSk7XG4gIGNvbnN0IHkgPSB4Lm1hcCh2ID0+IHYgKyBhcl9ydWlkbyAqIG5vcm1hbCh1KSk7XG4gIGNvbnN0IGttYXggPSA0MDtcbiAgY29uc3QgciA9IGF1dG9jb3JyZWxhY2lvbih5LCBrbWF4KTtcbiAgLy8gYXV0b2NvcnJlbGFjacOzbiB0ZcOzcmljYSBkZWwgQVIoMikgKHNpbiBydWlkbyksIHBvciBsYSByZWN1cnNpw7NuIGRlIFl1bGXigJNXYWxrZXJcbiAgY29uc3QgcmhvID0gWzEsIHBoaVswXSAvICgxIC0gcGhpWzFdKV07XG4gIGZvciAobGV0IGsgPSAyOyBrIDw9IGttYXg7IGsrKykgcmhvLnB1c2gocGhpWzBdICogcmhvW2sgLSAxXSArIHBoaVsxXSAqIHJob1trIC0gMl0pO1xuICBjb25zdCByMHggPSAoMSAtIHBoaVsxXSkgLyAoKDEgKyBwaGlbMV0pICogKCgxIC0gcGhpWzFdKSAqKiAyIC0gcGhpWzBdICoqIDIpKTsgICAgICAvLyB2YXJpYW56YSBkZWwgQVIoMikgY29uIGlubm92YWNpw7NuIHVuaWRhZFxuICBjb25zdCB0ZW9yID0gcmhvLm1hcCgodiwgaykgPT4gdiAqIHIweCArIChrID09PSAwID8gYXJfcnVpZG8gKiogMiA6IDApKTtcbiAgY29uc3QgbSA9IDE0O1xuICBjb25zdCBUID0gdG9lcGxpdHooci5zbGljZSgwLCBtKSk7XG4gIGNvbnN0IHt2YWxvcmVzfSA9IGF1dG9TaW1ldHJpY2EoVCk7XG4gIGNvbnN0IHl3ID0geXVsZVdhbGtlcihyLCBhcl9wKTtcbiAgLy8gcHJlZGljY2nDs24gYSB1biBwYXNvIGNvbiBsb3MgY29lZmljaWVudGVzIGVzdGltYWRvc1xuICBjb25zdCBtZWRpYSA9IHkucmVkdWNlKChzLCB2KSA9PiBzICsgdiwgMCkgLyB5Lmxlbmd0aDtcbiAgY29uc3QgcHJlZCA9IHkubWFwKChfLCB0KSA9PiB0IDwgYXJfcCA/IG51bGwgOiB5dy5waGkucmVkdWNlKChzLCBwaCwgaikgPT4gcyArIHBoICogKHlbdCAtIDEgLSBqXSAtIG1lZGlhKSwgbWVkaWEpKTtcbiAgY29uc3QgZXJyID0geS5zbGljZShhcl9wKS5tYXAoKHYsIGkpID0+IHYgLSBwcmVkW2kgKyBhcl9wXSk7XG4gIGNvbnN0IHJtc0VyciA9IE1hdGguc3FydChlcnIucmVkdWNlKChzLCBlKSA9PiBzICsgZSAqIGUsIDApIC8gZXJyLmxlbmd0aCk7XG4gIGNvbnN0IHNkWSA9IE1hdGguc3FydChyWzBdKTtcbiAgcmV0dXJuIHtmcywgcGhpLCB5LCByLCB0ZW9yLCBULCB2YWxvcmVzLCB5dywgcHJlZCwgcm1zRXJyLCBzZFksIGthcHBhOiB2YWxvcmVzWzBdIC8gdmFsb3Jlc1t2YWxvcmVzLmxlbmd0aCAtIDFdLCBtfTtcbn1cbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNCIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6Imh0bWxgPGRpdiBzdHlsZT1cImRpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6MXJlbVwiPlxuJHtQbG90LnBsb3Qoe3dpZHRoOiA1MjAsIGhlaWdodDogMjYwLCBtYXJnaW5MZWZ0OiA1MCwgeDoge2xhYmVsOiBcInQgKHMpXCJ9LCB5OiB7bGFiZWw6IFwieFwifSxcbiAgbWFya3M6IFtQbG90LmxpbmUoYXIueS5zbGljZSgwLCAzMDApLm1hcCgodiwgaSkgPT4gW2kgLyBhci5mcywgdl0pLCB7c3Ryb2tlOiBcIiMxQjZDQThcIn0pLFxuICAgICAgICAgIFBsb3QubGluZShhci5wcmVkLnNsaWNlKDAsIDMwMCkubWFwKCh2LCBpKSA9PiBbaSAvIGFyLmZzLCB2XSkuZmlsdGVyKGQgPT4gZFsxXSAhPT0gbnVsbCksIHtzdHJva2U6IFwiI0Q5NUYwMlwiLCBzdHJva2VEYXNoYXJyYXk6IFwiNCwzXCJ9KV0sXG4gIGNhcHRpb246IFwiU2XDsWFsIG9ic2VydmFkYSAoYXp1bCkgeSBwcmVkaWNjacOzbiBhIHVuIHBhc28gKG5hcmFuamEsIGRpc2NvbnRpbnVhKSwgcHJpbWVyb3MgMyBzLlwifSl9XG4ke1Bsb3QucGxvdCh7d2lkdGg6IDUyMCwgaGVpZ2h0OiAyNjAsIG1hcmdpbkxlZnQ6IDUwLCB4OiB7bGFiZWw6IFwicmV0YXJkbyBrXCJ9LCB5OiB7bGFiZWw6IFwicl9rXCJ9LFxuICBtYXJrczogW1Bsb3QucnVsZVkoWzBdKSwgUGxvdC5saW5lKGFyLnRlb3IubWFwKCh2LCBrKSA9PiBbaywgdl0pLCB7c3Ryb2tlOiBcIiMxRjI5MzdcIn0pLFxuICAgICAgICAgIFBsb3QuZG90KGFyLnIubWFwKCh2LCBrKSA9PiBbaywgdl0pLCB7ZmlsbDogXCIjRDk1RjAyXCIsIHI6IDN9KV0sXG4gIGNhcHRpb246IFwiQXV0b2NvcnJlbGFjacOzbiB0ZcOzcmljYSBzaW4gcnVpZG8gZGUgbWVkaWRhIG3DoXMgz4PCsiBlbiBy4oKAIChsw61uZWEpIHkgZXN0aW1hZGEgKHB1bnRvcykuXCJ9KX1cbiR7UGxvdC5wbG90KHt3aWR0aDogMzIwLCBoZWlnaHQ6IDMwMCwgbWFyZ2luTGVmdDogNDAsIHBhZGRpbmc6IDAsIHg6IHtsYWJlbDogXCJjb2x1bW5hXCJ9LCB5OiB7bGFiZWw6IFwiZmlsYVwiLCByZXZlcnNlOiB0cnVlfSwgY29sb3I6IHtzY2hlbWU6IFwiUmRCdVwiLCBkb21haW46IFstYXIuclswXSwgYXIuclswXV19LFxuICBtYXJrczogW1Bsb3QuY2VsbChhci5ULmZsYXRNYXAoKGYsIGkpID0+IGYubWFwKCh2LCBqKSA9PiAoe2ksIGosIHZ9KSkpLCB7eDogXCJqXCIsIHk6IFwiaVwiLCBmaWxsOiBcInZcIn0pXSxcbiAgY2FwdGlvbjogXCJUb2VwbGl0eiAoMTTDlzE0KSBkZSBsYSBhdXRvY29ycmVsYWNpw7NuIGVzdGltYWRhLlwifSl9XG4ke1Bsb3QucGxvdCh7d2lkdGg6IDMyMCwgaGVpZ2h0OiAzMDAsIG1hcmdpbkxlZnQ6IDUwLCB5OiB7dHlwZTogXCJsb2dcIiwgbGFiZWw6IFwidmFsb3IgcHJvcGlvXCJ9LCB4OiB7bGFiZWw6IFwiw61uZGljZVwifSxcbiAgbWFya3M6IFtQbG90LmRvdChhci52YWxvcmVzLnNsaWNlKCkucmV2ZXJzZSgpLm1hcCgodiwgaSkgPT4gW2kgKyAxLCBNYXRoLm1heCh2LCAxZS0xMildKSwge2ZpbGw6IFwiIzZGNDJDMVwiLCByOiA0fSldLFxuICBjYXB0aW9uOiBcIlZhbG9yZXMgcHJvcGlvcyBkZSBsYSBUb2VwbGl0ei5cIn0pfVxuPC9kaXY+YFxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC01IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoibWRgKioke2FyLnZhbG9yZXNbMF0gPiAwID8gXCLOuuKCgihUb2VwbGl0eikgPSBcIiArICgxIC8gYXIua2FwcGEpLnRvRXhwb25lbnRpYWwoMSkgOiBcIlRvZXBsaXR6IG5vIGRlZmluaWRhIHBvc2l0aXZhIChlbCBtZW5vciB2YWxvciBwcm9waW8gZXMg4omkIDAgcG9yIHJlZG9uZGVvKVwifSoqLiBDb2VmaWNpZW50ZXMgdGXDs3JpY29zIGRlbCBBUigyKTogz4YgPSAoJHthci5waGkubWFwKHYgPT4gdi50b0ZpeGVkKDMpKS5qb2luKFwiLCBcIil9KS4gRXN0aW1hZG9zIGNvbiBZdWxl4oCTV2Fsa2VyIGRlIG9yZGVuICR7YXJfcH06IM+GzIIgPSAoJHthci55dy5waGkubWFwKHYgPT4gdi50b0ZpeGVkKDMpKS5qb2luKFwiLCBcIil9KS4gKipFcnJvciBkZSBwcmVkaWNjacOzbioqIFJNUyA9ICR7YXIucm1zRXJyLnRvRml4ZWQoMyl9LCBkZXN2aWFjacOzbiB0w61waWNhIGRlIGxhIHNlw7FhbCA9ICR7YXIuc2RZLnRvRml4ZWQoMyl9IChjb2NpZW50ZSAkeyhhci5ybXNFcnIgLyBhci5zZFkpLnRvRml4ZWQoMil9KS5gXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ2FyX3InKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnYXJfZjAnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnYXJfTicpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdhcl9ydWlkbycpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdhcl9wJykifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ2FyX3NlbScpIn1dfQ==
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../../algebra/matrices";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "../..";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/me1catrr\.github\.io\/matematicado\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../algebra/matrices/a1-3.html" class="pagination-link" aria-label="A1.3 Matrices dispersas, de banda y por bloques">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">A1.3 Matrices dispersas, de banda y por bloques</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../algebra/matrices/a1-5.html" class="pagination-link" aria-label="A1.5 Matrices de Hankel">
+        <span class="nav-page-text">A1.5 Matrices de Hankel</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Contenido CC BY-SA 4.0 · código MIT · Rafael Castro Triguero</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/me1catrr/matematicado/edit/main/algebra/matrices/a1-4.qmd" class="toc-action"><i class="bi bi-github"></i>Editar esta página</a></li><li><a href="https://github.com/me1catrr/matematicado/issues/new" class="toc-action"><i class="bi empty"></i>Informar sobre problema</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Material hermano de <a href="https://me1catrr.github.io/resonancia/">Resonancia</a></p>
+</div>
+  </div>
+</footer>
+<script>
+/* =============================================================================
+ * ejercicios.js: ejercicios intercalados en el texto (autoevaluación)
+ *
+ * Lo inserta scripts/ejercicios.lua, en línea, solo en las páginas que tienen
+ * ejercicios. Sin dependencias. Todo ocurre en el navegador: las respuestas y
+ * el progreso se guardan en localStorage (nada sale del equipo del alumnado).
+ *
+ * Se escribe en Markdown (véase la guía en CLAUDE.md):
+ *   ::: {.ejercicio tipo="numerico" id="m5-2-zeta" respuesta="0.2" tol="1%" unidad=""}
+ *   Enunciado…
+ *   ::: {.pista}  …  :::
+ *   ::: {.solucion}  …  :::
+ *   :::
+ * En `opcion` puede añadirse `::: {.retro}` con una lista paralela a `.opciones`:
+ * el comentario de cada opción, que se muestra al elegirla (retroalimentación razonada
+ * por distractor). Sin JavaScript o al imprimir se ven todos.
+ * Tipos: vf, opcion, numerico, abierta, programacion, investigacion, encuesta.
+ *
+ * La lógica de corrección (parseNumero, comprobarNumerico, …) es pura y se
+ * prueba con recursos/js/ejercicios.test.mjs.
+ * ========================================================================== */
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ */
+  /* Lógica pura                                                         */
+  /* ------------------------------------------------------------------ */
+
+  /** Lee un número escrito a la española o a la inglesa: «0,0307», «3.07e-2»,
+   *  «3,07·10^-2», «30,7 mm» (se ignora lo que siga al número). NaN si no hay. */
+  function parseNumero(texto) {
+    if (texto === null || texto === undefined) return NaN;
+    let t = String(texto).trim().replace(/−/g, "-").replace(/\s+/g, "");
+    // 3,07·10^-2 · 3.07x10^-2 · 3,07×10-2  →  3.07e-2
+    t = t.replace(/[x×·*]10\^?\(?(-?\+?\d+)\)?/gi, "e$1");
+    if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+    const m = t.match(/^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?/i);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+
+  /** Interpreta la tolerancia: «1%» (relativa), «0.01» o «abs:0.01» (absoluta). */
+  function parseTolerancia(tol) {
+    const t = String(tol === undefined || tol === null || tol === "" ? "1%" : tol).trim();
+    if (t.endsWith("%")) return { tipo: "rel", valor: parseFloat(t) / 100 };
+    return { tipo: "abs", valor: parseFloat(t.replace(/^abs:/, "")) };
+  }
+
+  /** ¿Es correcta la respuesta numérica? Devuelve {ok, valor, error}. */
+  function comprobarNumerico(entrada, objetivo, tol) {
+    const valor = parseNumero(entrada);
+    if (!Number.isFinite(valor)) return { ok: false, valor, error: null, invalida: true };
+    const o = typeof objetivo === "number" ? objetivo : parseNumero(objetivo);
+    const t = parseTolerancia(tol);
+    const dif = Math.abs(valor - o);
+    const limite = t.tipo === "rel" && o !== 0 ? Math.abs(o) * t.valor : t.tipo === "rel" ? t.valor : t.valor;
+    return { ok: dif <= limite, valor, error: o !== 0 ? dif / Math.abs(o) : dif, invalida: false };
+  }
+
+  /** Normaliza «V», «Verdadero», «cierto», «F», «falso» a "verdadero" | "falso". */
+  function normalizaVF(x) {
+    const t = String(x).trim().toLowerCase();
+    if (["v", "verdadero", "cierto", "si", "sí", "true"].includes(t)) return "verdadero";
+    if (["f", "falso", "no", "false"].includes(t)) return "falso";
+    return t;
+  }
+
+  /** Compara conjuntos de letras para opción múltiple: «a,c» ≡ «c, a». */
+  function mismasOpciones(elegidas, correctas) {
+    const norm = (x) => Array.from(new Set(String(x).toLowerCase().split(/[,\s;]+/).filter(Boolean))).sort().join(",");
+    return norm(elegidas) === norm(correctas);
+  }
+
+  const LETRAS = "abcdefghijklmnopqrstuvwxyz";
+
+  /** Letras elegidas en una respuesta de opción múltiple: «c, a» → ["c", "a"]. */
+  function letrasElegidas(r) {
+    return Array.from(new Set(String(r || "").toLowerCase().split(/[,\s;]+/).filter(Boolean)));
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Almacenamiento local (con tolerancia a que no exista)               */
+  /* ------------------------------------------------------------------ */
+  const PREFIJO = "resonancia:ej:" + (typeof location !== "undefined" ? location.pathname : "");
+
+  function leer(id) {
+    try {
+      const v = localStorage.getItem(PREFIJO + ":" + id);
+      return v ? JSON.parse(v) : null;
+    } catch (e) { return null; }
+  }
+  function guardar(id, estado) {
+    try { localStorage.setItem(PREFIJO + ":" + id, JSON.stringify(estado)); } catch (e) { /* sin almacenamiento */ }
+  }
+  function borrarTodo() {
+    try {
+      Object.keys(localStorage).filter((k) => k.startsWith(PREFIJO + ":")).forEach((k) => localStorage.removeItem(k));
+    } catch (e) { /* nada */ }
+  }
+  function todos() {
+    const out = {};
+    try {
+      Object.keys(localStorage).filter((k) => k.startsWith(PREFIJO + ":")).forEach((k) => {
+        out[k.slice(PREFIJO.length + 1)] = JSON.parse(localStorage.getItem(k));
+      });
+    } catch (e) { /* nada */ }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Capa DOM                                                            */
+  /* ------------------------------------------------------------------ */
+  const ETIQUETA = {
+    vf: "Verdadero o falso", opcion: "Test", numerico: "Cálculo", abierta: "Respuesta abierta",
+    programacion: "Programación", investigacion: "Investigación", encuesta: "Reflexión (no evaluada)",
+  };
+  const ICONO = { vf: "✓✗", opcion: "◉", numerico: "∑", abierta: "✎", programacion: "⌘", investigacion: "⌕", encuesta: "☰" };
+
+  function el(tag, props, ...hijos) {
+    const e = document.createElement(tag);
+    if (props) for (const k of Object.keys(props)) {
+      if (k === "class") e.className = props[k];
+      else if (k === "text") e.textContent = props[k];
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), props[k]);
+      else e.setAttribute(k, props[k]);
+    }
+    hijos.flat().forEach((h) => h && e.append(h));
+    return e;
+  }
+
+  function sacar(ej, clase) {
+    const n = ej.querySelector(":scope > ." + clase);
+    if (n) n.remove();
+    return n;
+  }
+
+  function mensaje(zona, tipo, texto) {
+    zona.className = "ej-feedback ej-" + tipo;
+    zona.textContent = texto;
+  }
+
+  function construir(ej, indice) {
+    const tipo = ej.dataset.tipo;
+    if (!ETIQUETA[tipo]) return null;
+    const id = ej.id || "ej-" + indice;
+    ej.id = id;
+    ej.classList.add("ej-activo");
+
+    const pista = sacar(ej, "pista");
+    const solucion = sacar(ej, "solucion");
+    const opciones = sacar(ej, "opciones");
+    const rubrica = sacar(ej, "rubrica");
+    const criterios = sacar(ej, "criterios");
+    const retro = sacar(ej, "retro");
+
+    const cab = el("div", { class: "ej-cabecera" },
+      el("span", { class: "ej-icono", "aria-hidden": "true", text: ICONO[tipo] }),
+      el("span", { class: "ej-tipo", text: "Ejercicio · " + ETIQUETA[tipo] }),
+      el("span", { class: "ej-estado", "aria-live": "polite" }));
+    ej.prepend(cab);
+
+    const zona = el("div", { class: "ej-ui" });
+    const fb = el("div", { class: "ej-feedback", role: "status", "aria-live": "polite" });
+    const botones = el("div", { class: "ej-botones" });
+    const estado = leer(id) || { estado: "pendiente", intentos: 0 };
+
+    const marca = () => {
+      const m = { correcto: "✔ Resuelto", hecho: "✔ Hecho", visto: "Solución vista", enviado: "Guardado", pendiente: "" }[estado.estado] || "";
+      cab.querySelector(".ej-estado").textContent = m;
+      ej.dataset.estado = estado.estado;
+      guardar(id, estado);
+      actualizarProgreso();
+    };
+
+    const revelar = (nodo) => { if (nodo) { nodo.classList.remove("ej-oculto"); nodo.hidden = false; } };
+    [pista, solucion].forEach((n) => { if (n) { n.classList.add("ej-oculto"); n.hidden = true; } });
+
+    const btn = (texto, fn, clase) => el("button", { type: "button", class: "ej-btn " + (clase || ""), onclick: fn, text: texto });
+
+    const btnPista = pista ? btn("Pista", () => { revelar(pista); }) : null;
+    const btnSolucion = solucion ? btn("Ver solución", () => {
+      revelar(solucion);
+      if (estado.estado === "pendiente") estado.estado = "visto";
+      marca();
+    }) : null;
+
+    /* ---------- por tipo ---------- */
+    let comprobar = null;
+    let recoger = () => null;
+
+    if (tipo === "vf") {
+      const grupo = el("div", { role: "radiogroup", "aria-label": "Verdadero o falso", class: "ej-vf" });
+      ["verdadero", "falso"].forEach((v) => {
+        grupo.append(el("label", { class: "ej-opcion" },
+          el("input", { type: "radio", name: id, value: v }), el("span", { text: v === "verdadero" ? "Verdadero" : "Falso" })));
+      });
+      zona.append(grupo);
+      recoger = () => (zona.querySelector("input:checked") || {}).value || null;
+      comprobar = () => {
+        const r = recoger();
+        if (!r) return mensaje(fb, "aviso", "Elige una opción.");
+        estado.intentos++;
+        if (r === normalizaVF(ej.dataset.respuesta)) { estado.estado = "correcto"; mensaje(fb, "ok", "Correcto."); revelar(solucion); }
+        else { mensaje(fb, "mal", "No es correcto. Piénsalo otra vez o pide la pista."); }
+        estado.respuesta = r; marca();
+      };
+    }
+
+    if (tipo === "opcion") {
+      const multiple = ej.dataset.multiple === "true";
+      const items = opciones ? Array.from(opciones.querySelectorAll(":scope > ul > li, :scope > ol > li")) : [];
+      const grupo = el("div", { role: multiple ? "group" : "radiogroup", class: "ej-opciones" });
+      items.forEach((li, i) => {
+        const l = LETRAS[i];
+        const input = el("input", { type: multiple ? "checkbox" : "radio", name: id, value: l });
+        const etiqueta = el("label", { class: "ej-opcion" }, input, el("span", { class: "ej-letra", text: l + ")" }), el("span", { class: "ej-texto" }));
+        while (li.firstChild) etiqueta.querySelector(".ej-texto").append(li.firstChild);
+        grupo.append(etiqueta);
+      });
+      zona.append(grupo);
+      const comentarios = retro ? Array.from(retro.querySelectorAll(":scope > ul > li, :scope > ol > li")) : [];
+      comentarios.forEach((li, i) => { li.prepend(el("strong", { text: LETRAS[i] + ") " })); li.hidden = true; });
+      if (retro) { retro.classList.add("ej-oculto"); retro.hidden = true; }
+      const mostrarRetro = (r) => {
+        if (!retro) return;
+        const elegidas = letrasElegidas(r);
+        comentarios.forEach((li, i) => { li.hidden = !elegidas.includes(LETRAS[i]); });
+        if (elegidas.some((l) => comentarios[LETRAS.indexOf(l)])) revelar(retro);
+      };
+      recoger = () => Array.from(zona.querySelectorAll("input:checked")).map((i) => i.value).join(",") || null;
+      comprobar = () => {
+        const r = recoger();
+        if (!r) return mensaje(fb, "aviso", "Elige una opción.");
+        estado.intentos++;
+        if (mismasOpciones(r, ej.dataset.respuesta)) { estado.estado = "correcto"; mensaje(fb, "ok", "Correcto."); revelar(solucion); }
+        else mensaje(fb, "mal", retro ? "No es correcto. Lee el comentario a tu elección." : "No es correcto. Revisa el razonamiento.");
+        mostrarRetro(r);
+        estado.respuesta = r; marca();
+      };
+    }
+
+    if (tipo === "numerico" || tipo === "programacion") {
+      if (ej.dataset.respuesta !== undefined && ej.dataset.respuesta !== "") {
+        const entrada = el("input", { type: "text", inputmode: "decimal", autocomplete: "off", class: "ej-entrada", "aria-label": "Tu resultado", placeholder: "Tu resultado" });
+        zona.append(el("div", { class: "ej-numero" }, entrada, ej.dataset.unidad ? el("span", { class: "ej-unidad", text: ej.dataset.unidad }) : null));
+        entrada.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); comprobar(); } });
+        recoger = () => entrada.value.trim() || null;
+        comprobar = () => {
+          const r = recoger();
+          if (!r) return mensaje(fb, "aviso", "Escribe un valor numérico.");
+          const c = comprobarNumerico(r, ej.dataset.respuesta, ej.dataset.tol);
+          if (c.invalida) return mensaje(fb, "aviso", "No entiendo ese número. Puedes escribir 0,031 o 3.1e-2.");
+          estado.intentos++; estado.respuesta = r;
+          if (c.ok) { estado.estado = "correcto"; mensaje(fb, "ok", "Correcto."); revelar(solucion); }
+          else mensaje(fb, "mal", "Aún no. Revisa las unidades y los pasos (tolerancia " + (ej.dataset.tol || "1%") + ").");
+          marca();
+        };
+        if (estado.respuesta) entrada.value = estado.respuesta;
+      }
+    }
+
+    if (tipo === "abierta" || tipo === "investigacion" || tipo === "programacion" || tipo === "encuesta") {
+      const necesitaTexto = tipo === "abierta" || tipo === "investigacion" || (tipo === "encuesta" && ej.dataset.texto === "true");
+      if (necesitaTexto) {
+        const ta = el("textarea", { class: "ej-texto-libre", rows: tipo === "investigacion" ? "6" : "4", "aria-label": "Tu respuesta", placeholder: "Escribe aquí tu respuesta (se guarda solo en este navegador)." });
+        ta.value = estado.texto || "";
+        ta.addEventListener("input", () => { estado.texto = ta.value; guardar(id, estado); });
+        zona.append(ta);
+      }
+      const lista = rubrica || criterios;
+      if (lista && tipo !== "encuesta") {
+        const titulo = tipo === "investigacion" ? "Criterios (márcalos cuando los cumplas)" : "Autoevalúate: ¿tu respuesta incluye…?";
+        const caja = el("fieldset", { class: "ej-rubrica" }, el("legend", { text: titulo }));
+        const marcados = estado.rubrica || [];
+        Array.from(lista.querySelectorAll("li")).forEach((li, i) => {
+          const cb = el("input", { type: "checkbox", value: String(i) });
+          cb.checked = marcados.includes(i);
+          cb.addEventListener("change", () => {
+            estado.rubrica = Array.from(caja.querySelectorAll("input:checked")).map((x) => Number(x.value));
+            guardar(id, estado);
+          });
+          const l = el("label", { class: "ej-opcion" }, cb, el("span", { class: "ej-texto" }));
+          while (li.firstChild) l.querySelector(".ej-texto").append(li.firstChild);
+          caja.append(l);
+        });
+        zona.append(caja);
+      }
+      if (tipo !== "programacion" || !comprobar) {
+        comprobar = () => {
+          if (tipo === "encuesta") {
+            const r = recoger();
+            estado.estado = "enviado";
+            mensaje(fb, "ok", "Guardado en este navegador. Puedes cambiarlo cuando quieras.");
+            marca(); return;
+          }
+          const hechos = (estado.rubrica || []).length;
+          const total = (lista ? lista.querySelectorAll("li").length : 0);
+          if (total && hechos < total) return mensaje(fb, "aviso", "Marca todos los puntos cuando los cumplas, o mira la solución modelo.");
+          estado.estado = "hecho"; mensaje(fb, "ok", "Hecho. Compara con la solución modelo si quieres."); marca();
+        };
+      }
+    }
+
+    if (tipo === "encuesta") {
+      const items = opciones ? Array.from(opciones.querySelectorAll("li")) : [];
+      if (items.length) {
+        const grupo = el("div", { role: "radiogroup", class: "ej-opciones" });
+        items.forEach((li, i) => {
+          const input = el("input", { type: "radio", name: id, value: String(i) });
+          input.checked = estado.respuesta === String(i);
+          const l = el("label", { class: "ej-opcion" }, input, el("span", { class: "ej-texto" }));
+          while (li.firstChild) l.querySelector(".ej-texto").append(li.firstChild);
+          grupo.append(l);
+        });
+        zona.prepend(grupo);
+        recoger = () => (zona.querySelector("input[type=radio]:checked") || {}).value || null;
+        const previo = comprobar;
+        comprobar = () => { const r = recoger(); estado.respuesta = r; previo(); };
+      }
+    }
+
+    /* restaurar estado visual */
+    if (estado.respuesta && (tipo === "vf" || tipo === "opcion")) {
+      String(estado.respuesta).split(",").forEach((v) => {
+        const i = zona.querySelector('input[value="' + v + '"]'); if (i) i.checked = true;
+      });
+    }
+
+    if (comprobar) botones.append(btn(tipo === "encuesta" ? "Guardar" : tipo === "abierta" || tipo === "investigacion" ? "He terminado" : "Comprobar", comprobar, "ej-btn-principal"));
+    if (btnPista) botones.append(btnPista);
+    if (btnSolucion) botones.append(btnSolucion);
+    botones.append(btn("Reiniciar", () => {
+      estado.estado = "pendiente"; estado.intentos = 0; delete estado.respuesta; delete estado.rubrica; delete estado.texto;
+      zona.querySelectorAll("input").forEach((i) => { if (i.type === "checkbox" || i.type === "radio") i.checked = false; else i.value = ""; });
+      zona.querySelectorAll("textarea").forEach((t) => (t.value = ""));
+      [pista, solucion, retro].forEach((n) => { if (n) { n.classList.add("ej-oculto"); n.hidden = true; } });
+      fb.className = "ej-feedback"; fb.textContent = ""; marca();
+    }, "ej-btn-sec"));
+
+    ej.append(zona, botones, fb);
+    [retro, pista, solucion].forEach((n) => { if (n) ej.append(n); });
+    marca();
+    return ej;
+  }
+
+  /* ---------- panel de progreso ---------- */
+  let panel = null;
+  function actualizarProgreso() {
+    if (!panel) return;
+    const lista = Array.from(document.querySelectorAll(".ejercicio.ej-activo"));
+    const evaluables = lista.filter((e) => e.dataset.tipo !== "encuesta");
+    const hechos = evaluables.filter((e) => ["correcto", "hecho"].includes(e.dataset.estado)).length;
+    const vistos = evaluables.filter((e) => e.dataset.estado === "visto").length;
+    panel.querySelector(".ej-resumen").textContent =
+      "Tu progreso en esta unidad: " + hechos + " de " + evaluables.length + " ejercicios resueltos" + (vistos ? " (" + vistos + " con la solución vista)" : "") + ".";
+    const barra = panel.querySelector("progress");
+    barra.max = Math.max(evaluables.length, 1); barra.value = hechos;
+  }
+
+  function crearPanel(n) {
+    panel = el("div", { class: "ej-progreso", role: "region", "aria-label": "Progreso de los ejercicios" },
+      el("p", { class: "ej-resumen" }),
+      el("progress", { max: "1", value: "0", "aria-hidden": "true" }),
+      el("p", { class: "ej-nota", text: "Tus respuestas y tu progreso se guardan solo en este navegador. No se envían a ningún sitio." }),
+      el("div", { class: "ej-botones" },
+        el("button", { type: "button", class: "ej-btn ej-btn-sec", text: "Descargar mis respuestas", onclick: () => {
+          const blob = new Blob([JSON.stringify({ pagina: location.pathname, fecha: new Date().toISOString(), respuestas: todos() }, null, 2)], { type: "application/json" });
+          const a = el("a", { href: URL.createObjectURL(blob), download: "resonancia-respuestas.json" }); a.click();
+        } }),
+        el("button", { type: "button", class: "ej-btn ej-btn-sec", text: "Borrar mis respuestas", onclick: () => {
+          if (confirm("¿Borrar todas tus respuestas y tu progreso en esta página?")) { borrarTodo(); location.reload(); }
+        } })));
+    const primero = document.querySelector(".ejercicio.ej-activo");
+    const hueco = document.querySelector("#quarto-document-content h2, main h2");
+    (hueco || primero).before(panel);
+  }
+
+  function iniciar() {
+    const lista = Array.from(document.querySelectorAll(".ejercicio"));
+    if (!lista.length) return;
+    lista.forEach((e, i) => construir(e, i + 1));
+    crearPanel(lista.length);
+    actualizarProgreso();
+  }
+
+  if (typeof document !== "undefined") {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
+    else iniciar();
+  }
+
+  if (typeof globalThis !== "undefined" && globalThis.__EJ_TEST__) {
+    globalThis.__EJ_EXPORTS__ = { parseNumero, parseTolerancia, comprobarNumerico, normalizaVF, mismasOpciones, letrasElegidas };
+  }
+})();
+
+</script>
+
+
+
+
+</body></html>
