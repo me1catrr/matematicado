@@ -1,0 +1,38 @@
+---
+title: "S1.1 La transformada de Laplace"
+subtitle: "S1 · Transformada de Laplace y función de transferencia"
+id: S1.1
+unidad: S1
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+::: {.callout-note .historia icon=false title="Un poco de historia: de las integrales de Euler al cálculo operacional"}
+Según el resumen histórico de la Wikipedia en inglés, Euler examinó integrales relacionadas con la transformada a partir de 1744; Laplace usó una transformada similar en probabilidad (escribió sobre funciones generatrices en 1814) y la aplicó a ecuaciones en diferencias desde 1785; Cauchy desarrolló un cálculo operacional hacia 1821, y Heaviside la popularizó hacia el cambio de siglo. Es una fuente enciclopédica, y no se ha contrastado con los originales: las fechas deben tomarse como orientativas.
+
+<span class="fuentes-caja">Fuente: [Wikipedia, «Laplace transform», sección «History»](https://en.wikipedia.org/wiki/Laplace_transform). Consultado el 25-10-2026.</span>
+:::
+
+::: {#def-laplace}
+**Transformada de Laplace.** Para una señal $x(t)$ con $x(t)=0$ si $t<0$, $X(s)=\mathcal L[x](s)=\displaystyle\int_{0}^{\infty}x(t)\,e^{-st}\,\mathrm dt$, con $s=\sigma+\mathrm j\omega$ complejo, para los $s$ en los que la integral converge (**región de convergencia**).
+:::
+
+La transformada «pesa» la señal con una exponencial $e^{-st}$: la parte real $\sigma$ amortigua las señales que crecen, y la imaginaria $\omega$ las proyecta sobre oscilaciones de frecuencia $\omega$. La transformada de Fourier (F1) es el caso $\sigma=0$ (cuando existe).
+
+| Señal $x(t)$, $t\ge0$ | $X(s)$ |
+|:--|:--|
+| $\delta(t)$ (impulso) | $1$ |
+| $1$ (escalón) | $1/s$ |
+| $e^{-at}$ | $1/(s+a)$ |
+| $\sin\omega t$ | $\omega/(s^2+\omega^2)$ |
+| $e^{-\sigma_0 t}\sin\omega_dt$ | $\omega_d/((s+\sigma_0)^2+\omega_d^2)$ |
+
+: Pares de transformadas de uso frecuente. {#tbl-pares}
+
+Propiedades (con condiciones iniciales nulas): **linealidad**; **derivación**, $\mathcal L[\dot x]=sX(s)-x(0)$ y $\mathcal L[\ddot x]=s^2X(s)-sx(0)-\dot x(0)$; **convolución**, $\mathcal L[x*h]=X(s)H(s)$; y **valor final**, si todos los polos de $sX(s)$ están en el semiplano izquierdo, $\lim_{t\to\infty}x(t)=\lim_{s\to0}sX(s)$.
+
+::: {.callout-note .demostracion collapse="true" title="Demostración de la derivación y de la convolución"}
+**Derivación.** Integrando por partes, $\int_0^\infty\dot x\,e^{-st}\mathrm dt=\big[x\,e^{-st}\big]_0^\infty+s\int_0^\infty x\,e^{-st}\mathrm dt=-x(0)+sX(s)$ (el término en $\infty$ se anula en la región de convergencia). Aplicando la fórmula dos veces se obtiene la de $\ddot x$.
+
+**Convolución.** $\mathcal L[x*h]=\int_0^\infty\!\!\int_0^t x(\tau)h(t-\tau)\,\mathrm d\tau\,e^{-st}\mathrm dt$. Cambiando el orden de integración y poniendo $u=t-\tau$, queda $\int_0^\infty x(\tau)e^{-s\tau}\mathrm d\tau\int_0^\infty h(u)e^{-su}\mathrm du=X(s)H(s)$. $\square$
+:::

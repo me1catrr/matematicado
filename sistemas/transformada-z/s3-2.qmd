@@ -1,0 +1,126 @@
+---
+title: "S3.2 Del plano $s$ al plano $z$"
+subtitle: "S3 · Transformada Z y sistemas discretos"
+id: S3.2
+unidad: S3
+bloque: "Sistemas dinámicos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, DelimitedFiles, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+zeta3 = diag(Phi3' * C3 * Phi3) ./ (2 .* 2π .* f3)
+```
+
+Si una señal continua $x(t)=e^{st}$ se muestrea cada $\Delta t$, se obtiene $x[k]=e^{sk\Delta t}=(e^{s\Delta t})^k$: la secuencia de potencias de $z=e^{s\Delta t}$. Por eso un polo continuo $s$ da un polo discreto
+
+$$
+z=e^{s\Delta t},\qquad s=\frac{\ln z}{\Delta t}.
+$$ {#eq-z}
+
+![Correspondencia entre el plano $s$ (banda $\lvert\omega\rvert<\pi/\Delta t$) y el plano $z$. El semiplano izquierdo (estable) se convierte en el interior del círculo unidad; las rectas de frecuencia constante, en radios; los rayos de amortiguamiento constante, en espirales logarítmicas.](fig/plano-z.svg){#fig-plano-z fig-alt="A la izquierda el plano s con una banda horizontal sombreada en el semiplano izquierdo, un rayo de amortiguamiento constante y una recta horizontal de frecuencia constante. A la derecha el plano z con el círculo unidad sombreado, una espiral de amortiguamiento constante y un radio de frecuencia constante. Una flecha etiquetada z igual a e elevado a s por delta t une los dos planos."}
+
+Tres consecuencias:
+
+1. **Estabilidad:** $\lvert z\rvert=e^{\sigma\Delta t}<1$ si y solo si $\sigma<0$.
+2. **Frecuencia y amortiguamiento.** Para $s=-\zeta\omega_n+\mathrm j\omega_n\sqrt{1-\zeta^2}$ se cumple $\lvert\ln z\rvert=\omega_n\Delta t$, y por tanto
+$$
+f=\frac{\lvert\ln z\rvert}{2\pi\Delta t},\qquad \zeta=-\frac{\ln\lvert z\rvert}{\lvert\ln z\rvert}.
+$$ {#eq-fz}
+3. **Aliasing y logaritmo multivaluado.** $e^{(s+\mathrm j2\pi m/\Delta t)\Delta t}=e^{s\Delta t}$ para todo entero $m$: **infinitos polos continuos dan el mismo polo discreto**. Solo se pueden distinguir frecuencias de $0$ a $f_{\mathrm s}/2$, con $f_{\mathrm s}=1/\Delta t$ (frecuencia de Nyquist), y una señal de frecuencia $f>f_{\mathrm s}/2$ aparece como si tuviera la frecuencia $\lvert f-m f_{\mathrm s}\rvert$ más próxima a cero. Es la razón de que se **filtre antes de muestrear** ([M3](https://me1catrr.github.io/resonancia/mse/m03-senales-i/index.html) y [M8](https://me1catrr.github.io/resonancia/mse/m08-adquisicion/index.html)).
+
+::: {.callout-warning}
+## La relación $z=e^{s\Delta t}$ es exacta; la de Euler no
+Si se aproxima $e^{s\Delta t}\approx1+s\Delta t$ (Euler explícito, [S2.3](../espacio-estados/s2-3.qmd)), un polo estable puede dar un $\lvert z\rvert>1$. La correspondencia de la @eq-z es la de la **discretización exacta**, y es la que debe usarse para convertir polos identificados en $f$ y $\zeta$.
+:::
+
+```{julia}
+#| label: ej-z
+s_ej = -0.5 + 10.0im                          # polo continuo (rad/s)
+dt_ej = 0.01
+z_ej = exp(s_ej * dt_ej)
+(z = z_ej, módulo = abs(z_ej), ángulo_rad = angle(z_ej), f_recuperada = abs(log(z_ej)) / (2π * dt_ej),
+ zeta_recuperada = -log(abs(z_ej)) / abs(log(z_ej)))
+```
+
+Para $s=-0{,}5+10\mathrm j$ rad/s y $\Delta t=0{,}01$ s se obtiene $z=$ `{julia} coma(abs(z_ej); d=5)` $\angle$ `{julia} coma(angle(z_ej); d=4)` rad. Y, a la inversa, la @eq-fz devuelve $f=$ `{julia} coma(abs(log(z_ej)) / (2π * dt_ej); d=4)` Hz y $\zeta=$ `{julia} coma(-log(abs(z_ej)) / abs(log(z_ej)); d=4)`, los valores de partida: $f=\lvert s\rvert/2\pi$ y $\zeta=-\sigma/\lvert s\rvert\approx0{,}0499$.
+
+
+## Laboratorio: muestreo y plano $z$ {#lab-z}
+
+**Simulación 1. Un polo en los planos $s$ y $z$.** Elige la frecuencia y el amortiguamiento de un oscilador y la frecuencia de muestreo. A la izquierda se ve el polo en el plano $z$ (con el círculo unidad, el radio de $f$ constante y la espiral de $\zeta$ constante); a la derecha, la señal continua y sus muestras. Si $f>f_{\mathrm s}/2$, la señal muestreada parece de otra frecuencia (*aliasing*), y el polo discreto que se obtiene es el de esa frecuencia aparente.
+
+```{ojs}
+//| echo: false
+viewof f_lab = Inputs.range([0.2, 30], {value: 4, step: 0.1, label: "f (Hz)"})
+viewof z_lab = Inputs.range([0.002, 0.3], {value: 0.03, step: 0.002, transform: Math.log, label: "ζ (adimensional)"})
+viewof fs_lab = Inputs.range([5, 100], {value: 20, step: 1, label: "frecuencia de muestreo fₛ (Hz)"})
+```
+
+```{ojs}
+//| echo: false
+polo = {
+  const dt = 1 / fs_lab, w = 2 * Math.PI * f_lab;
+  const sre = -z_lab * w, sim = w * Math.sqrt(1 - z_lab ** 2);
+  const mod = Math.exp(sre * dt), ang = sim * dt;                   // z = e^{s Δt}
+  const angPlegado = ((ang + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+  const fAparente = Math.abs(angPlegado) / (2 * Math.PI * dt);
+  return {dt, w, mod, ang, angPlegado, fAparente, aliasing: f_lab > fs_lab / 2};
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const th = d3.range(0, 2 * Math.PI + 0.02, 0.02);
+  const esp = d3.range(0, Math.PI + 0.01, 0.01).map(t => [Math.exp(-z_lab / Math.sqrt(1 - z_lab ** 2) * t) * Math.cos(t), Math.exp(-z_lab / Math.sqrt(1 - z_lab ** 2) * t) * Math.sin(t)]);
+  const zr = polo.mod * Math.cos(polo.angPlegado), zi = polo.mod * Math.sin(polo.angPlegado);
+  const planoZ = Plot.plot({
+    width: 360, height: 360, aspectRatio: 1, grid: true, marginLeft: 40,
+    x: {domain: [-1.15, 1.15], label: "Re z"}, y: {domain: [-1.15, 1.15], label: "Im z"},
+    marks: [
+      Plot.line(th.map(t => [Math.cos(t), Math.sin(t)]), {stroke: "#6B7280"}),
+      Plot.line(esp, {stroke: "#D95F02", strokeDasharray: "4,3"}),
+      Plot.line(esp.map(([a, b]) => [a, -b]), {stroke: "#D95F02", strokeDasharray: "4,3"}),
+      Plot.line([[0, 0], [Math.cos(polo.angPlegado), Math.sin(polo.angPlegado)]], {stroke: "#1B6CA8", strokeDasharray: "4,3"}),
+      Plot.dot([[zr, zi], [zr, -zi]], {fill: "#1B6CA8", r: 6})
+    ]
+  });
+  // señal continua y muestras
+  const T = 4 / Math.max(0.5, Math.min(f_lab, 3)) ;
+  const t = d3.range(0, T, T / 600);
+  const x = (tt) => Math.exp(-z_lab * polo.w * tt) * Math.cos(polo.w * Math.sqrt(1 - z_lab ** 2) * tt);
+  const ks = d3.range(0, Math.floor(T / polo.dt) + 1).map(k => ({t: k * polo.dt, x: x(k * polo.dt)}));
+  const serie = Plot.plot({
+    width: 520, height: 280, marginLeft: 45, x: {label: "t (s)"}, y: {label: "x(t)", domain: [-1.1, 1.1]},
+    marks: [Plot.ruleY([0]), Plot.line(t.map(tt => ({t: tt, x: x(tt)})), {x: "t", y: "x", stroke: "#9CA3AF"}),
+      Plot.ruleX(ks, {x: "t", y1: 0, y2: "x", stroke: "#D95F02"}), Plot.dot(ks, {x: "t", y: "x", fill: "#D95F02", r: 3})]
+  });
+  return html`<div style="display:flex; gap:16px; flex-wrap:wrap">${planoZ}${serie}</div>`;
+}
+```
+
+```{ojs}
+//| echo: false
+md`**Polo discreto** z = ${polo.mod.toFixed(5).replace(".", ",")} ∠ ${polo.angPlegado.toFixed(4).replace(".", ",")} rad. Frecuencia de Nyquist: **${(fs_lab / 2).toFixed(1).replace(".", ",")} Hz**. ${polo.aliasing ? "⚠️ **Aliasing**: la frecuencia real (" + f_lab.toFixed(1).replace(".", ",") + " Hz) supera la de Nyquist y las muestras se comportan como las de **" + polo.fAparente.toFixed(2).replace(".", ",") + " Hz**." : "Sin aliasing: la frecuencia recuperada con ln z es **" + polo.fAparente.toFixed(2).replace(".", ",") + " Hz**."}`
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Señal:** una única respuesta libre amortiguada $e^{-\zeta\omega t}\cos\omega_{\mathrm d}t$, sin ruido y sin filtro antialiasing. En un sistema real, el filtro antes del muestreo evita el aliasing; aquí se muestra cómo ocurre cuando no existe.
+- **Plano $z$:** se dibuja el polo con el argumento plegado a $(-\pi,\pi]$, es decir, el que se obtendría de las muestras. El rayo de frecuencia constante y la espiral de $\zeta$ constante son los de la figura de la teoría.
+- **El amortiguamiento no cambia por el aliasing:** el módulo $\lvert z\rvert=e^{-\zeta\omega\Delta t}$ se conserva, pero al leer $\zeta$ con la @eq-fz y la frecuencia aparente, sale un valor distinto (más alto), porque se divide por una $\lvert\ln z\rvert$ menor.
+- **Qué no se puede concluir:** que un registro muestreado a una frecuencia baja es «fiel»; a partir de las muestras no se puede saber si hubo aliasing, y solo el diseño previo (filtro y $f_{\mathrm s}$) lo evita.
+
+**Para explorar.** (1) Con $f=4$ Hz y $f_{\mathrm s}=20$ Hz, mueve $\zeta$ y observa cómo el polo recorre la espiral. (2) Sube $f$ por encima de 10 Hz y observa el polo aparente. (3) Con $f_{\mathrm s}=20$ Hz, ¿qué frecuencias distintas dan exactamente el mismo polo discreto que 3 Hz?

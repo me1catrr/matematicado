@@ -1,0 +1,12 @@
+---
+title: "S1.3 Polos, estabilidad y valores propios"
+subtitle: "S1 · Transformada de Laplace y función de transferencia"
+id: S1.3
+unidad: S1
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+Con la forma de estado $\dot{\mathbf x}=\mathbf A\mathbf x+\mathbf B\mathbf u$ ([espacio de estados](../../sistemas/espacio-estados/index.qmd)), los polos de $\mathbf H(s)$ son valores propios de $\mathbf A$. Un sistema lineal e invariante es **asintóticamente estable** si todos los polos están en el semiplano izquierdo abierto, $\operatorname{Re}(s_k)<0$: las respuestas libres decaen. Un polo en el eje imaginario (sin amortiguamiento) da oscilaciones que no decaen, y un polo con parte real positiva, una respuesta que crece. Una estructura real tiene siempre amortiguamiento positivo, así que si un procedimiento de identificación devuelve polos en el semiplano derecho, lo que se ha identificado no es una estructura estable: es un **polo espurio** o un error.
+
+Que *todos* los valores propios de $\mathbf A$ sean polos de un $H_{ij}(s)$ concreto no está garantizado: si la entrada no excita un modo o la salida no lo observa, ese polo se cancela con un cero. Es el problema de **controlabilidad y observabilidad**, que se desarrolla en la página de [espacio de estados](../../sistemas/espacio-estados/index.qmd).

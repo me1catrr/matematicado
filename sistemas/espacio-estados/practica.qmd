@@ -1,0 +1,129 @@
+---
+title: "Práctica y cierre"
+subtitle: "S2 · Espacio de estados"
+id: S2-cierre
+unidad: S2
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Obtén $(\mathbf A,\mathbf B)$ del edificio con `espacio_estados` y comprueba que los valores propios de $\mathbf A$ dan las frecuencias y los amortiguamientos de `polos_modales`.
+2. Construye la salida de aceleración de la cubierta ($\mathbf C_{\mathrm s}$ y $\mathbf D$ de la [ecuación 2 de S2.1](s2-1.qmd#eq-acelerometro)) y compara $\mathbf C(\mathrm j\omega\mathbf I-\mathbf A)^{-1}\mathbf B+\mathbf D$ con $-\omega^2H_{33}$.
+3. Discretiza con `discretizar_zoh` a 100 Hz y comprueba que los polos discretos son $e^{s\Delta t}$.
+4. Calcula el radio espectral con Euler y con la discretización exacta.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, LinearAlgebra
+M, C, K = edificio_tres_plantas()
+A, B = espacio_estados(M, C, K, [0.0, 0.0, 1.0])
+f, zeta = polos_modales(A)
+Ad, Bd = discretizar_zoh(A, B, 0.01)
+z = eigvals(Ad)
+maximum(abs.(z)), maximum(abs.(eigvals(I + 0.01 * A)))      # exacta frente a Euler
+```
+
+## Python
+
+```python
+import numpy as np
+from scipy import linalg
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+M, C, K = mx.edificio_tres_plantas("A", amortiguado=True)
+A, B = mx.espacio_estados(M, C, K, [[0.0], [0.0], [1.0]])
+f, zeta = mx.polos_modales(A)
+Ad, Bd = mx.discretizar_zoh(A, B, 0.01)
+np.abs(np.linalg.eigvals(Ad)).max(), np.abs(np.linalg.eigvals(np.eye(6) + 0.01 * A)).max()
+```
+:::
+
+El código Python **no se ejecuta en la web**: `espacio_estados`, `polos_modales` y `discretizar_zoh` están probadas con `pytest` frente a Julia en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y el paquete `Resonancia`: toma el edificio de tres plantas (`edificio_tres_plantas`), escríbelo en espacio de estados con `espacio_estados`, discretízalo a 100 Hz con `discretizar_zoh`, simula 60 s de respuesta a ruido blanco en las tres plantas con semilla fija, y compara la PSD de la aceleración de la cubierta con las frecuencias de `modos_propios`. Después compara con Euler explícito y dime qué pasa.»
+
+**Verifica.** (a) Que usa `discretizar_zoh`, no un Euler escrito a mano. (b) Que el radio espectral de la discretización exacta es menor que 1 y el de Euler, mayor que 1. (c) Que las frecuencias de los picos de la PSD coinciden con `modos_propios` dentro de la resolución espectral. (d) Que la semilla es fija y se informa. (e) Que no concluye «Euler es válido» si no ha mirado el radio espectral.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-6-euler" respuesta="falso"}
+El método de Euler explícito conserva la estabilidad de un oscilador amortiguado si el paso de tiempo es suficientemente pequeño.
+
+::: {.solucion}
+**Falso** para sistemas poco amortiguados: $\lvert z\rvert=\lvert1+s\Delta t\rvert>1$ siempre para un oscilador con amortiguamiento ligero (el crecimiento es lento si $\Delta t$ es pequeño, pero existe). Solo es estable con amortiguamiento grande y paso pequeño; para estructuras, no es una buena opción.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-6-rango-central" respuesta="4"}
+Una cadena de tres masas iguales unidas entre dos paredes por cuatro muelles iguales se mide con un único sensor de desplazamiento en la masa central. ¿Cuál es el rango de la matriz de observabilidad del sistema de seis estados?
+
+::: {.solucion}
+**4**. El modo antisimétrico tiene un nodo en la masa central, y su par de polos ($2$ estados) no es observable.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-6-radio" respuesta="0.99005" tol="0.1%"}
+Un oscilador de $\omega_n=2$ rad/s y $\zeta=0{,}1$ se discretiza con ZOH y $\Delta t=0{,}05$ s. ¿Cuánto vale el módulo de sus polos discretos?
+
+::: {.solucion}
+$\lvert z\rvert=e^{-\zeta\omega_n\Delta t}=e^{-0{,}2\cdot0{,}05}=e^{-0{,}01}=0{,}99005$.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-6-salida-acel" respuesta="b"}
+Para un acelerómetro, la ecuación de salida $\mathbf y=\mathbf C\mathbf x+\mathbf D\mathbf u$ tiene:
+
+::: {.opciones}
+- $\mathbf D=\mathbf 0$ siempre, como con sensores de desplazamiento.
+- $\mathbf C=\mathbf L[-\mathbf M^{-1}\mathbf K\;\;-\mathbf M^{-1}\mathbf C_{\mathrm a}]$ y $\mathbf D=\mathbf L\mathbf M^{-1}\mathbf B_2$.
+- $\mathbf C=[\mathbf 0\;\mathbf I]$.
+- $\mathbf C=[\mathbf I\;\mathbf 0]$ y $\mathbf D=\mathbf M$.
+:::
+
+::: {.solucion}
+La **b**: la aceleración es $\ddot{\mathbf q}=-\mathbf M^{-1}\mathbf K\mathbf q-\mathbf M^{-1}\mathbf C_{\mathrm a}\dot{\mathbf q}+\mathbf M^{-1}\mathbf B_2\mathbf u$ ([ecuación 2 de S2.1](s2-1.qmd#eq-acelerometro)), que depende de la fuerza instantánea: transmisión directa.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-6-sensores"}
+Debes instrumentar una pasarela simétrica de tres vanos con tres acelerómetros. ¿Dónde **no** pondrías los sensores y por qué? ¿Qué ocurriría con los modos antisimétricos?
+
+::: {.rubrica}
+- Digo que un sensor en un punto de simetría no ve los modos antisimétricos, que tienen un nodo allí.
+- Relaciono con la observabilidad: ese modo no aparece en la salida y sus polos no se pueden identificar con esos sensores.
+- Propongo repartir los sensores o desplazarlos de los ejes de simetría, y comprobar la visibilidad modal con un modelo previo.
+:::
+
+::: {.solucion}
+En el punto central, los modos antisimétricos tienen un nodo y un sensor allí no los ve (residuo nulo): sus polos no aparecen en los datos. Conviene colocar los sensores fuera de los ejes de simetría y comprobar con un modelo la visibilidad de cada modo de interés.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Paso un sistema de segundo orden a espacio de estados y construyo las salidas para desplazamiento, velocidad y aceleración.
+- [ ] Obtengo la función de transferencia del cuarteto $(\mathbf A,\mathbf B,\mathbf C,\mathbf D)$ y sé que la realización no es única.
+- [ ] Construyo $\mathcal O$ y $\mathcal C$, interpreto el rango y explico por qué un sensor en un nodo no ve ese modo.
+- [ ] Sé que el rango numérico de $\mathcal O$ es frágil y recurro al criterio modal.
+- [ ] Discretizo con ZOH (exponencial de la matriz ampliada) y sé por qué Euler explícito inestabiliza una estructura.
+- [ ] Simulo la respuesta de un edificio con la recursión discreta.
+
+## Qué no dice esta unidad
+
+- No se estudian las matrices de Gram de controlabilidad y observabilidad ni la reducción balanceada.
+- Con amortiguamiento no proporcional los modos de $\mathbf A$ son complejos; aquí solo se usa el caso proporcional para la interpretación modal.
+- No se trata el estado estocástico (ruido de proceso y de medida) ni el filtro de Kalman; son la base de la identificación con SSI, que se desarrolla en [M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html).
+- La simulación es lineal: no incluye no linealidades ni variación de la rigidez con la amplitud.

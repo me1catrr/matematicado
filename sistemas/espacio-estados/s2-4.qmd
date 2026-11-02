@@ -1,0 +1,52 @@
+---
+title: "S2.4 Simulación de la respuesta"
+subtitle: "S2 · Espacio de estados"
+id: S2.4
+unidad: S2
+bloque: "Sistemas dinámicos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+A3, B3 = espacio_estados(M3, C3, K3, [0.0, 0.0, 1.0])
+```
+
+Con $\mathbf A_{\mathrm d}$ y $\mathbf B_{\mathrm d}$ la simulación es una recursión. Para una excitación ambiental de fuerzas independientes, de ruido blanco, el edificio produce un registro cuya densidad espectral muestra las tres frecuencias naturales. Es **exactamente** el procedimiento con que se han generado los datos de `datos/edificio-3-plantas/` (véase `scripts/generar_edificio.jl`).
+
+```{julia}
+#| label: fig-respuesta
+#| fig-cap: "Respuesta libre del edificio de tres plantas a un impulso en la cubierta, calculada con la discretización exacta a 100 Hz. Arriba, aceleración de la cubierta; abajo, su densidad espectral de potencia: los tres picos están en las frecuencias naturales."
+#| fig-alt: "Dos gráficas. La de arriba muestra una señal oscilatoria que decae lentamente durante 40 segundos. La de abajo muestra su espectro con tres picos, en 1,1, 2,9 y 4,4 hercios."
+dt = 0.01
+Ad, Bd = discretizar_zoh(A3, B3, dt)
+N = 4096
+x = zeros(6)
+a = zeros(N)
+Minv = inv(M3)
+for k in 1:N
+    u = k == 1 ? 1.0e4 / dt : 0.0                      # impulso de 10⁴ N·s aplicado en el primer paso
+    acc = Minv * ([0.0, 0.0, u] - C3 * x[4:6] - K3 * x[1:3])
+    a[k] = acc[3]
+    x = Ad * x + Bd * [u]
+end
+fr, P = psd_welch(a, 1 / dt; nseg=2048)
+fig = Figure(size=(780, 480))
+ax1 = Axis(fig[1, 1]; xlabel="t (s)", ylabel="a₃ (m/s²)", limits=(0, 40, nothing, nothing))
+lines!(ax1, (0:N-1) .* dt, a; color=AZUL, linewidth=1.2)
+ax2 = Axis(fig[2, 1]; xlabel="f (Hz)", ylabel="PSD (m/s²)²/Hz", yscale=log10, limits=(0, 6, 1e-14, nothing))
+lines!(ax2, fr, P; color=NARANJA, linewidth=1.6)
+vlines!(ax2, f3; color=GRIS, linestyle=:dash)
+fig
+```

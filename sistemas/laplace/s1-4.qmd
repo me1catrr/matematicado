@@ -1,0 +1,140 @@
+---
+title: "S1.4 Ceros y antirresonancias"
+subtitle: "S1 · Transformada de Laplace y función de transferencia"
+id: S1.4
+unidad: S1
+bloque: "Sistemas dinámicos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+zeta3 = diag(Phi3' * C3 * Phi3) ./ (2 .* 2π .* f3)       # amortiguamiento modal exacto
+Hrec(ω) = inv(K3 - ω^2 * M3 + im * ω * C3)               # receptancia: desplazamientos / fuerzas
+```
+
+Los ceros de $H_{ij}(s)$ son las frecuencias a las que, con entrada en $j$, la salida en $i$ se anula. Hay un hecho clásico, comprobable con el edificio: **la receptancia en un punto** ($i=j$, sensor y excitación en el mismo grado de libertad) tiene un cero entre cada dos polos consecutivos, y esos ceros (sin amortiguamiento) son las frecuencias naturales de la estructura *con ese grado de libertad bloqueado*. Los ceros de $H_{ij}$ con $i\ne j$ son otros y dependen del par. En una cadena tridiagonal como el edificio de cortante, el elemento $(i,j)$ de la inversa se calcula con los menores principales de los extremos; cuando sensor y fuerza están en **los dos extremos** (plantas 1 y 3), el numerador es una constante y $H_{13}$ **no tiene ceros finitos**: solo tiene valles poco profundos entre resonancias, como cualquier función con picos próximos.
+
+```{julia}
+#| label: ej-ceros
+f_anti = modos_propios(K3[1:2, 1:2], M3[1:2, 1:2])[1]          # planta 3 bloqueada
+fs = range(0.5, 5.5; length=200_001)
+mag33 = [abs(Hrec(2π * x)[3, 3]) for x in fs]
+i_min = [k for k in 2:length(fs)-1 if mag33[k] < mag33[k-1] && mag33[k] < mag33[k+1]]
+(frecuencias_con_planta_3_bloqueada = f_anti, minimos_de_la_FRF_H33 = fs[i_min])
+```
+
+Con la planta 3 bloqueada, el edificio tiene frecuencias de `{julia} join(coma.(f_anti; d=3), " y ")` Hz; la FRF puntual en la cubierta tiene mínimos en `{julia} join(coma.(fs[i_min]; d=3), " y ")` Hz. La primera coincide dentro del $0{,}1\,\%$; la segunda se aparta un $0{,}5\,\%$ porque el amortiguamiento y la cercanía del tercer polo desplazan el mínimo de módulo (con amortiguamiento, el cero exacto sale del eje imaginario).
+
+```{julia}
+#| label: tbl-valles
+#| tbl-cap: "Valles de la receptancia $H_{ij}$ entre 0,5 y 5,5 Hz: frecuencia y profundidad respecto del menor de los dos picos vecinos (dB). Un valle muy profundo indica un cero cerca del eje imaginario."
+modulo(i, j) = [abs(Hrec(2π * x)[i, j]) for x in fs]
+function valles(i, j)
+    v = modulo(i, j)
+    m = [k for k in 2:length(v)-1 if v[k] < v[k-1] && v[k] < v[k+1]]
+    p = [k for k in 2:length(v)-1 if v[k] > v[k-1] && v[k] > v[k+1]]
+    [(fs[k], 20log10(v[k] / min(maximum(v[q] for q in p if fs[q] < fs[k]), maximum(v[q] for q in p if fs[q] > fs[k])))) for k in m]
+end
+sub = Dict(1 => "₁", 2 => "₂", 3 => "₃")
+filas = String[]
+for (i, j) in [(1, 1), (2, 2), (3, 3), (1, 2), (2, 3), (1, 3)]
+    vs = valles(i, j)
+    push!(filas, "| H" * sub[i] * sub[j] * " | " * join(["$(coma(f; d=2)) Hz: $(coma(d; d=1)) dB" for (f, d) in vs], " · ") * " |")
+end
+Markdown.parse("| Elemento | Valles (frecuencia y profundidad) |\n|:--|:--|\n" * join(filas, "\n"))
+```
+
+Los valles de las FRF puntuales ($H_{11}$, $H_{22}$) son entre 39 y 56 dB más bajos que los picos vecinos; los de la no puntual de los extremos ($H_{13}$), solo 12–23 dB. $H_{12}$ tiene un cero cerca del eje a 2,25 Hz (la frecuencia $\sqrt{k_3/m}/2\pi$) y un valle profundo allí. La segunda antirresonancia de $H_{33}$ es poco profunda (13 dB) porque su cero queda muy cerca del tercer polo (4,29 Hz frente a 4,39 Hz). La profundidad **no** es una propiedad de la estructura: depende del par entrada–salida.
+
+```{julia}
+#| label: fig-polos-ceros
+#| fig-cap: "Plano $s$ de la receptancia puntual en la cubierta, $H_{33}$. Los polos (cruces) están en el semiplano izquierdo, muy cerca del eje imaginario porque $\\zeta\\approx1\\,\\%$; los ceros (círculos), sin amortiguamiento, estarían exactamente sobre el eje imaginario, en las frecuencias del edificio con la planta 3 bloqueada. Se alternan: un cero entre cada dos polos. La escala horizontal es mucho más fina que la vertical para que se vea la parte real."
+#| fig-alt: "Plano complejo con tres pares de polos conjugados en el semiplano izquierdo, cerca del eje imaginario, y dos pares de ceros sobre el eje imaginario situados entre los polos, de modo que se alternan polos y ceros al subir por el eje."
+A3, _ = espacio_estados(M3, C3, K3, [0.0, 0.0, 1.0])
+s_polos = filter(p -> imag(p) > 0, eigvals(A3))
+ωz = 2π .* f_anti
+fig = Figure(size=(560, 420))
+ax = Axis(fig[1, 1]; xlabel="parte real, σ (rad/s)", ylabel="parte imaginaria, ω (rad/s)", limits=(-1.0, 0.4, -32, 32))
+vlines!(ax, [0.0]; color=GRIS)
+scatter!(ax, vcat(real.(s_polos), real.(s_polos)), vcat(imag.(s_polos), -imag.(s_polos)); marker=:xcross, color=NARANJA, markersize=16, label="polos")
+scatter!(ax, zeros(4), vcat(ωz, -ωz); marker=:circle, color=:white, markersize=11, strokewidth=2, strokecolor=AZUL, label="ceros (sin amortiguamiento)")
+axislegend(ax; position=:rb)
+fig
+```
+
+::: {.callout-warning}
+## Polos y ceros no se leen igual en una medida
+
+Los polos que se identifican de un registro de aceleraciones son **los mismos** con cualquier sensor. Los ceros no: cambian con la posición del sensor y de la excitación, y por eso las antirresonancias **no** son propiedades de la estructura sino del experimento. Un sensor colocado en un nodo de un modo (residuo nulo) no ve ese polo; y un par polo–cero muy próximo (que casi se cancelan) lleva un residuo pequeño y es difícil de identificar.
+:::
+
+
+## Laboratorio: ceros y antirresonancias en un edificio {#lab-frf}
+
+```{ojs}
+//| echo: false
+import {edificioCortante, modosPropios} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 1. FRF de un edificio de tres plantas.** Elige la planta donde se excita y la planta donde se mide, y el amortiguamiento modal (el mismo para los tres modos). Se dibuja el módulo de la receptancia $H_{ij}(\mathrm j\omega)$ en decibelios (con $1$ m/N de referencia) y su fase, con la frecuencia natural de cada modo marcada (línea vertical gris).
+
+```{ojs}
+//| echo: false
+viewof entrada = Inputs.radio([1, 2, 3], {value: 3, label: "planta de excitación j"})
+viewof salida = Inputs.radio([1, 2, 3], {value: 3, label: "planta del sensor i"})
+viewof zeta_lab = Inputs.range([0.002, 0.05], {value: 0.01, step: 0.002, transform: Math.log, label: "ζ (adimensional)"})
+```
+
+```{ojs}
+//| echo: false
+frf = {
+  const e = edificioCortante([2e5, 2e5, 2e5], [5e7, 5e7, 4e7]);
+  const m = modosPropios(e.K, e.M);
+  const i = salida - 1, j = entrada - 1;
+  const puntos = [];
+  for (let f = 0.5; f <= 5.5001; f += 0.005) {
+    const w = 2 * Math.PI * f;
+    let re = 0, im = 0;
+    for (let k = 0; k < 3; k++) {
+      const wk = 2 * Math.PI * m.f[k], r = m.Phi[i][k] * m.Phi[j][k];
+      const a = wk * wk - w * w, b = 2 * zeta_lab * wk * w, d = a * a + b * b;
+      re += r * a / d; im += -r * b / d;
+    }
+    puntos.push({f, db: 20 * Math.log10(Math.hypot(re, im)), fase: Math.atan2(im, re) * 180 / Math.PI});
+  }
+  return {puntos, fn: m.f};
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const marcas = frf.fn.map(f => Plot.ruleX([f], {stroke: "#9CA3AF", strokeDasharray: "4,4"}));
+  const a = Plot.plot({width: 700, height: 240, marginLeft: 55, x: {label: "f (Hz)"}, y: {label: "|H| (dB re 1 m/N)", grid: true},
+    marks: [...marcas, Plot.line(frf.puntos, {x: "f", y: "db", stroke: "#1B6CA8", strokeWidth: 2})]});
+  const b = Plot.plot({width: 700, height: 200, marginLeft: 55, x: {label: "f (Hz)"}, y: {label: "fase (°)", domain: [-185, 185], ticks: [-180, -90, 0, 90, 180], grid: true},
+    marks: [...marcas, Plot.line(frf.puntos, {x: "f", y: "fase", stroke: "#D95F02", strokeWidth: 2})]});
+  return html`${a}${b}`;
+}
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Modelo:** edificio de cortante de tres plantas con amortiguamiento modal uniforme $\zeta$ (la página usa $\zeta\approx1\,\%$ con Rayleigh, algo distinta en el tercer modo); sin dinámica de sensores ni de la cimentación.
+- **Qué se ve:** con $i=j$ aparecen **antirresonancias**: valles profundos entre resonancias, con un salto de fase de $+180^\circ$. Con $i\ne j$ depende del par: $H_{12}$ tiene un cero a 2,25 Hz, y $H_{13}$ no tiene ceros y solo muestra valles poco profundos y una fase que baja (véase la @tbl-valles).
+- **Lo que no muestra:** la FRF de **aceleración** (la que miden los acelerómetros) es $-\omega^2H(\mathrm j\omega)$; cambia la pendiente pero no las posiciones de los polos.
+- **Qué no se puede concluir:** que los valles a las frecuencias de las antirresonancias identifiquen propiedades de la estructura: dependen del sensor y de la excitación.
+
+**Para explorar.** (1) Con $i=j=3$ cuenta las antirresonancias y compáralas con las frecuencias de la estructura con la planta 3 bloqueada (cálculo de este apartado). (2) Con $i=1$, $j=3$ observa que los valles son mucho menos profundos y la fase no sube. (3) Sube $\zeta$ al 5 %: ¿qué pasa con la profundidad de las antirresonancias?

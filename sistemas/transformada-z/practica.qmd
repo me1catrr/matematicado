@@ -1,0 +1,126 @@
+---
+title: "Práctica y cierre"
+subtitle: "S3 · Transformada Z y sistemas discretos"
+id: S3-cierre
+unidad: S3
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Lee `escenario_A.csv` y toma la aceleración de la cubierta (columna 4).
+2. Reduce el muestreo de 100 a 12,5 Hz promediando bloques de 8 muestras.
+3. Ajusta un AR(8) con `autocorrelacion`, `yule_walker` y `polos_ar`. Compara las frecuencias con las del modelo.
+4. Repite con el escenario C (daño en el entrepiso 2) y mira cómo cambian las frecuencias estimadas.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, DelimitedFiles, Statistics
+D = readdlm("escenario_A.csv", ';', skipstart=1)
+x = D[:, 4] .- mean(D[:, 4])
+xd = [mean(@view x[i:i+7]) for i in 1:8:length(x)-7]
+phi, sigma2 = yule_walker(autocorrelacion(xd, 8), 8)
+f, zeta = polos_ar(phi, 0.08)
+```
+
+## Python
+
+```python
+import numpy as np
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+D = np.loadtxt("escenario_A.csv", delimiter=";", skiprows=1)
+x = D[:, 3] - D[:, 3].mean()
+xd = x[: len(x) // 8 * 8].reshape(-1, 8).mean(axis=1)
+r = mx.autocorrelacion(xd, 8)
+phi, sigma2 = mx.yule_walker(r, 8)
+f, zeta = mx.polos_ar(phi, 0.08)
+```
+:::
+
+El código Python **no se ejecuta en la web**: `polos_ar` está probada con `pytest` frente a Julia en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y el paquete `Resonancia`: toma `escenario_A.csv` y `escenario_C.csv` (aceleraciones de un edificio de tres plantas a 100 Hz), decima por 8 con un promedio de bloques, ajusta un AR(8) con Yule–Walker y calcula frecuencias y amortiguamientos de los polos con `polos_ar`. Dime si los cambios de frecuencia entre A y C se pueden distinguir de la dispersión del método, haciendo el ajuste en varios tramos de 60 s de cada registro.»
+
+**Verifica.** (a) Que decima (o dice por qué no) antes de ajustar el modelo. (b) Que usa `polos_ar` y compara con las frecuencias reales del edificio, que están en la ficha de datos. (c) Que no confunde polos espurios con modos y que filtra por amortiguamiento razonable. (d) Que da la **dispersión** de la frecuencia entre tramos antes de hablar de cambio. (e) Que no atribuye el cambio de amortiguamiento a daño: el amortiguamiento sale con mucha más incertidumbre.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-7-estable-z" respuesta="verdadero"}
+Un sistema discreto lineal es estable si y solo si todos sus polos están dentro del círculo unidad.
+
+::: {.solucion}
+**Verdadero**: $\lvert z_k\rvert<1$ equivale a $\operatorname{Re}(s_k)<0$ por la correspondencia $z=e^{s\Delta t}$ ([ecuación 1 de S3.2](s3-2.qmd#eq-z)).
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-7-modulo" respuesta="0.99501" tol="0.1%"}
+Un polo continuo $s=-0{,}5+10\,\mathrm j$ rad/s se muestrea con $\Delta t=0{,}01$ s. ¿Cuánto vale el módulo del polo discreto?
+
+::: {.solucion}
+$\lvert z\rvert=e^{\sigma\Delta t}=e^{-0{,}5\cdot0{,}01}=e^{-0{,}005}=0{,}99501$ (y el ángulo es $\omega\Delta t=0{,}1$ rad).
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-7-zeta" respuesta="0.3314" tol="1%"}
+Un modelo ajustado a datos muestreados cada $\Delta t=0{,}1$ s tiene un polo en $z=0{,}9\,e^{\mathrm j\,0{,}3}$. ¿Cuánto vale el amortiguamiento relativo $\zeta$?
+
+::: {.pista}
+Usa la [ecuación 2 de S3.2](s3-2.qmd#eq-fz): $\zeta=-\ln\lvert z\rvert/\lvert\ln z\rvert$ con $\ln z=\ln0{,}9+0{,}3\,\mathrm j$.
+:::
+
+::: {.solucion}
+$\ln z=-0{,}10536+0{,}3\,\mathrm j$, $\lvert\ln z\rvert=0{,}31796$, así que $\zeta=0{,}10536/0{,}31796=0{,}3314$ y $f=0{,}31796/(2\pi\cdot0{,}1)=0{,}506$ Hz.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-7-alias" respuesta="3" tol="1%" unidad="Hz"}
+Una vibración de 7 Hz se muestrea a 10 Hz sin filtro antialiasing. ¿A qué frecuencia aparente se ve?
+
+::: {.solucion}
+$\lvert7-10\rvert=3$ Hz: la frecuencia de Nyquist es 5 Hz y 7 Hz se pliega hacia abajo.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-7-ar-falla"}
+Ajustas un AR(6) a una aceleración de un puente muestreada a 200 Hz, cuyos modos de interés están entre 1 y 6 Hz, y los resultados no tienen sentido. Propón dos cambios que probarías y explica por qué.
+
+::: {.rubrica}
+- Propongo reducir la frecuencia de muestreo (decimación con filtro antialiasing) para concentrar el orden del modelo en la banda de interés.
+- Propongo aumentar el orden y distinguir polos físicos de espurios (amortiguamiento, estabilidad al cambiar el orden).
+- Menciono el mal condicionamiento de la matriz de Toeplitz con polos próximos a $z=1$ o la conveniencia de métodos mejores (ERA, SSI, FDD).
+:::
+
+::: {.solucion}
+Decimar (con un filtro paso bajo que evite el aliasing) a unos 20–25 Hz, de modo que los polos se separen de $z=1$ y la matriz de Toeplitz esté mejor condicionada, y subir el orden mirando qué polos se mantienen al cambiarlo. Y valorar métodos de identificación más robustos ([M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html)).
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Escribo la función de transferencia discreta de una ecuación en diferencias y reconozco sus polos.
+- [ ] Paso de polos continuos a discretos con $z=e^{s\Delta t}$ y al revés con $\ln z/\Delta t$.
+- [ ] Obtengo $f$ y $\zeta$ de un polo discreto.
+- [ ] Explico el aliasing y por qué el logaritmo complejo es multivaluado.
+- [ ] Ajusto un AR con Yule–Walker, calculo sus polos e interpreto cuáles son modos y cuáles espurios.
+- [ ] Sé que el amortiguamiento estimado es mucho menos fiable que la frecuencia.
+
+## Qué no dice esta unidad
+
+- El método AR de Yule–Walker se usa aquí como **ejemplo didáctico**, no como método de identificación recomendado; ERA, SSI y FDD ([M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html)) están pensados para esto.
+- Se usa un promedio de bloques como filtro de decimación; un diseño correcto del filtro antialiasing (FIR/IIR) es tema de [M3](https://me1catrr.github.io/resonancia/mse/m03-senales-i/index.html) y [M8](https://me1catrr.github.io/resonancia/mse/m08-adquisicion/index.html).
+- La tabla de resultados es de un registro y una semilla; no se ha hecho un estudio de dispersión entre registros (se propone en «Pídeselo a Claude»).
+- No se desarrolla la región de convergencia de la transformada Z ni las propiedades de la transformada inversa; se usan fracciones simples en la práctica.
+- Las atribuciones históricas proceden de una fuente enciclopédica y deben contrastarse antes de citarlas en un trabajo formal.

@@ -1,0 +1,147 @@
+---
+title: "Práctica y cierre"
+subtitle: "S1 · Transformada de Laplace y función de transferencia"
+id: S1-cierre
+unidad: S1
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Calcula con Julia los polos del edificio como valores propios de $\mathbf A$ (`espacio_estados`) y con `polos_modales`; comprueba que dan las mismas frecuencias y los amortiguamientos del 1 %.
+2. Calcula la receptancia $H_{33}(\mathrm j\omega)$ por inversión directa y por suma modal, y comprueba que coinciden.
+3. Localiza sus mínimos y compara con las frecuencias del edificio con la planta 3 bloqueada.
+4. Repite con $H_{13}$ y mide la profundidad de los valles (cociente entre el módulo en el mínimo y en la resonancia anterior).
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, LinearAlgebra
+M, C, K = edificio_tres_plantas()
+A, B = espacio_estados(M, C, K, [0.0, 0.0, 1.0])
+f, zeta = polos_modales(A)                      # polos de la planta 3
+H(ω) = inv(K - ω^2 * M + im * ω * C)
+f_anti = modos_propios(K[1:2, 1:2], M[1:2, 1:2])[1]   # planta 3 bloqueada
+```
+
+## Python
+
+```python
+import numpy as np
+from scipy import linalg
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+M, K = mx.edificio_tres_plantas("A")
+H = lambda w, C: np.linalg.inv(K - w**2 * M + 1j * w * C)   # C: matriz de amortiguamiento
+f_anti = np.sqrt(linalg.eigh(K[:2, :2], M[:2, :2], eigvals_only=True)) / (2 * np.pi)
+```
+:::
+
+El código Python **no se ejecuta en la web**: su versión probada está en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y el paquete `Resonancia`: para el edificio de tres plantas (`edificio_tres_plantas`), calcula la receptancia $H_{ij}(\mathrm j\omega)$ por inversión directa para $i,j\in\{1,2,3\}$, dibuja el módulo de las nueve en dB entre 0,5 y 5,5 Hz y dime en cuáles hay antirresonancias profundas. Verifica con la suma modal. No generalices más allá de este edificio.»
+
+**Verifica.** (a) Que construye $\mathbf K-\omega^2\mathbf M+\mathrm j\omega\mathbf C$ y la invierte, en vez de dividir elemento a elemento. (b) Que la matriz es simétrica ($H_{ij}=H_{ji}$, reciprocidad). (c) Que la suma modal coincide con la inversión (error $\sim10^{-15}$). (d) Que cuantifica la profundidad de los valles en lugar de dar un «sí/no» (en este edificio hay valles profundos fuera de la diagonal, como $H_{12}$). (e) Que no atribuye las antirresonancias a «daño» ni a propiedades de la estructura.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-4-polos-A" respuesta="falso"}
+Todos los valores propios de la matriz de estado $\mathbf A$ son polos de **cualquier** función de transferencia $H_{ij}(s)$ del sistema.
+
+::: {.solucion}
+**Falso.** Si el modo no es controlable desde la entrada $j$ o no es observable desde la salida $i$, su polo se cancela con un cero y no aparece en $H_{ij}$. Un sensor en un nodo de un modo no lo ve.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-4-zeta" respuesta="0.196" tol="1%"}
+Un sistema tiene $H(s)=1/(s^2+2s+26)$. ¿Cuánto vale su amortiguamiento relativo $\zeta$?
+
+::: {.pista}
+Compara con $s^2+2\zeta\omega_ns+\omega_n^2$.
+:::
+
+::: {.solucion}
+$\omega_n^2=26$ ($\omega_n=5{,}099$ rad/s) y $2\zeta\omega_n=2$, luego $\zeta=1/\sqrt{26}=0{,}196$. Los polos son $-1\pm5\mathrm j$.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-4-valor-final" respuesta="0.02" tol="1%" unidad="m"}
+Un oscilador con $m=2$ kg, $c=3$ N·s/m y $k=50$ N/m recibe un escalón de fuerza de 1 N. ¿A qué valor tiende el desplazamiento?
+
+::: {.pista}
+Teorema del valor final con $X(s)=H(s)/s$.
+:::
+
+::: {.solucion}
+$x(\infty)=\lim_{s\to0}sH(s)/s=H(0)=1/k=0{,}02$ m. Los polos son estables ($c>0$), así que el teorema es aplicable.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-4-antirresonancia" respuesta="2.381" tol="1%" unidad="Hz"}
+En el edificio de tres plantas, ¿en qué frecuencia (la primera) tiene un mínimo profundo la FRF puntual de la cubierta $H_{33}$?
+
+::: {.pista}
+Es una frecuencia natural del edificio con la planta 3 bloqueada: elimina la fila y la columna 3 de $\mathbf K$ y $\mathbf M$.
+:::
+
+::: {.solucion}
+Con la planta 3 bloqueada quedan dos plantas, con frecuencias de 2,381 Hz y 4,289 Hz; el primer valle de $H_{33}$ está en 2,381 Hz.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-4-sensor" respuesta="c"}
+Dos sensores colocados en plantas distintas del mismo edificio identifican las frecuencias naturales. ¿Qué es cierto?
+
+::: {.opciones}
+- Las frecuencias coinciden y las antirresonancias también.
+- Las frecuencias son distintas porque cada sensor ve una parte diferente.
+- Las frecuencias (polos) coinciden; las antirresonancias (ceros) dependen del sensor y de la excitación.
+- Las frecuencias coinciden solo si los dos sensores están en la misma planta.
+:::
+
+::: {.solucion}
+La **c**. Los polos son propiedades del sistema; los ceros dependen de la entrada y de la salida ([ecuación 1 de S1.2](s1-2.qmd#eq-transferencia)).
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-4-espurio"}
+Un procedimiento de identificación devuelve un polo con parte real positiva para un puente en servicio. ¿Qué puede significar? ¿Qué harías?
+
+::: {.rubrica}
+- Digo que un sistema físico con amortiguamiento positivo no tiene polos en el semiplano derecho, así que no es un modo del puente.
+- Menciono causas posibles: orden del modelo demasiado alto, ruido, no estacionariedad, errores de procesado.
+- Propongo acciones: bajar el orden, comprobar con un diagrama de estabilización, repetir con otros datos, descartar el polo.
+:::
+
+::: {.solucion}
+Es un polo **espurio** (o un artefacto numérico): una estructura estable y amortiguada no puede tenerlo. Se descarta, y conviene revisar el orden del modelo, la calidad de los datos y los parámetros del algoritmo ([M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html)).
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Enuncio la transformada de Laplace y aplico la derivación, la convolución y el valor final.
+- [ ] Construyo la matriz de transferencia de un sistema de varios grados de libertad y la descompongo en modos.
+- [ ] Relaciono los polos con los valores propios de $\mathbf A$ y con $f$ y $\zeta$ de cada modo.
+- [ ] Distingo polos (propiedades de la estructura) de ceros (propiedades del experimento).
+- [ ] Explico por qué aparecen antirresonancias en la FRF puntual y no en las no puntuales de una cadena.
+- [ ] Explico por qué un polo con parte real positiva es espurio en una estructura.
+
+## Qué no dice esta unidad
+
+- No se estudia la región de convergencia en detalle ni la transformada inversa por integral de Bromwich; se usan fracciones simples y tablas.
+- La ausencia de ceros de $H_{13}$ es propia de una cadena tridiagonal con sensor y fuerza en los extremos; no se generaliza a otra topología ni a otros pares.
+- La relación entre ceros y antirresonancias supone amortiguamiento despreciable; con amortiguamiento los ceros salen del eje imaginario.
+- La reciprocidad $H_{ij}=H_{ji}$ vale para sistemas lineales y reciprocos (sin giroscópicos ni no linealidades).
+- La fecha de las aportaciones históricas procede de una fuente enciclopédica y debe contrastarse antes de citarse en un trabajo formal.

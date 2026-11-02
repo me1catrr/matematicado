@@ -1,0 +1,57 @@
+---
+title: "S2.3 Discretización exacta"
+subtitle: "S2 · Espacio de estados"
+id: S2.3
+unidad: S2
+bloque: "Sistemas dinámicos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+A3, B3 = espacio_estados(M3, C3, K3, [0.0, 0.0, 1.0])
+```
+
+Un sensor da muestras cada $\Delta t$. Si la entrada es constante entre muestras (retenedor de orden cero, ZOH), la solución exacta de $\dot{\mathbf x}=\mathbf A\mathbf x+\mathbf B\mathbf u$ es
+
+$$
+\mathbf x_{k+1}=\mathbf A_{\mathrm d}\mathbf x_k+\mathbf B_{\mathrm d}\mathbf u_k,\qquad
+\mathbf A_{\mathrm d}=e^{\mathbf A\Delta t},\quad
+\mathbf B_{\mathrm d}=\int_0^{\Delta t}e^{\mathbf A\tau}\,\mathrm d\tau\;\mathbf B .
+$$ {#eq-zoh}
+
+Es **exacta**: no es una aproximación de orden $\Delta t$ ni de ningún otro. Y los valores propios cumplen $z_k=e^{s_k\Delta t}$ (se desarrolla en [la transformada Z](../../sistemas/transformada-z/index.qmd)), con lo que el módulo $\lvert z_k\rvert=e^{-\zeta_k\omega_k\Delta t}$ conserva el decaimiento exacto.
+
+Una forma práctica de calcular $\mathbf A_{\mathrm d}$ y $\mathbf B_{\mathrm d}$ juntas, también si $\mathbf A$ es singular, es la exponencial de una matriz ampliada: $\exp\!\left(\begin{bmatrix}\mathbf A&\mathbf B\\\mathbf 0&\mathbf 0\end{bmatrix}\Delta t\right)=\begin{bmatrix}\mathbf A_{\mathrm d}&\mathbf B_{\mathrm d}\\\mathbf 0&\mathbf I\end{bmatrix}$. Es lo que hace `discretizar_zoh` de `Resonancia`.
+
+Las alternativas simples no conservan la estabilidad:
+
+- **Euler explícito**, $\mathbf A_{\mathrm d}\approx\mathbf I+\mathbf A\Delta t$, da $z=1+s\Delta t$. Para un oscilador poco amortiguado, $\lvert z\rvert=\sqrt{(1-\zeta\omega\Delta t)^2+(\omega_{\mathrm d}\Delta t)^2}>1$: **siempre inestable**, por pequeño que sea $\Delta t$ (crece como $e^{\omega^2\Delta t\,t/2}$).
+- **Tustin** (regla del trapecio), $\mathbf A_{\mathrm d}=(\mathbf I-\tfrac{\Delta t}{2}\mathbf A)^{-1}(\mathbf I+\tfrac{\Delta t}{2}\mathbf A)$, conserva la estabilidad (un polo en el semiplano izquierdo va dentro del círculo unidad) pero distorsiona las frecuencias.
+
+```{julia}
+#| label: tbl-discretizacion
+#| tbl-cap: "Radio espectral (mayor módulo de los polos discretos) del edificio de tres plantas con tres discretizaciones. Un valor superior a 1 indica un sistema discreto inestable. El valor exacto es $e^{-\\zeta_1\\omega_1\\Delta t}$."
+rad(Ad) = maximum(abs.(eigvals(Ad)))
+filas = String[]
+for dt in (0.01, 0.1)
+    Ad, _ = discretizar_zoh(A3, B3, dt)
+    Ae = I + A3 * dt
+    Tu = (I - A3 * dt / 2) \ (I + A3 * dt / 2)
+    push!(filas, "| $(coma(dt; d=2)) | $(coma(rad(Ad); d=5)) | $(coma(rad(Ae); d=3)) | $(coma(rad(Tu); d=5)) |")
+end
+Markdown.parse("| Δt (s) | exacta (ZOH) | Euler explícito | Tustin |\n|--:|--:|--:|--:|\n" * join(filas, "\n"))
+```
+
+Con $\Delta t=0{,}01$ s (100 Hz, la frecuencia de muestreo de los datos sintéticos) Euler da un radio espectral $1{,}034$: la simulación **explota** exponencialmente aunque el paso sea cien veces menor que el periodo del tercer modo. Con $\Delta t=0{,}1$ s, el radio es $2{,}92$. La discretización exacta, en cambio, da $0{,}99931$ (el modo más lento, $e^{-\zeta_1\omega_1\Delta t}$).

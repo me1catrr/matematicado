@@ -1,0 +1,51 @@
+---
+title: "S1.2 Función de transferencia"
+subtitle: "S1 · Transformada de Laplace y función de transferencia"
+id: S1.2
+unidad: S1
+bloque: "Sistemas dinámicos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+zeta3 = diag(Phi3' * C3 * Phi3) ./ (2 .* 2π .* f3)       # amortiguamiento modal exacto
+Hrec(ω) = inv(K3 - ω^2 * M3 + im * ω * C3)               # receptancia: desplazamientos / fuerzas
+```
+
+Para $\mathbf M\ddot{\mathbf u}+\mathbf C\dot{\mathbf u}+\mathbf K\mathbf u=\mathbf B\,\mathbf f(t)$ con condiciones iniciales nulas, la transformada es $(s^2\mathbf M+s\mathbf C+\mathbf K)\mathbf U(s)=\mathbf B\mathbf F(s)$. Si se mide una combinación lineal de desplazamientos, $\mathbf y=\mathbf L\mathbf u$, la **matriz de transferencia** es
+
+$$
+\mathbf H(s)=\mathbf L\,(s^2\mathbf M+s\mathbf C+\mathbf K)^{-1}\mathbf B.
+$$ {#eq-transferencia}
+
+Sus elementos son cocientes de polinomios en $s$: $H_{ij}(s)=N_{ij}(s)/D(s)$. Las raíces del **denominador común** $D(s)=\det(s^2\mathbf M+s\mathbf C+\mathbf K)$ son los **polos**; las raíces del numerador de cada elemento, los **ceros**.
+
+**Descomposición modal.** Con amortiguamiento proporcional y los modos $\boldsymbol\varphi_k$ normalizados a masa unidad (A2), cada elemento de la receptancia es una suma de $n$ osciladores:
+
+$$
+H_{ij}(s)=\sum_{k=1}^{n}\frac{\varphi_{ik}\,\varphi_{jk}}{s^2+2\zeta_k\omega_k s+\omega_k^2},
+\qquad \zeta_k=\frac{\boldsymbol\varphi_k^{\mathsf T}\mathbf C\boldsymbol\varphi_k}{2\omega_k}.
+$$ {#eq-modal}
+
+Es la fórmula que une toda la unidad: los **polos** $s_k=-\zeta_k\omega_k\pm\mathrm j\omega_k\sqrt{1-\zeta_k^2}$ dependen solo de la estructura; la forma modal solo entra como el **residuo** $\varphi_{ik}\varphi_{jk}$ de cada polo, que depende de dónde se excita ($j$) y de dónde se mide ($i$). De ahí sale que, midiendo con sensores en distintos puntos, **las frecuencias son las mismas y las formas se obtienen de los residuos**.
+
+```{julia}
+#| label: ej-suma-modal
+ω_prueba = 2π * 2.0
+Hm = sum(Phi3[:, k] * Phi3[:, k]' / ((2π * f3[k])^2 - ω_prueba^2 + 2im * zeta3[k] * 2π * f3[k] * ω_prueba) for k in 1:3)
+err_modal = maximum(abs.(Hm - Hrec(ω_prueba))) / maximum(abs.(Hrec(ω_prueba)))
+```
+
+La suma modal reproduce la inversión directa de $\mathbf K-\omega^2\mathbf M+\mathrm j\omega\mathbf C$ en $f=2$ Hz con un error relativo de `{julia} @sprintf("%.0e", err_modal)` (redondeo): la @eq-modal es una identidad exacta cuando el amortiguamiento es proporcional.

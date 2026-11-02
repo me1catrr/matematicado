@@ -1,0 +1,80 @@
+---
+title: "S3.3 Modelos AR y sus polos"
+subtitle: "S3 · Transformada Z y sistemas discretos"
+id: S3.3
+unidad: S3
+bloque: "Sistemas dinámicos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, DelimitedFiles, Printf, Markdown
+include("../../recursos/_tema.jl")
+M3, C3, K3 = edificio_tres_plantas()
+f3, Phi3 = modos_propios(K3, M3)
+zeta3 = diag(Phi3' * C3 * Phi3) ./ (2 .* 2π .* f3)
+```
+
+Un modelo AR($p$), $x[k]=\sum_{j=1}^p\phi_jx[k-j]+e[k]$ con $e[k]$ ruido blanco, tiene función de transferencia $1/(1-\sum\phi_jz^{-j})$. Sus **polos** son las raíces de $z^p-\phi_1z^{p-1}-\dots-\phi_p$, es decir, los valores propios de su **matriz compañera**; los coeficientes salen de las ecuaciones de Yule–Walker ([A1.4](../../algebra/matrices/a1-4.qmd)) y, con la [ecuación 2 de S3.2](s3-2.qmd#eq-fz), cada pareja de polos conjugados da una frecuencia y un amortiguamiento. Es el método de identificación más sencillo que existe, y sirve para ver sus límites.
+
+Una estructura excitada por ruido blanco no tiene respuesta exactamente AR: su aceleración tiene también **ceros** (S1), y la señal medida lleva ruido. Veamos qué pasa con el registro de aceleración de la cubierta del escenario A (`datos/edificio-3-plantas/`), cuyos polos verdaderos se conocen: $f=$ `{julia} join(coma.(f3; d=3), ", ")` Hz y $\zeta=$ `{julia} join(coma.(100 .* zeta3; d=2), ", ")` %.
+
+```{julia}
+#| label: ej-ar
+D = readdlm("../../datos/edificio-3-plantas/escenario_A.csv", ';', skipstart=1)
+x = D[:, 4] .- mean(D[:, 4])                       # aceleración de la cubierta a 100 Hz
+dt = 0.01
+function ajusta_ar(x, p, dt)
+    r = autocorrelacion(x, p)
+    phi, _ = yule_walker(r, p)
+    polos_ar(phi, dt)
+end
+bloque(x, q) = [mean(@view x[i:i+q-1]) for i in 1:q:length(x)-q+1]    # promedio de bloques: filtro paso bajo muy simple
+resultados = [(; q, p, fz = ajusta_ar(bloque(x, q), p, dt * q)) for (q, p) in [(1, 6), (1, 12), (8, 6), (8, 8)]]
+nothing
+```
+
+```{julia}
+#| label: tbl-ar-edificio
+#| tbl-cap: "Polos estimados con un modelo AR de Yule–Walker ajustado a la aceleración de la cubierta (escenario A, 600 s). Los valores verdaderos son 1,105; 2,939 y 4,390 Hz, con $\\zeta$ de 1,00 %, 1,00 % y 1,27 %. Con 100 Hz el ajuste falla; al reducir el muestreo con un promedio de bloques, el orden 8 recupera las tres frecuencias y añade dos polos espurios."
+filas = String[]
+for r in resultados
+    push!(filas, "| " * (r.q == 1 ? "100" : coma(100 / r.q; d=1)) * " | $(r.p) | " * join(coma.(r.fz[1]; d=3), "; ") * " | " * join(coma.(100 .* r.fz[2]; d=1), "; ") * " |")
+end
+Markdown.parse("| Muestreo (Hz) | Orden p | Frecuencias (Hz) | Amortiguamientos (%) |\n|--:|--:|:--|:--|\n" * join(filas, "\n"))
+```
+
+Lo que enseña la @tbl-ar-edificio:
+
+- **Con la frecuencia de muestreo original (100 Hz) el método falla**, aunque la señal sea buena: tres modos por debajo de 5 Hz a 100 Hz de muestreo dejan los polos muy cerca de $z=1$, y la matriz de Toeplitz queda mal condicionada. Un modelo AR gasta su orden en lo que ve de más alta frecuencia.
+- **Reduciendo el muestreo** (decimando por 8 con un promedio de bloques, que es un filtro paso bajo muy simple) y con orden 8, **las tres frecuencias salen con errores de $1{,}3\,\%$, $0{,}2\,\%$ y $0{,}1\,\%$**: el análisis AR es útil con la banda de interés bien resuelta.
+- **El amortiguamiento sale mal**: el tercer modo sale con $\zeta\approx3{,}6\,\%$ cuando el valor verdadero es $1{,}27\,\%$. Es una pauta general: los métodos paramétricos estiman bien las frecuencias y peor los amortiguamientos, y Yule–Walker en particular tiende a **sobrestimarlos** en señales poco amortiguadas.
+- **Aparecen polos espurios** (6,3 y 6,7 Hz, con $\zeta$ de $13$ y $37\,\%$): el orden elegido es mayor que el de la señal. Son fuertemente amortiguados, lo que los delata, pero para decidirlo con criterio se necesitan los diagramas de estabilización de [M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html).
+
+```{julia}
+#| label: fig-polos-z
+#| fig-cap: "Polos del plano $z$. Los círculos azules son los polos reales del edificio (discretización exacta a 12,5 Hz); las cruces naranjas, los estimados por el modelo AR de orden 8 ajustado a la aceleración de la cubierta. Las frecuencias coinciden bien; el tercer par está más hacia el interior del círculo (más amortiguamiento) que el real, y hay dos polos espurios más cerca del origen."
+#| fig-alt: "Círculo unidad con tres pares de círculos azules cerca de la circunferencia, en ángulos pequeños, y cruces naranjas que coinciden con ellos en el ángulo pero con módulo algo menor en el último par, más dos pares de cruces cerca del origen."
+q, p = 8, 8
+xd = bloque(x, q)
+phi8, _ = yule_walker(autocorrelacion(xd, p), p)
+Cm = zeros(p, p); Cm[1, :] = phi8; for i in 2:p; Cm[i, i-1] = 1; end
+z_est = eigvals(Cm)
+A3, _ = espacio_estados(M3, C3, K3, [0.0, 0.0, 1.0])
+z_real = filter(w -> imag(w) > 0, exp.(eigvals(A3) .* (dt * q)))
+fig = Figure(size=(560, 520))
+ax = Axis(fig[1, 1]; xlabel="Re z", ylabel="Im z", aspect=DataAspect(), limits=(-1.1, 1.1, -1.1, 1.1))
+lines!(ax, cos.(range(0, 2π; length=200)), sin.(range(0, 2π; length=200)); color=GRIS)
+scatter!(ax, vcat(real.(z_real), real.(z_real)), vcat(imag.(z_real), -imag.(z_real)); color=:white, strokecolor=AZUL, strokewidth=2, markersize=14, label="polos reales")
+scatter!(ax, real.(z_est), imag.(z_est); marker=:xcross, color=NARANJA, markersize=14, label="AR(8) estimado")
+axislegend(ax; position=:lb)
+fig
+```

@@ -1,0 +1,12 @@
+---
+title: "S1.5 Respuesta en frecuencia y respuesta impulsional"
+subtitle: "S1 · Transformada de Laplace y función de transferencia"
+id: S1.5
+unidad: S1
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+Sobre el eje imaginario, $\mathbf H(\mathrm j\omega)$ es la **respuesta en frecuencia** (FRF): la amplitud y la fase con que el sistema transforma una excitación armónica de frecuencia $\omega$ en régimen estacionario. La respuesta impulsional $\mathbf h(t)=\mathcal L^{-1}[\mathbf H(s)]$ se obtiene por fracciones simples: cada par de polos aporta un término $\frac{\varphi_{ik}\varphi_{jk}}{\omega_{dk}}e^{-\zeta_k\omega_kt}\sin\omega_{dk}t$. Ambas contienen la misma información; la FRF es la que se mide con excitación controlada, y la respuesta impulsional (o sus covarianzas) es la que alimenta a ERA y a SSI ([A1.5](../../algebra/matrices/a1-5.qmd)).
+
+La conexión con la medición ambiental es que, si no se conoce la fuerza, no se puede calcular $\mathbf H(\mathrm j\omega)$ como cociente salida/entrada. Lo que sí se tiene es la **densidad espectral** de las salidas, $\mathbf S_{yy}(\omega)=\mathbf H(\mathrm j\omega)\,\mathbf S_{ff}\,\mathbf H(\mathrm j\omega)^{\mathsf H}$, y si la entrada es ruido blanco ($\mathbf S_{ff}$ constante), la forma de $\mathbf S_{yy}$ la fija $\mathbf H$ (F1 y [M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html)). Es la base de FDD.

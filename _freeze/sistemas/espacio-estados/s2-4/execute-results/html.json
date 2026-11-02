@@ -1,0 +1,12 @@
+{
+  "hash": "0404c1e9ba15309defd4df047c226bb7",
+  "result": {
+    "engine": "julia",
+    "markdown": "---\ntitle: \"S2.4 Simulación de la respuesta\"\nsubtitle: \"S2 · Espacio de estados\"\nid: S2.4\nunidad: S2\nbloque: \"Sistemas dinámicos\"\nestado: borrador\nengine: julia\nexecute:\n  warning: false\nformat:\n  html:\n    code-fold: true\n    code-summary: \"Ver el código\"\n---\n\n\n\nCon $\\mathbf A_{\\mathrm d}$ y $\\mathbf B_{\\mathrm d}$ la simulación es una recursión. Para una excitación ambiental de fuerzas independientes, de ruido blanco, el edificio produce un registro cuya densidad espectral muestra las tres frecuencias naturales. Es **exactamente** el procedimiento con que se han generado los datos de `datos/edificio-3-plantas/` (véase `scripts/generar_edificio.jl`).\n\n::: {#cell-fig-respuesta .cell execution_count=1}\n``` {.julia .cell-code}\ndt = 0.01\nAd, Bd = discretizar_zoh(A3, B3, dt)\nN = 4096\nx = zeros(6)\na = zeros(N)\nMinv = inv(M3)\nfor k in 1:N\n    u = k == 1 ? 1.0e4 / dt : 0.0                      # impulso de 10⁴ N·s aplicado en el primer paso\n    acc = Minv * ([0.0, 0.0, u] - C3 * x[4:6] - K3 * x[1:3])\n    a[k] = acc[3]\n    x = Ad * x + Bd * [u]\nend\nfr, P = psd_welch(a, 1 / dt; nseg=2048)\nfig = Figure(size=(780, 480))\nax1 = Axis(fig[1, 1]; xlabel=\"t (s)\", ylabel=\"a₃ (m/s²)\", limits=(0, 40, nothing, nothing))\nlines!(ax1, (0:N-1) .* dt, a; color=AZUL, linewidth=1.2)\nax2 = Axis(fig[2, 1]; xlabel=\"f (Hz)\", ylabel=\"PSD (m/s²)²/Hz\", yscale=log10, limits=(0, 6, 1e-14, nothing))\nlines!(ax2, fr, P; color=NARANJA, linewidth=1.6)\nvlines!(ax2, f3; color=GRIS, linestyle=:dash)\nfig\n```\n\n::: {.cell-output .cell-output-display execution_count=1}\n![Respuesta libre del edificio de tres plantas a un impulso en la cubierta, calculada con la discretización exacta a 100 Hz. Arriba, aceleración de la cubierta; abajo, su densidad espectral de potencia: los tres picos están en las frecuencias naturales.](s2-4_files/figure-html/fig-respuesta-output-1.svg){#fig-respuesta fig-alt='Dos gráficas. La de arriba muestra una señal oscilatoria que decae lentamente durante 40 segundos. La de abajo muestra su espectro con tres picos, en 1,1, 2,9 y 4,4 hercios.'}\n:::\n:::\n\n\n\n",
+    "supporting": [
+      "s2-4_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

@@ -1,0 +1,26 @@
+---
+title: "S3.1 La transformada Z"
+subtitle: "S3 · Transformada Z y sistemas discretos"
+id: S3.1
+unidad: S3
+bloque: "Sistemas dinámicos"
+estado: borrador
+---
+
+::: {.callout-note .historia icon=false title="Un poco de historia: de las funciones generatrices a los sistemas muestreados"}
+Según el resumen histórico de la Wikipedia en inglés, la idea de fondo se atribuye a de Moivre (1730, en probabilidad) y Laplace la conocía; Hurewicz y otros la reintrodujeron en 1947 para los sistemas de control con datos muestreados (radar), y Ragazzini y Zadeh, en el grupo de control de la Universidad de Columbia, le dieron el nombre de «transformada z» en 1952. Es una fuente enciclopédica no contrastada con los originales: las atribuciones deben tomarse como orientativas.
+
+<span class="fuentes-caja">Fuente: [Wikipedia, «Z-transform», sección «History»](https://en.wikipedia.org/wiki/Z-transform). Consultado el 25-10-2026.</span>
+:::
+
+::: {#def-z}
+**Transformada Z.** Para una secuencia $x[k]$, $k\ge0$, $X(z)=\mathcal Z[x](z)=\displaystyle\sum_{k=0}^{\infty}x[k]\,z^{-k}$, con $z\in\mathbb C$ en la región donde la serie converge.
+:::
+
+La propiedad más útil es el **desplazamiento**: retrasar la secuencia una muestra, $x[k-1]$, equivale a multiplicar por $z^{-1}$ (con condiciones iniciales nulas). Por eso una ecuación en diferencias
+
+$$
+y[k]+a_1y[k-1]+\dots+a_py[k-p]=b_0u[k]+b_1u[k-1]+\dots+b_qu[k-q]
+$$
+
+se convierte en $A(z)Y(z)=B(z)U(z)$, con **función de transferencia discreta** $H(z)=B(z)/A(z)$. Sus **polos** son las raíces de $A(z)$; el sistema es **estable** si todas están dentro del círculo unidad, $\lvert z_k\rvert<1$. Si no hay numerador ($B(z)=b_0$), el modelo es **autorregresivo** (AR): todo polos.
