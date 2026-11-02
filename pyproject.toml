@@ -1,0 +1,19 @@
+[project]
+name = "matematicado"
+version = "0.1.0"
+description = "Entorno Python de matematicado: versiones probadas del código de las pestañas Python y pruebas de navegador"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.3",
+    "scipy>=1.17.1",
+]
+
+[dependency-groups]
+dev = [
+    "playwright>=1.64.1",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["python", "pruebas/web"]
+pythonpath = ["python"]

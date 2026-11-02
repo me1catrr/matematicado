@@ -1,0 +1,117 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+    - "**/*.qmd"
+    - "!_plan/**"
+    - "!README.md"
+    - "!ROADMAP.md"
+    - "!CLAUDE.md"
+
+lang: es
+bibliography: recursos/bibliografia.bib
+
+# Ejercicios intercalados (scripts/ejercicios.lua) y lista de referencias al final
+# de las páginas con citas al margen (scripts/referencias.lua).
+filters:
+  - scripts/ejercicios.lua
+  - scripts/referencias.lua
+
+website:
+  title: "matematicado"
+  description: "Matemáticas aplicadas a vibraciones y monitorización estructural, para aprender por tu cuenta con Julia"
+  site-url: https://me1catrr.github.io/matematicado/
+  repo-url: https://github.com/me1catrr/matematicado
+  repo-actions: [edit, issue]
+  page-navigation: true
+  navbar:
+    left:
+      - text: Inicio
+        href: index.qmd
+      - text: Cómo estudiar
+        href: como-estudiar.qmd
+      - text: Álgebra
+        href: algebra/index.qmd
+      - text: Sistemas
+        href: sistemas/index.qmd
+      - text: Señales
+        href: senales/index.qmd
+      - text: Probabilidad
+        href: probabilidad/index.qmd
+      - text: Caso
+        href: caso/edificio/index.qmd
+    right:
+      - text: Resonancia
+        href: https://me1catrr.github.io/resonancia/
+      - icon: github
+        href: https://github.com/me1catrr/matematicado
+        aria-label: Repositorio en GitHub
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - index.qmd
+      - como-estudiar.qmd
+      - section: "E · Caso transversal"
+        contents:
+          - caso/edificio/index.qmd
+      - section: "A · Álgebra lineal"
+        href: algebra/index.qmd
+        contents:
+          - algebra/matrices/index.qmd
+          - algebra/valores-propios/index.qmd
+          - algebra/svd/index.qmd
+      - section: "S · Sistemas dinámicos"
+        href: sistemas/index.qmd
+        contents:
+          - sistemas/laplace/index.qmd
+          - sistemas/espacio-estados/index.qmd
+          - sistemas/transformada-z/index.qmd
+      - section: "F · Señales"
+        href: senales/index.qmd
+        contents:
+          - senales/fourier/index.qmd
+          - senales/hilbert/index.qmd
+      - section: "P · Probabilidad y procesos"
+        href: probabilidad/index.qmd
+        contents:
+          - probabilidad/estocasticos/index.qmd
+          - probabilidad/correlacion/index.qmd
+  page-footer:
+    left: "Contenido CC BY-SA 4.0 · código MIT · Rafael Castro Triguero"
+    right: "Material hermano de [Resonancia](https://me1catrr.github.io/resonancia/)"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    grid:
+      sidebar-width: 270px
+      body-width: 880px
+      margin-width: 270px
+      gutter-width: 1.5rem
+    toc: true
+    code-copy: true
+    citations-hover: true
+    link-citations: true
+    reference-section-title: "Referencias"
+
+crossref:
+  fig-title: "Figura"
+  tbl-title: "Tabla"
+  eq-prefix: "ecuación"
+  thm-title: "Teorema"
+  prp-title: "Proposición"
+  def-title: "Definición"
+  exm-title: "Ejemplo"
+  lem-title: "Lema"
+  cor-title: "Corolario"
+  thm-prefix: "Teorema"
+  prp-prefix: "Proposición"
+  def-prefix: "Definición"
+  exm-prefix: "Ejemplo"
+  lem-prefix: "Lema"
+  cor-prefix: "Corolario"
+
+execute:
+  freeze: auto

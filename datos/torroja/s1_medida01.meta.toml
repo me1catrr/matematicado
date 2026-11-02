@@ -1,0 +1,10 @@
+origen = "Campaña de vibración ambiental en el puente de Eduardo Torroja, 22-06-2018. Pachón et al. (2018), https://doi.org/10.1016/j.engstruct.2018.02.035. Copia de Resonancia (datos/reales-publicables/torroja-puente/, commit f677c80)"
+cita = "pachon2018"
+descripcion = "Estación GS1, medida 1 (07:40–07:50): un único registro de 10 min, el que usa A1 (matrices de Toeplitz y AR)"
+sensor = "acelerómetro triaxial, estación GS1"
+fs = "100 Hz"
+unidades = "aceleración en g (ejes X0HNE, Y0HNN, Z0HNZ)"
+formato = "4 líneas de cabecera (Station_code, Sampling_rate, Start_date, nombres de columna) y después hh:mm:ss.mmm  X  Y  Z, separadas por espacios; 60 000 muestras"
+completo = "Las cinco estaciones y las dos grabaciones completas están en Zenodo: https://doi.org/10.5281/zenodo.23639137"
+licencia = "CC BY 4.0"
+publicable = true

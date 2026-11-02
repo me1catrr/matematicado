@@ -1,0 +1,15 @@
+---
+title: "A · Álgebra lineal"
+---
+
+Las matrices de masa y rigidez, sus valores propios y la descomposición en valores singulares: el lenguaje en que se escriben los modos de una estructura y los métodos que los identifican.
+
+::: {.indice-unidades}
+
+| Id | Página | Pregunta a la que responde | Tiempo |
+|----|--------|----------------------------|--------|
+| A1 | [Matrices estructuradas](matrices/index.qmd) | ¿Qué estructura tienen las matrices que aparecen en vibraciones y en señales, y qué se gana al aprovecharla? | 4 h |
+| A2 | [Valores propios](valores-propios/index.qmd) | ¿Cuáles son las frecuencias y los modos de una estructura, y cuánto cambian si pierde rigidez? | 3 h |
+| A3 | [Descomposición en valores singulares](svd/index.qmd) | ¿Cuántas componentes independientes hay en los registros de varios sensores? | 3 h |
+
+:::

@@ -1,0 +1,14 @@
+---
+title: "F · Señales"
+---
+
+Del tiempo a la frecuencia y vuelta: cómo leer un espectro sin engañarse y cómo extraer la envolvente de una oscilación.
+
+::: {.indice-unidades}
+
+| Id | Página | Pregunta a la que responde | Tiempo |
+|----|--------|----------------------------|--------|
+| F1 | [Fourier](fourier/index.qmd) | ¿Cuánto hay que medir para separar dos modos, y por qué un pico puede salir más bajo de lo que es? | 4 h |
+| F2 | [Hilbert y señal analítica](hilbert/index.qmd) | ¿Se puede leer el amortiguamiento en la envolvente de una respuesta libre? | 3 h |
+
+:::

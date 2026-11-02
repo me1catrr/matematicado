@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "Si usas este material, cítalo con los metadatos de este fichero."
+title: "matematicado: matemáticas aplicadas a vibraciones y monitorización estructural"
+abstract: >-
+  Material de autoformación en matemáticas aplicadas a vibraciones: álgebra
+  matricial, valores propios y SVD; transformadas de Laplace, Fourier, Z y
+  Hilbert; espacio de estados; procesos estocásticos y correlación. Cada
+  herramienta se estudia sobre un edificio de tres plantas de respuesta conocida,
+  con simulaciones interactivas, práctica en Julia y Python, y ejercicios
+  autocorregibles. Procede de la sesión M2 de Resonancia.
+authors:
+  - family-names: Castro Triguero
+    given-names: Rafael
+    affiliation: Universidad de Córdoba
+version: 0.1.0
+# Licencia del código. Los textos, diapositivas y figuras van bajo CC-BY-SA-4.0
+# (véase LICENSE-CONTENIDO).
+license: MIT
+url: "https://me1catrr.github.io/matematicado/"
+repository-code: "https://github.com/me1catrr/matematicado"
+keywords:
+  - vibraciones
+  - análisis modal
+  - procesamiento de señales
+  - álgebra lineal
+  - Julia

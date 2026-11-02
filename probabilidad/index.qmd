@@ -1,0 +1,14 @@
+---
+title: "P · Probabilidad y procesos"
+---
+
+Una estructura en servicio vibra por excitaciones que nadie mide. Los procesos estocásticos y las correlaciones permiten identificarla igualmente.
+
+::: {.indice-unidades}
+
+| Id | Página | Pregunta a la que responde | Tiempo |
+|----|--------|----------------------------|--------|
+| P1 | [Procesos estocásticos](estocasticos/index.qmd) | ¿Cuándo basta un solo registro para conocer las propiedades estadísticas de una vibración? | 3 h |
+| P2 | [Correlación](correlacion/index.qmd) | ¿Cómo se obtienen los modos de un edificio sin conocer la excitación? | 3 h |
+
+:::

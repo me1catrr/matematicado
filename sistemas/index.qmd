@@ -1,0 +1,15 @@
+---
+title: "S · Sistemas dinámicos"
+---
+
+Tres formas de escribir el mismo sistema: la función de transferencia, el espacio de estados y su versión muestreada. Las tres llevan a los polos, que son lo que se quiere identificar.
+
+::: {.indice-unidades}
+
+| Id | Página | Pregunta a la que responde | Tiempo |
+|----|--------|----------------------------|--------|
+| S1 | [Laplace y función de transferencia](laplace/index.qmd) | ¿Por qué dos sensores ven los mismos picos pero valles distintos? | 3 h |
+| S2 | [Espacio de estados](espacio-estados/index.qmd) | ¿Qué ve cada sensor, y cómo se simula la respuesta sin error de discretización? | 3 h |
+| S3 | [Transformada Z](transformada-z/index.qmd) | ¿Qué le pasa a un modo al muestrearlo, y se puede identificar con un modelo autorregresivo? | 3 h |
+
+:::

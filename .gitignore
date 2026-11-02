@@ -1,0 +1,20 @@
+# --- Quarto: salidas generadas (se regeneran al compilar) ---
+/.quarto/
+/_site/
+**/*.quarto_ipynb
+# NO ignorar _freeze/: guarda los resultados de Julia para publicar sin ejecutarlo
+
+# --- Apuntes de consulta: solo locales, nunca se publican ---
+/docs/
+
+# --- Python (entorno uv local) ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Sistema ---
+.DS_Store
+
+# --- Claude Code: ajustes personales ---
+.claude/settings.local.json

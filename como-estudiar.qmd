@@ -1,0 +1,59 @@
+---
+title: "Cómo estudiar aquí"
+subtitle: "Esquema de las páginas, entorno de trabajo y uso de Claude Code"
+format:
+  html:
+    citation-location: margin
+---
+
+## Cada página, el mismo esquema
+
+1. **Objetivos y prerrequisitos.** Qué sabrás hacer y qué páginas necesitas antes (el [mapa de dependencias](index.qmd#fig-mapa) las resume todas).
+2. **Teoría breve en tres capas.** La **intuición**, con figuras y laboratorios; el **fundamento**, con definiciones, resultados y demostraciones plegables; y la **aplicación**, sobre el edificio de tres plantas o sobre registros reales. Si vas justo de tiempo, la intuición y la aplicación dan una idea del tema; el fundamento es lo que permite justificar los resultados.
+3. **Laboratorios.** Simulaciones con deslizadores que se calculan en tu navegador, rotuladas «Simulación n». Cada una explica qué se ve y, sobre todo, **qué no se puede concluir** de ella.
+4. **Práctica guiada.** Código en Julia, con su equivalente en Python en otra pestaña.
+5. **«Pídeselo a Claude».** Una propuesta de trabajo para un asistente de programación, con un apartado *Verifica* que dice cómo comprobar lo que te devuelva.
+6. **Ejercicios.** Intercalados tras cada apartado y reunidos al final.
+7. **«La doy por superada si…».** Una lista que puedes marcar.
+
+Cada página termina con un apartado «Qué no dice esta página», que marca los límites de lo que has aprendido.
+
+## Los ejercicios
+
+Hay respuestas de verdadero o falso, de opción, numéricas (con tolerancia), de programación y abiertas, estas con una rúbrica para autoevaluarte. **Todo ocurre en tu navegador**: las respuestas se guardan en el almacenamiento local (`localStorage`) y no se envían a ninguna parte. Si cambias de navegador o borras sus datos, el progreso se pierde.
+
+Las respuestas numéricas se han comprobado en Julia antes de publicarlas.
+
+## Montar el entorno
+
+Para leer y hacer los laboratorios basta un navegador. Para la práctica guiada:
+
+1. **Julia** 1.12 o posterior ([juliaup](https://github.com/JuliaLang/juliaup) es la forma más cómoda de instalarla).
+2. Clona el repositorio y activa su entorno:
+
+   ```bash
+   git clone https://github.com/me1catrr/matematicado.git
+   cd matematicado
+   julia --project=. -e 'using Pkg; Pkg.instantiate()'
+   ```
+
+   Se instala, entre otros, el paquete [Resonancia.jl](https://github.com/me1catrr/resonancia/tree/main/Resonancia.jl), que reúne las funciones que se usan en las páginas (`edificio_tres_plantas`, `modos_propios`, `polos_modales`, `ventana`…). Cada función tiene su documentación: en Julia, `?modos_propios`.
+3. **Python** (opcional), con [uv](https://docs.astral.sh/uv/): `uv sync` instala NumPy y SciPy. El código de las pestañas Python no se ejecuta en la web; su versión probada está en `python/`, con sus pruebas (`uv run pytest python`).
+4. Para compilar el sitio en tu equipo hace falta [Quarto](https://quarto.org): `quarto preview`.
+
+Los datos del edificio están en `datos/edificio-3-plantas/`. Son sintéticos y se regeneran con `julia --project=. scripts/generar_edificio.jl`. El registro real del puente de Torroja (`datos/torroja/`) procede de una campaña publicada con licencia CC BY 4.0 [@pachon2018].
+
+## Con Claude Code
+
+El repositorio trae un fichero `CLAUDE.md` con sus convenciones, así que [Claude Code](https://claude.com/claude-code) las conoce al abrirlo. Algunas formas útiles de usarlo mientras estudias:
+
+- **Pedir el razonamiento, no el resultado.** «Explícame por qué la matriz de rigidez del edificio es de banda, sin calcular nada todavía».
+- **Hacer las propuestas «Pídeselo a Claude»** de cada página y aplicar su apartado *Verifica*. Lo que aprendes está en la verificación.
+- **Contrastar con el paquete.** «Busca en el código de Resonancia.jl cómo calcula `modos_propios` la normalización a masa unidad y compáralo con lo que dice A2».
+- **Inventar variantes.** «Cambia el edificio a cuatro plantas y repite el laboratorio de modos en Julia».
+
+Un asistente se equivoca con aplomo: comprueba siempre las cifras con el código de la página o con un cálculo independiente.
+
+## Los códigos M, J y C
+
+Algunas páginas enlazan con unidades de [Resonancia](https://me1catrr.github.io/resonancia/), el curso del que procede este material. **M** son las sesiones de monitorización de la salud estructural (por ejemplo, M7 es la identificación modal), **J** las de Julia para ingeniería y **C** las de Claude y Claude Code. No hacen falta para seguir matematicado, pero amplían lo que aquí se presenta.
