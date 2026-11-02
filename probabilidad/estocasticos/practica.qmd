@@ -1,0 +1,130 @@
+---
+title: "Práctica y cierre"
+subtitle: "P1 · Variables aleatorias y procesos estocásticos"
+id: P1-cierre
+unidad: P1
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Genera 400 realizaciones de un AR(1) con $\phi=0{,}9$ y compara la varianza de conjunto con la teórica $1/(1-\phi^2)$.
+2. Estima la autocorrelación de una realización con `autocorrelacion` y compárala con $\phi^\tau/(1-\phi^2)$.
+3. Calcula el RMS por bloques de 60 s del escenario A y comprueba que no hay tendencia.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, Random, Statistics
+Random.seed!(1)
+phi = 0.9
+x = zeros(40_000); x[1] = randn() / sqrt(1 - phi^2)
+for k in 2:length(x); x[k] = phi * x[k-1] + randn(); end
+r = autocorrelacion(x, 5)
+teorica = [phi^k / (1 - phi^2) for k in 0:5]
+```
+
+## Python
+
+```python
+import numpy as np
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+rng = np.random.default_rng(1)
+phi = 0.9
+x = np.zeros(40_000)
+x[0] = rng.standard_normal() / np.sqrt(1 - phi**2)
+for k in range(1, len(x)):
+    x[k] = phi * x[k - 1] + rng.standard_normal()
+r = mx.autocorrelacion(x, 5)
+teorica = [phi**k / (1 - phi**2) for k in range(6)]
+```
+:::
+
+El código Python **no se ejecuta en la web**: `autocorrelacion` está probada con `pytest` frente a Julia en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y `Resonancia`: carga `escenario_A.csv` y comprueba la estacionariedad de la aceleración de la cubierta: (1) RMS por bloques de 60 s con `rms_por_ventana`; (2) la autocorrelación en dos mitades del registro y su diferencia; (3) una regresión del RMS de los bloques sobre el tiempo con su intervalo de confianza. Después aplica una ganancia que crece de 1 a 1,5 y repítelo. Dime qué se detecta y qué no.»
+
+**Verifica.** (a) Que usa `rms_por_ventana` y `autocorrelacion` del paquete. (b) Que cuantifica la tendencia con un intervalo de confianza en vez de decir «parece que sube». (c) Que no concluye ergodicidad de una comprobación visual. (d) Que explica por qué la dispersión de los bloques estacionarios no es una tendencia. (e) Que indica la semilla o los datos exactos.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="vf" id="m2-9-correlacion-indep" respuesta="falso"}
+Si dos variables aleatorias tienen coeficiente de correlación $\rho=0$, entonces son independientes.
+
+::: {.solucion}
+**Falso.** $\rho=0$ solo excluye dependencia lineal. Con $X\sim\mathcal N(0,1)$ e $Y=X^2$ se tiene $\rho=0$ y $Y$ depende totalmente de $X$.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-9-var-ar1" respuesta="5.263" tol="1%"}
+Un AR(1) con $\phi=0{,}9$ y ruido de varianza $\sigma^2=1$ es estacionario. ¿Cuánto vale su varianza $r(0)$?
+
+::: {.solucion}
+$r(0)=\sigma^2/(1-\phi^2)=1/0{,}19=5{,}263$.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-9-r1" respuesta="4.737" tol="1%"}
+Para el AR(1) anterior, ¿cuánto vale la autocovarianza en el retardo 1?
+
+::: {.solucion}
+$r(1)=\phi\,r(0)=0{,}9\cdot5{,}263=4{,}737$.
+:::
+:::
+
+::: {.ejercicio tipo="opcion" id="m2-9-no-ergodico" respuesta="b"}
+Una máquina mide siempre con un sensor cuyo cero (offset) es distinto cada vez que se enciende, pero constante durante cada medida. El proceso «aceleración medida»:
+
+::: {.opciones}
+- no es estacionario, porque la media cambia con el tiempo.
+- puede ser estacionario y no ergódico: la media de conjunto es 0, pero cada registro tiene su propio nivel.
+- es ergódico siempre que el registro sea largo.
+- es ruido blanco.
+:::
+
+::: {.solucion}
+La **b**. La media de conjunto es constante, pero la media temporal de cada registro es el offset de esa medida; ningún registro, por largo que sea, representa al conjunto.
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-9-tren"}
+Mides un puente que tiene una línea de tren cercana. Aparece un pico estrecho a 4,2 Hz que no estaba en la medición del día anterior. ¿Qué hipótesis de la identificación modal ambiental pones en duda y qué comprobarías?
+
+::: {.rubrica}
+- Digo que se supone excitación de ruido blanco estacionario y que un tren no lo es (aporta energía en frecuencias concretas y es transitoria).
+- Propongo comprobar si el pico aparece solo mientras pasa el tren (bloques cortos, RMS por ventana).
+- Menciono que un pico de excitación no es un modo y que hay que contrastar con la forma modal o con otra medida.
+:::
+
+::: {.solucion}
+Se duda de que la excitación sea blanca y estacionaria. Se miran bloques cortos y su RMS para ver si el pico es transitorio, y se comprueba con la forma modal (un modo tiene forma coherente en todos los sensores; una excitación armónica local, no necesariamente) o repitiendo la medida sin tren.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Calculo e interpreto media, varianza, covarianza y correlación, sabiendo que $\rho=0$ no es independencia.
+- [ ] Defino proceso estocástico, estacionariedad débil y ergodicidad.
+- [ ] Doy ejemplos de procesos no estacionarios y no ergódicos y los reconozco en simulaciones.
+- [ ] Calculo la autocorrelación de un AR(1) y del ruido blanco.
+- [ ] Aplico $S_{yy}=\lvert H\rvert^2S_{ff}$ y explico por qué la identificación ambiental supone ruido blanco.
+- [ ] Compruebo la estacionariedad de un registro con estadísticas por bloques.
+
+## Qué no dice esta unidad
+
+- No se desarrolla la teoría de la medida de los procesos estocásticos ni los teoremas ergódicos.
+- La comprobación por bloques no es un contraste de hipótesis; los contrastes formales (de raíz unitaria, de estacionariedad) no se tratan.
+- Los procesos simulados son de semilla fija y de tamaño modesto; las cifras de la [Tabla 1 de P1.3](p1-3.qmd#tbl-ergodico) cambian con la semilla (no su orden de magnitud).
+- No se estudian procesos no gaussianos ni no lineales ni la excitación armónica superpuesta, que en puentes reales es frecuente.

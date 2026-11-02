@@ -1,0 +1,12 @@
+{
+  "hash": "1940a4080865b8e4a78175b3813be3f6",
+  "result": {
+    "engine": "julia",
+    "markdown": "---\ntitle: \"P1.4 El registro del edificio\"\nsubtitle: \"P1 · Variables aleatorias y procesos estocásticos\"\nid: P1.4\nunidad: P1\nbloque: \"Probabilidad y procesos\"\nestado: borrador\nengine: julia\nexecute:\n  warning: false\nformat:\n  html:\n    code-fold: true\n    code-summary: \"Ver el código\"\n---\n\n\n\nLa excitación del edificio sintético es de ruido blanco estacionario, de modo que su aceleración debe ser estacionaria y ergódica. Se comprueba mirando el valor eficaz (RMS) por bloques de 60 s, y se contrasta con una versión **no estacionaria** en la que la intensidad de la excitación crece un $50\\,\\%$ a lo largo del registro (como si el tráfico fuera aumentando):\n\n::: {#cell-fig-rms .cell execution_count=1}\n``` {.julia .cell-code}\nD = readdlm(\"../../datos/edificio-3-plantas/escenario_A.csv\", ';', skipstart=1)\nx = D[:, 4]\nganancia = range(1.0, 1.5; length=length(x))\nxn = x .* ganancia\n_, r1 = rms_por_ventana(x, 100.0, 60.0)\ntt, r2 = rms_por_ventana(xn, 100.0, 60.0)\nfig = Figure(size=(720, 320))\nax = Axis(fig[1, 1]; xlabel=\"t (s)\", ylabel=\"RMS (m/s²)\", limits=(0, 600, 0, nothing))\nscatterlines!(ax, tt, r1; color=AZUL, linewidth=2, label=\"estacionario\")\nscatterlines!(ax, tt, r2; color=NARANJA, linewidth=2, label=\"con ganancia creciente\")\naxislegend(ax; position=:lt)\nfig\n```\n\n::: {.cell-output .cell-output-display execution_count=1}\n![Valor eficaz de la aceleración de la cubierta (escenario A) en bloques de 60 s. Azul: registro original, estacionario; naranja: el mismo registro con una ganancia que crece linealmente de 1 a 1,5. La variación entre bloques del primero es la propia del muestreo del ruido (unos $\\pm5\\,\\%$); la del segundo es sistemática y es una **tendencia**.](p1-4_files/figure-html/fig-rms-output-1.svg){#fig-rms fig-alt='Dos series de diez puntos: la azul fluctúa alrededor de un valor constante; la naranja crece de forma casi lineal.'}\n:::\n:::\n\n\n\nLos bloques del registro estacionario varían entre $\\pm$13 % de la media, sin tendencia; con la ganancia creciente, el RMS pasa de 0,202 a 0,284 m/s². **Si se calcula un solo espectro de todo el registro no estacionario, se mezclan estados de excitación distintos**; la solución es trabajar con bloques cortos o normalizar.\n\n",
+    "supporting": [
+      "p1-4_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

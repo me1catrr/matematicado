@@ -1,0 +1,12 @@
+---
+title: "P1.1 Variables aleatorias"
+subtitle: "P1 · Variables aleatorias y procesos estocásticos"
+id: P1.1
+unidad: P1
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+Una variable aleatoria $X$ se describe por su distribución; sus **momentos** más usados son la media $\mu=\mathbb E[X]$ y la varianza $\sigma^2=\mathbb E[(X-\mu)^2]$. Para dos variables, la **covarianza** $\operatorname{cov}(X,Y)=\mathbb E[(X-\mu_X)(Y-\mu_Y)]$ y el **coeficiente de correlación** $\rho=\operatorname{cov}/(\sigma_X\sigma_Y)\in[-1,1]$ miden la dependencia **lineal**. Independencia implica $\rho=0$, pero no a la inversa (si $X\sim\mathcal N(0,1)$ e $Y=X^2$, son dependientes y $\rho=0$). La **distribución normal** es la protagonista por el teorema central del límite: la suma de muchos efectos pequeños e independientes (el viento sobre un puente) tiende a ser gaussiana, lo que hace que el ruido ambiental sea, con frecuencia, aproximadamente gaussiano.
+
+Un vector aleatorio $\mathbf X$ tiene **matriz de covarianza** $\boldsymbol\Sigma=\mathbb E[(\mathbf X-\boldsymbol\mu)(\mathbf X-\boldsymbol\mu)^{\mathsf T}]$, simétrica y semidefinida positiva ([A1.2](../../algebra/matrices/a1-2.qmd)); sus vectores propios son las direcciones principales, que es lo que calcula la POD de [A3](../../algebra/svd/index.qmd).

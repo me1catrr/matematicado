@@ -1,0 +1,23 @@
+---
+title: "P2.1 Definiciones y estimación"
+subtitle: "P2 · Covarianza, autocorrelación y correlación cruzada"
+id: P2.1
+unidad: P2
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+Para dos procesos estacionarios $x(t)$, $y(t)$ de media cero:
+
+$$
+r_{xx}(\tau)=\mathbb E[x(t)\,x(t+\tau)],\qquad r_{xy}(\tau)=\mathbb E[x(t)\,y(t+\tau)].
+$$ {#eq-corr}
+
+Con una realización de $N$ muestras se usa el estimador **sesgado** $\hat r_{xy}[k]=\frac1N\sum_{t}(x_t-\bar x)(y_{t+k}-\bar y)$ (división por $N$ y no por $N-k$: es el que garantiza que la matriz de Toeplitz resultante sea semidefinida positiva, [A1.4](../../algebra/matrices/a1-4.qmd)). Si $y$ es una copia de $x$ retrasada $d$ muestras, $\hat r_{xy}$ tiene su máximo en $k=d$.
+
+Propiedades:
+
+- $r_{xx}(\tau)=r_{xx}(-\tau)$ (par) y $\lvert r_{xx}(\tau)\rvert\le r_{xx}(0)$; en cambio $r_{xy}(\tau)=r_{yx}(-\tau)$.
+- **Wiener–Khinchin:** $S_{xx}(f)=\mathcal F\{r_{xx}\}$ y $S_{xy}(f)=\mathcal F\{r_{xy}\}$ (espectro cruzado). Es la relación que permite calcular la correlación con la FFT, en $O(N\log N)$: `autocorrelacion_fft` coincide con `autocorrelacion`.
+- El **coeficiente de correlación** $\rho_{xy}[k]=\hat r_{xy}[k]/\sqrt{\hat r_{xx}[0]\hat r_{yy}[0]}\in[-1,1]$ no depende de la escala de las señales.
+- Para **ruido blanco** de $N$ muestras, $\hat\rho[k]$ ($k\neq0$) es aproximadamente normal de media cero y desviación $1/\sqrt N$: una banda $\pm1{,}96/\sqrt N$ deja fuera del 95 % de los retardos de una señal sin estructura. Un pico dentro de esa banda **no** es significativo.

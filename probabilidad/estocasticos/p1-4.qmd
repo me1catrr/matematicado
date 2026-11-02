@@ -1,0 +1,43 @@
+---
+title: "P1.4 El registro del edificio"
+subtitle: "P1 · Variables aleatorias y procesos estocásticos"
+id: P1.4
+unidad: P1
+bloque: "Probabilidad y procesos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, DelimitedFiles, Random, Printf, Markdown
+include("../../recursos/_tema.jl")
+```
+
+La excitación del edificio sintético es de ruido blanco estacionario, de modo que su aceleración debe ser estacionaria y ergódica. Se comprueba mirando el valor eficaz (RMS) por bloques de 60 s, y se contrasta con una versión **no estacionaria** en la que la intensidad de la excitación crece un $50\,\%$ a lo largo del registro (como si el tráfico fuera aumentando):
+
+```{julia}
+#| label: fig-rms
+#| fig-cap: "Valor eficaz de la aceleración de la cubierta (escenario A) en bloques de 60 s. Azul: registro original, estacionario; naranja: el mismo registro con una ganancia que crece linealmente de 1 a 1,5. La variación entre bloques del primero es la propia del muestreo del ruido (unos $\\pm5\\,\\%$); la del segundo es sistemática y es una **tendencia**."
+#| fig-alt: "Dos series de diez puntos: la azul fluctúa alrededor de un valor constante; la naranja crece de forma casi lineal."
+D = readdlm("../../datos/edificio-3-plantas/escenario_A.csv", ';', skipstart=1)
+x = D[:, 4]
+ganancia = range(1.0, 1.5; length=length(x))
+xn = x .* ganancia
+_, r1 = rms_por_ventana(x, 100.0, 60.0)
+tt, r2 = rms_por_ventana(xn, 100.0, 60.0)
+fig = Figure(size=(720, 320))
+ax = Axis(fig[1, 1]; xlabel="t (s)", ylabel="RMS (m/s²)", limits=(0, 600, 0, nothing))
+scatterlines!(ax, tt, r1; color=AZUL, linewidth=2, label="estacionario")
+scatterlines!(ax, tt, r2; color=NARANJA, linewidth=2, label="con ganancia creciente")
+axislegend(ax; position=:lt)
+fig
+```
+
+Los bloques del registro estacionario varían entre $\pm$`{julia} coma(100 * (maximum(r1) - minimum(r1)) / (2 * mean(r1)); d=0)` % de la media, sin tendencia; con la ganancia creciente, el RMS pasa de `{julia} coma(r2[1]; d=3)` a `{julia} coma(r2[end]; d=3)` m/s². **Si se calcula un solo espectro de todo el registro no estacionario, se mezclan estados de excitación distintos**; la solución es trabajar con bloques cortos o normalizar.

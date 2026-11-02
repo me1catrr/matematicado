@@ -1,0 +1,74 @@
+---
+title: "P2.4 Los modos del edificio a partir de correlaciones"
+subtitle: "P2 · Covarianza, autocorrelación y correlación cruzada"
+id: P2.4
+unidad: P2
+bloque: "Probabilidad y procesos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, DelimitedFiles, Random, Printf, Markdown
+include("../../recursos/_tema.jl")
+RUTA = "../../datos/edificio-3-plantas/"
+M3, C3, K3 = edificio_tres_plantas()
+f3, _ = modos_propios(K3, M3)
+```
+
+Con el escenario A del [caso transversal](../../caso/edificio/index.qmd), se calcula la correlación cruzada entre la aceleración de la cubierta y la de la planta 1 y, también, la autocorrelación de la cubierta:
+
+```{julia}
+#| label: fig-correlaciones
+#| fig-cap: "Correlaciones de las aceleraciones del escenario A: autocorrelación de la cubierta (azul) y correlación cruzada cubierta → planta 1 (naranja), retardos de 0 a 8 s. Ambas son oscilaciones amortiguadas con las frecuencias del edificio; la cruzada tiene signos distintos según el modo y no es máxima en $\\tau=0$."
+#| fig-alt: "Dos curvas oscilatorias que decaen en el tiempo. La azul empieza en su valor máximo; la naranja parte de un valor menor y oscila con otra fase."
+D = readdlm(RUTA * "escenario_A.csv", ';', skipstart=1)
+a1, a3 = D[:, 2], D[:, 4]
+kmax = 800
+r33 = correlacion_cruzada(a3, a3, kmax)[kmax+1:end]          # lags 0..kmax
+r31 = correlacion_cruzada(a3, a1, kmax)[kmax+1:end]
+τ = (0:kmax) ./ 100
+fig = Figure(size=(780, 380))
+ax = Axis(fig[1, 1]; xlabel="retardo τ (s)", ylabel="correlación ((m/s²)²)")
+lines!(ax, τ, r33; color=AZUL, linewidth=1.6, label="r₃₃ (autocorrelación de la cubierta)")
+lines!(ax, τ, r31; color=NARANJA, linewidth=1.6, label="r₃₁ (cubierta → planta 1)")
+axislegend(ax; position=:rt)
+fig
+```
+
+Con ellas como si fueran respuestas impulsionales, ERA ([A1.5](../../algebra/matrices/a1-5.qmd)) estima frecuencias y amortiguamientos con orden $n=6$ (tres modos). Se compara con los valores verdaderos para los escenarios A y C:
+
+```{julia}
+#| label: tbl-era-corr
+#| tbl-cap: "Frecuencias (Hz) y amortiguamientos (%) estimados aplicando ERA de orden 6 a la correlación cruzada cubierta → planta 1 (retardos 0 a 8 s), frente a los valores verdaderos de cada escenario."
+function era_corr(esc)
+    D = readdlm(RUTA * "escenario_$(esc).csv", ';', skipstart=1)
+    c = correlacion_cruzada(D[:, 4], D[:, 2], kmax)[kmax+1:end]
+    era(c, 6, 0.01)
+end
+filas = String[]
+for e in (:A, :C)
+    M, C, K = edificio_tres_plantas(escenario=e)
+    fv, P = modos_propios(K, M)
+    zv = diag(P' * C * P) ./ (2 .* 2π .* fv)
+    fe, ze = era_corr(String(e))
+    for j in 1:3
+        push!(filas, "| $e | $j | $(coma(fv[j]; d=3)) | $(coma(fe[j]; d=3)) | $(coma(100 * zv[j]; d=2)) | $(coma(100 * ze[j]; d=2)) |")
+    end
+end
+Markdown.parse("| Escenario | Modo | f verdadera | f estimada | ζ verdadero (%) | ζ estimado (%) |\n|:--:|:--:|--:|--:|--:|--:|\n" * join(filas, "\n"))
+```
+
+El resultado es notable por su sencillez: **sin conocer la fuerza**, las frecuencias salen con errores menores del $0{,}4\,\%$ (en ambos escenarios, incluido el cambio de $-1{,}85\,\%$ y $-3{,}1\,\%$ del daño), y los amortiguamientos con el orden de magnitud correcto pero con errores de hasta un $25\,\%$ (por ejemplo, $0{,}76\,\%$ frente a $1{,}00\,\%$ en el primer modo del escenario A). Es la pauta de siempre: las frecuencias son robustas; los amortiguamientos, no. Con un orden mayor, ERA incorpora **polos espurios** (en una prueba con $n=8$ aparece un cuarto polo de $2{,}9$ Hz y $\zeta$ distinto), que es lo que los diagramas de estabilización de [M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html) ayudan a descartar.
+
+::: {.callout-warning}
+## La correlación estima la respuesta libre solo si la excitación es blanca
+La [ecuación 1 de P2.3](p2-3.qmd#eq-lambda) exige que la fuerza sea ruido blanco (o suficientemente ancha respecto de los modos) y estacionaria. Con una excitación armónica (una máquina) la correlación contiene **su** frecuencia, que no decae, y se confunde con un modo de amortiguamiento nulo. Con una excitación no estacionaria, la correlación mezcla estados distintos ([P1](../../probabilidad/estocasticos/index.qmd)).
+:::

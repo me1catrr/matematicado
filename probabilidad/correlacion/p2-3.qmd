@@ -1,0 +1,16 @@
+---
+title: "P2.3 La correlación como respuesta libre"
+subtitle: "P2 · Covarianza, autocorrelación y correlación cruzada"
+id: P2.3
+unidad: P2
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+Sea un sistema $\mathbf x_{k+1}=\mathbf A\mathbf x_k+\mathbf w_k$, $\mathbf y_k=\mathbf C\mathbf x_k$ excitado por ruido blanco $\mathbf w_k$. Las covarianzas de la salida cumplen, para $\tau\ge1$,
+
+$$
+\boldsymbol\Lambda_\tau=\mathbb E[\mathbf y_{k+\tau}\mathbf y_k^{\mathsf T}]=\mathbf C\,\mathbf A^{\tau-1}\,\mathbf G,\qquad \mathbf G=\mathbf A\boldsymbol\Sigma\mathbf C^{\mathsf T},
+$$ {#eq-lambda}
+
+con $\boldsymbol\Sigma$ la covarianza del estado: es la misma forma que la respuesta impulsional $h_\tau=\mathbf C\mathbf A^{\tau-1}\mathbf B$ de [A1.5](../../algebra/matrices/a1-5.qmd). Por eso **la sucesión de correlaciones decae y oscila con los mismos polos que la respuesta libre del sistema**, y se puede alimentar a ERA como si fuera una respuesta impulsional (es la idea de la técnica de excitación natural, NExT, y de SSI-COV; el desarrollo completo está en [M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html)).

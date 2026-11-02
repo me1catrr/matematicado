@@ -1,0 +1,69 @@
+---
+title: "P2.2 Estimar un retardo"
+subtitle: "P2 · Covarianza, autocorrelación y correlación cruzada"
+id: P2.2
+unidad: P2
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+El retardo entre dos registros es la posición del máximo de $\hat r_{xy}$. Su **resolución** es una muestra ($1/f_{\mathrm s}$); con interpolación parabólica del máximo se puede bajar de la muestra si el pico es nítido. Pero cuidado: (1) una señal de **banda estrecha** (casi una sinusoide) tiene una correlación periódica, con muchos máximos equivalentes (ambigüedad de $T$); (2) el ruido ensancha o desplaza el máximo; (3) con tendencias o no estacionariedad aparecen correlaciones espurias.
+
+
+## Laboratorio: estimar un retardo {#lab-correlacion}
+
+```{ojs}
+//| echo: false
+import {correlacionCruzada, rng, normal} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 1. Retardo entre dos sensores.** La señal $x$ es ruido filtrado (un AR(1) con coeficiente $\phi$: cuanto mayor, más lenta); $y$ es $x$ retrasada $d$ muestras más ruido de medida independiente. Se muestra la correlación cruzada, la banda de significación $\pm1{,}96/\sqrt N$ y el retardo estimado (máximo).
+
+```{ojs}
+//| echo: false
+viewof retardo = Inputs.range([-30, 30], {value: 12, step: 1, label: "retardo real d (muestras)"})
+viewof phi_c = Inputs.range([0, 0.98], {value: 0.7, step: 0.01, label: "coeficiente φ de la señal"})
+viewof ruido_c = Inputs.range([0, 4], {value: 1, step: 0.1, label: "ruido de medida (σ relativo a la señal)"})
+viewof Nc = Inputs.select([128, 256, 512, 1024, 4096], {value: 512, label: "longitud N"})
+```
+
+```{ojs}
+//| echo: false
+cc = {
+  const g = rng(21), N = Nc, m = 60, pad = 40;
+  const e = Array.from({length: N + 2 * pad}, () => normal(g));
+  const s = new Array(e.length); s[0] = e[0];
+  for (let k = 1; k < e.length; k++) s[k] = phi_c * s[k - 1] + e[k];
+  const sd = Math.sqrt(s.reduce((a, v) => a + v * v, 0) / s.length);
+  const x = s.slice(pad, pad + N);
+  const y = s.slice(pad - retardo, pad - retardo + N).map(v => v + ruido_c * sd * normal(g));
+  const r = correlacionCruzada(x, y, m);
+  const rho = r.map(v => v / Math.sqrt(correlacionCruzada(x, x, 0)[0] * correlacionCruzada(y, y, 0)[0]));
+  const pts = rho.map((v, i) => ({k: i - m, v}));
+  const pico = pts.reduce((a, b) => b.v > a.v ? b : a);
+  return {pts, pico, banda: 1.96 / Math.sqrt(N)};
+}
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 720, height: 300, marginLeft: 55, x: {label: "retardo k (muestras)"}, y: {label: "coeficiente de correlación ρ[k]", domain: [-1, 1]},
+  marks: [
+    Plot.ruleY([0]), Plot.ruleY([cc.banda, -cc.banda], {stroke: "#D95F02", strokeDasharray: "5,4"}),
+    Plot.ruleX(cc.pts, {x: "k", y: "v", stroke: "#1B6CA8"}),
+    Plot.dot([cc.pico], {x: "k", y: "v", fill: "#D95F02", r: 5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`**Retardo estimado:** **${cc.pico.k}** muestras (real: ${retardo}). Máximo de ρ: **${cc.pico.v.toFixed(2).replace(".", ",")}**; banda de significación: ±**${cc.banda.toFixed(3).replace(".", ",")}**. ${cc.pico.k === retardo ? "✓ Coincide." : "✗ No coincide: el máximo no es el retardo real."} ${cc.pico.v < 2 * cc.banda ? "⚠️ El pico apenas supera la banda: poco fiable." : ""}`
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Señales:** un AR(1) con ruido de medida independiente y un retardo entero; semilla fija. En una estructura real, el retardo entre sensores depende de la frecuencia (dispersión) y no es entero.
+- **Qué se observa:** con $\phi$ alto, el pico es ancho y la ubicación del máximo es menos precisa; con ruido grande o $N$ pequeño el pico se esconde en la banda; con $\phi$ casi 0 (ruido blanco) el pico es muy nítido.
+- **Qué no se puede concluir:** que un retardo entre dos señales indique causalidad: la correlación mide parecido, no causa.

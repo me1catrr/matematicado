@@ -1,0 +1,90 @@
+---
+title: "P1.2 Procesos estocásticos"
+subtitle: "P1 · Variables aleatorias y procesos estocásticos"
+id: P1.2
+unidad: P1
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+::: {#def-proceso}
+**Proceso estocástico.** Una familia de variables aleatorias $\{X(t)\}$ indexada por el tiempo. Una **realización** es una trayectoria $x(t)$ concreta: lo que medimos. La **media de conjunto** es $\mu(t)=\mathbb E[X(t)]$ (se promedia entre realizaciones, en un instante fijo) y la **autocovarianza** es $C(t_1,t_2)=\operatorname{cov}(X(t_1),X(t_2))$.
+:::
+
+::: {#def-estacionario}
+**Estacionariedad débil.** $\mu(t)=\mu$ constante y $C(t_1,t_2)=r(t_2-t_1)$ depende solo del retardo. Es la que se necesita en este curso. Tiene dos consecuencias: la varianza $r(0)$ es constante, y la autocorrelación $r(\tau)$ es una función par de $\tau$ y define el espectro por el teorema de Wiener–Khinchin, $S(f)=\int r(\tau)e^{-\mathrm j2\pi f\tau}\mathrm d\tau$.
+:::
+
+::: {#def-ergodico}
+**Ergodicidad.** Un proceso estacionario es **ergódico** (en media y en autocorrelación) si los promedios **en el tiempo** de **una sola realización** convergen a los promedios **de conjunto**: $\frac1T\int_0^Tx(t)\,\mathrm dt\to\mu$ y $\frac1T\int_0^Tx(t)x(t+\tau)\,\mathrm dt\to r(\tau)$ cuando $T\to\infty$.
+:::
+
+La ergodicidad es lo que justifica la práctica de **estimar el espectro de un puente con un único registro de unas horas**: se acepta que el promedio temporal representa a los infinitos registros posibles. Es una hipótesis, no un hecho, y falla de dos maneras sencillas:
+
+- **No estacionario:** el proceso cambia con el tiempo (un paseo aleatorio, cuya varianza crece con $t$; o una excitación que varía con el tráfico).
+- **Estacionario pero no ergódico:** cada realización tiene su propio nivel (una constante aleatoria $B$ más ruido: la media de conjunto es 0, pero cada registro tiene media $B$).
+
+Dos procesos de referencia:
+
+- **Ruido blanco** $e[k]$: variables independientes de media 0 y varianza $\sigma^2$; $r(0)=\sigma^2$ y $r(\tau)=0$ si $\tau\neq0$; espectro plano. Es una idealización (energía infinita en continuo), válida cuando es más ancho que el sistema que excita.
+- **AR(1):** $x[k]=\phi\,x[k-1]+e[k]$, con $\lvert\phi\rvert<1$; es estacionario si se inicia en su distribución estacionaria, con $r(\tau)=\dfrac{\sigma^2\phi^{\lvert\tau\rvert}}{1-\phi^2}$. Es el proceso del apartado [A1.4](../../algebra/matrices/a1-4.qmd).
+
+
+## Laboratorio: conjuntos de realizaciones {#lab-estocasticos}
+
+```{ojs}
+//| echo: false
+import {rng, normal} from "../../recursos/js/matematicas.js"
+```
+
+**Simulación 1. Estacionariedad y ergodicidad.** Elige un proceso y el número de realizaciones. Se dibujan las realizaciones (líneas finas), la **media de conjunto** (negra) con su banda $\pm1$ desviación, y la **media temporal** de la primera realización (naranja).
+
+```{ojs}
+//| echo: false
+viewof proceso = Inputs.select(["AR(1) estacionario", "Paseo aleatorio (no estacionario)", "Nivel aleatorio + ruido (no ergódico)"], {label: "proceso"})
+viewof phi_lab = Inputs.range([0, 0.98], {value: 0.9, step: 0.01, label: "φ (solo AR(1))"})
+viewof nr = Inputs.range([5, 300], {value: 100, step: 5, label: "realizaciones"})
+```
+
+```{ojs}
+//| echo: false
+conjunto = {
+  const T = 300, g = rng(7);
+  const reales = Array.from({length: nr}, () => {
+    const x = new Array(T);
+    if (proceso.startsWith("AR")) { x[0] = normal(g) / Math.sqrt(1 - phi_lab ** 2); for (let k = 1; k < T; k++) x[k] = phi_lab * x[k - 1] + normal(g); }
+    else if (proceso.startsWith("Paseo")) { x[0] = normal(g); for (let k = 1; k < T; k++) x[k] = x[k - 1] + normal(g); }
+    else { const b = 2 * normal(g); for (let k = 0; k < T; k++) x[k] = b + normal(g); }
+    return x;
+  });
+  const media = Array.from({length: T}, (_, k) => reales.reduce((s, x) => s + x[k], 0) / nr);
+  const sd = Array.from({length: T}, (_, k) => Math.sqrt(reales.reduce((s, x) => s + (x[k] - media[k]) ** 2, 0) / nr));
+  const mt = reales[0].reduce((a, v) => a + v, 0) / T;
+  return {reales, media, sd, mt, T};
+}
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 720, height: 360, marginLeft: 50, x: {label: "instante k"}, y: {label: "x"},
+  marks: [
+    ...conjunto.reales.slice(0, 15).map(x => Plot.line(x.map((v, k) => ({k, v})), {x: "k", y: "v", stroke: "#9CA3AF", strokeWidth: 0.7})),
+    Plot.areaY(conjunto.media.map((m, k) => ({k, lo: m - conjunto.sd[k], hi: m + conjunto.sd[k]})), {x: "k", y1: "lo", y2: "hi", fill: "#1B6CA8", fillOpacity: 0.18}),
+    Plot.line(conjunto.media.map((v, k) => ({k, v})), {x: "k", y: "v", stroke: "#1F2937", strokeWidth: 2}),
+    Plot.ruleY([conjunto.mt], {stroke: "#D95F02", strokeWidth: 2, strokeDasharray: "6,4"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`**Media de conjunto** en el instante final: **${conjunto.media[conjunto.T - 1].toFixed(2).replace(".", ",")}**. **Media temporal** de la realización 1: **${conjunto.mt.toFixed(2).replace(".", ",")}**. **Desviación de conjunto** en k = 50 y k = 299: **${conjunto.sd[50].toFixed(2).replace(".", ",")}** y **${conjunto.sd[conjunto.T - 1].toFixed(2).replace(".", ",")}**. ${Math.abs(conjunto.sd[conjunto.T - 1] / conjunto.sd[50] - 1) > 0.35 ? "⚠️ La varianza **cambia con el tiempo**: no es estacionario." : Math.abs(conjunto.mt - conjunto.media[conjunto.T - 1]) > 0.6 * conjunto.sd[conjunto.T - 1] ? "⚠️ La media temporal de esta realización **no coincide** con la de conjunto: no es ergódico." : "La media temporal y la de conjunto concuerdan: compatible con estacionario y ergódico."}`
+```
+
+### Hipótesis y límites de la simulación 1 {#limites-sim1}
+
+- **Procesos:** tres modelos mínimos con semilla fija. Los datos reales mezclan varios efectos (tráfico, viento, temperatura).
+- **Criterio automático:** el aviso usa umbrales sencillos (varianza que cambia más de un 35 % entre $k=50$ y el final; media temporal alejada más de $0{,}6\sigma$) que no son un contraste estadístico: sirven de guía visual.
+- **Qué se observa:** con $\phi$ alto el AR(1) tarda más en «olvidar»: las medias temporales de registros cortos se dispersan más (la ergodicidad se cumple, pero necesita **más tiempo**).
+- **Qué no se puede concluir:** que un registro «parezca estacionario» demuestre que lo sea; se pueden detectar incumplimientos, no probar su ausencia.

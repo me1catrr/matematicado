@@ -1,0 +1,111 @@
+---
+title: "Práctica y cierre"
+subtitle: "P2 · Covarianza, autocorrelación y correlación cruzada"
+id: P2-cierre
+unidad: P2
+bloque: "Probabilidad y procesos"
+estado: borrador
+---
+
+## Práctica guiada
+
+::: {.callout-note}
+## Práctica guiada
+
+1. Calcula `autocorrelacion` y `autocorrelacion_fft` de la aceleración de la cubierta (retardos 0 a 800) y comprueba que coinciden y cuánto tarda cada una.
+2. Calcula la correlación cruzada cubierta → planta 1 y aplica `era` con $n=6$ y $\Delta t=0{,}01$ s.
+3. Compara con las frecuencias de `modos_propios` y repite para el escenario C.
+
+::: {.panel-tabset}
+## Julia
+
+```julia
+using Resonancia, DelimitedFiles
+D = readdlm("escenario_A.csv", ';', skipstart=1)
+a1, a3 = D[:, 2], D[:, 4]
+r = autocorrelacion(a3, 800)
+r_fft = autocorrelacion_fft(a3, 800)
+maximum(abs.(r - r_fft))                     # ≈ 1e-15
+c = correlacion_cruzada(a3, a1, 800)[801:end]
+f, zeta = era(c, 6, 0.01)
+```
+
+## Python
+
+```python
+import numpy as np
+import matrices as mx      # python/matrices.py (probado con pytest)
+
+D = np.loadtxt("escenario_A.csv", delimiter=";", skiprows=1)
+a1, a3 = D[:, 1], D[:, 3]
+c = mx.correlacion_cruzada(a3, a1, 800)[800:]
+# ERA: matriz de Hankel de la correlación, SVD y valores propios de A (véase A1.5)
+```
+:::
+
+El código Python **no se ejecuta en la web**: `correlacion_cruzada` está probada con `pytest` frente a Julia en [`python/matrices.py`](https://github.com/me1catrr/matematicado/blob/main/python/matrices.py).
+:::
+
+## «Pídeselo a Claude» {#pideselo}
+
+::: {.callout-tip}
+## Prompt
+«Con Julia y `Resonancia`: usa `escenario_A.csv`, `escenario_B.csv` y `escenario_C.csv`. Para cada uno, calcula la correlación cruzada cubierta → planta 1 hasta 8 s, aplica `era` con orden 6 y dime las tres frecuencias. Después repite con orden 8 y explica qué polos son espurios. Compara con las frecuencias de `edificio_tres_plantas` y no concluyas que hay daño sin calcular la dispersión de la estimación en varios tramos.»
+
+**Verifica.** (a) Que usa la correlación cruzada (no la autocorrelación solamente) y el $\Delta t$ correcto (0,01 s). (b) Que solo se usan retardos positivos de la correlación como respuesta impulsional. (c) Que con orden 8 detecta un polo adicional que no coincide con ninguna frecuencia del modelo. (d) Que compara con los valores verdaderos de cada escenario. (e) Que no atribuye a daño un cambio de frecuencia menor que la dispersión entre tramos.
+:::
+
+## Ejercicios
+
+::: {.ejercicio tipo="numerico" id="m2-10-banda" respuesta="0.062" tol="1%"}
+Una señal de ruido blanco tiene $N=1000$ muestras. ¿Cuánto vale la banda de significación al 95 %, $1{,}96/\sqrt N$, de su coeficiente de correlación?
+
+::: {.solucion}
+$1{,}96/\sqrt{1000}=1{,}96/31{,}62=0{,}062$.
+:::
+:::
+
+::: {.ejercicio tipo="numerico" id="m2-10-retardo" respuesta="25" tol="1%" unidad="m/s"}
+Dos sensores separados $5$ m registran la misma onda; la correlación cruzada tiene su máximo en un retardo de $0{,}2$ s. ¿A qué velocidad se propaga la onda?
+
+::: {.solucion}
+$v=d/\tau=5/0{,}2=25$ m/s (suponiendo una sola onda no dispersiva).
+:::
+:::
+
+::: {.ejercicio tipo="vf" id="m2-10-par" respuesta="verdadero"}
+La autocorrelación de un proceso estacionario es una función par del retardo y alcanza su máximo en el retardo cero.
+
+::: {.solucion}
+**Verdadero**: $r(\tau)=r(-\tau)$ y $\lvert r(\tau)\rvert\le r(0)$ (desigualdad de Cauchy–Schwarz).
+:::
+:::
+
+::: {.ejercicio tipo="abierta" id="m2-10-maquina"}
+Un puente tiene una máquina cercana que vibra a 3,00 Hz de forma casi sinusoidal, y su primer modo está en 3,05 Hz. Calculas la correlación de la respuesta y le aplicas ERA. ¿Qué dificultades esperas?
+
+::: {.rubrica}
+- Digo que la excitación armónica viola la hipótesis de ruido blanco y que su correlación no decae.
+- Señalo que ERA verá un polo de amortiguamiento casi nulo a 3,00 Hz que no es un modo.
+- Menciono la dificultad de separar dos frecuencias tan próximas y propongo medir sin la máquina o identificar y eliminar la componente armónica.
+:::
+
+::: {.solucion}
+La armónica aparece como un polo sin amortiguamiento que se puede confundir con un modo y que, además, está a solo $0{,}05$ Hz del modo real (mucha resolución necesaria). Se debe comprobar el amortiguamiento de los polos, usar mediciones con la máquina parada o métodos que identifiquen y eliminen armónicas.
+:::
+:::
+
+## La doy por superada si…
+
+- [ ] Estimo autocorrelaciones y correlaciones cruzadas y sé en qué retardos mirar.
+- [ ] Decido si un pico de correlación es significativo con la banda $\pm1{,}96/\sqrt N$.
+- [ ] Explico por qué la correlación de la respuesta a ruido blanco se comporta como una respuesta libre.
+- [ ] Aplico ERA a correlaciones y valoro la calidad (frecuencias robustas, amortiguamientos poco fiables, polos espurios).
+- [ ] Sé qué hipótesis de la excitación hacen falta y cuándo fallan.
+
+## Qué no dice esta unidad
+
+- La identificación completa (SSI-COV con múltiples referencias, diagramas de estabilización, incertidumbres) es de [M7](https://me1catrr.github.io/resonancia/mse/m07-identificacion/index.html).
+- Se usa una sola correlación cruzada y un orden fijo; en la práctica se utilizan matrices de correlaciones de varios sensores.
+- La estimación de amortiguamientos es de un solo registro y semilla; no se ha cuantificado su dispersión con Monte Carlo.
+- La técnica NExT se menciona como idea, sin citar el artículo original, que no se ha consultado.

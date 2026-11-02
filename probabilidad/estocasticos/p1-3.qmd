@@ -1,0 +1,63 @@
+---
+title: "P1.3 Respuesta de un sistema lineal a ruido blanco"
+subtitle: "P1 · Variables aleatorias y procesos estocásticos"
+id: P1.3
+unidad: P1
+bloque: "Probabilidad y procesos"
+estado: borrador
+engine: julia
+execute:
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Ver el código"
+---
+
+```{julia}
+#| include: false
+using Resonancia, LinearAlgebra, Statistics, DelimitedFiles, Random, Printf, Markdown
+include("../../recursos/_tema.jl")
+```
+
+Si un sistema lineal estable con respuesta en frecuencia $H(\mathrm j\omega)$ se excita con un proceso estacionario de espectro $S_{ff}$, la salida es estacionaria y
+
+$$
+S_{yy}(\omega)=\lvert H(\mathrm j\omega)\rvert^2\,S_{ff}(\omega).
+$$ {#eq-syy}
+
+Si $S_{ff}$ es **constante** (ruido blanco), la forma del espectro de la salida es la de $\lvert H\rvert^2$: los picos de la salida son las resonancias del sistema. **Es la hipótesis de la identificación modal ambiental** (FDD, SSI, ERA sobre covarianzas): no se mide la fuerza, y se supone que es blanca (o que su color no tiene picos que se confundan con los modos). Y si no lo es (una máquina que gira, un tren que pasa), aparecen picos que **no son modos**.
+
+## Qué falla cuando la hipótesis no se cumple
+
+```{julia}
+#| label: ej-conjunto
+Random.seed!(2026)
+nreal, T = 400, 400
+φ = 0.9
+function ar1(φ, T)
+    x = zeros(T)
+    x[1] = randn() / sqrt(1 - φ^2)                 # estado estacionario
+    for k in 2:T
+        x[k] = φ * x[k-1] + randn()
+    end
+    x
+end
+estacionario = reduce(hcat, [ar1(φ, T) for _ in 1:nreal])          # T × nreal
+paseo = cumsum(randn(T, nreal); dims=1)
+constante = randn(1, nreal) .+ randn(T, nreal)                     # nivel aleatorio por realización
+resumen(X) = (media_conjunto_t200 = mean(X[200, :]), var_conjunto_t100 = var(X[100, :]), var_conjunto_t400 = var(X[400, :]),
+              media_temporal_real1 = mean(X[:, 1]), desv_media_temporal = std(vec(mean(X; dims=1))))
+(AR1 = resumen(estacionario), paseo_aleatorio = resumen(paseo), nivel_aleatorio = resumen(constante))
+```
+
+```{julia}
+#| label: tbl-ergodico
+#| tbl-cap: "Estadísticas de conjunto (400 realizaciones, por instante) frente a estadísticas temporales (por realización, 400 muestras). Para el AR(1), ambas coinciden; para el paseo aleatorio, la varianza crece con $t$; para el nivel aleatorio, la media temporal de cada realización es distinta."
+r = [resumen(estacionario), resumen(paseo), resumen(constante)]
+nom = ["AR(1), φ = 0,9", "paseo aleatorio", "nivel aleatorio + ruido"]
+filas = ["| $(nom[i]) | $(coma(r[i].var_conjunto_t100; d=2)) | $(coma(r[i].var_conjunto_t400; d=2)) | $(coma(r[i].desv_media_temporal; d=2)) |" for i in 1:3]
+Markdown.parse("| Proceso | varianza de conjunto en t = 100 | en t = 400 | dispersión de la media temporal entre realizaciones |\n|:--|--:|--:|--:|\n" * join(filas, "\n"))
+```
+
+La @tbl-ergodico lo resume. El AR(1) estacionario tiene varianza $\sigma^2/(1-\phi^2)=5{,}26$ en cualquier instante, y las medias temporales de las distintas realizaciones son casi iguales (dispersión pequeña, que baja al alargar el registro): es **estacionario y ergódico**. El paseo aleatorio tiene varianza $\approx t$ (100 y 400): **no es estacionario**. Y el nivel aleatorio tiene varianza de conjunto constante (2) pero cada realización tiene una media temporal distinta (dispersión $\approx1$): **estacionario y no ergódico**. En los dos últimos, **un registro no representa al proceso**.
